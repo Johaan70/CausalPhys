@@ -1,0 +1,96 @@
+--- a/PearlDoCalculus/CausalModel.lean	2026-10-19 19:37:18.760873028 +0200
++++ b/PearlDoCalculus/CausalModel.lean	2026-10-19 20:31:22.308870846 +0200
+@@ -64,7 +64,6 @@
+   /-- The conditional kernel: value distribution at `v` given parent values. -/
+   kernel : ∀ v, (∀ u : {u // u ∈ G.parents v}, α u.1) → PMF (α v)
+ 
+-attribute [instance] CausalModel.fin CausalModel.deq
+ 
+ /--
+ Vertices with rank at most `n` — the finite "prefix" of the topological
+--- a/PearlDoCalculus/DSepSoundSkeleton.lean	2026-10-19 19:37:18.760873028 +0200
++++ b/PearlDoCalculus/DSepSoundSkeleton.lean	2026-10-19 20:33:36.105506016 +0200
+@@ -177,7 +177,7 @@
+ /-- Reachability in the induced subgraph implies reachability in `G`. -/
+ lemma DAG.induce_reaches {A : Finset V} {u w : V}
+     (h : (DAG.induce G A).Reaches u w) : G.Reaches u w := by
+-  exact Relation.ReflTransGen.mono (fun _ _ e => DAG.induce_edge e) h
++  exact Relation.ReflTransGen.mono (fun _ _ e => DAG.induce_edge e) _ _ h
+ 
+ /--
+ Ancestors of `S`: every vertex reaching some element of `S`. Contains `S`
+@@ -268,7 +268,9 @@
+     (hA : ∀ v ∈ A, ∀ w, G.edge w v → w ∈ A) (v : V) (hv : v ∈ A) :
+     (DAG.induce G A).parents v = G.parents v := by
+   ext u
+-  simp [DAG.parents, DAG.induce]
++  rw [DAG.parents, DAG.parents, Finset.mem_filter, Finset.mem_filter]
++  simp only [Finset.mem_univ, true_and]
++  show (u ∈ A ∧ v ∈ A ∧ G.edge u v) ↔ G.edge u v
+   constructor
+   · exact fun h => h.2.2
+   · exact fun he => ⟨hA v hv u he, hv, he⟩
+@@ -314,8 +316,13 @@
+     (a : Assignment (α := α) (B ∪ ([] : List V).toFinset)) :
+     (extendOverList M B base [] hpar) a = if a = cast (by simp) base then 1 else 0 := by
+   have hB : B ∪ ([] : List V).toFinset = B := by simp
+-  rw! (castMode := .all) [hB]
+-  simp [extendOverList, eqRec_eq_cast, cast_cast, PMF.pure_apply]
++  have key : ∀ (S : Finset V) (h : S = B) (a : Assignment (α := α) S),
++      (cast (congrArg (fun S => PMF (Assignment (α := α) S)) h.symm) (PMF.pure base)) a
++        = if a = cast (congrArg (fun S => Assignment (α := α) S) h.symm) base then 1 else 0 := by
++    intro S h a
++    subst h
++    simp [PMF.pure_apply]
++  exact key _ hB a
+ /-- Flytter en `cast` fra den ene siden av en likhet til den andre. -/
+ lemma cast_eq_iff_eq_cast_symm {A B : Sort _} (h : A = B) (b : A) (a : B) :
+     (cast h b = a) ↔ (b = cast h.symm a) := by
+@@ -1092,11 +1099,12 @@
+     exact le_trans (le_of_lt (G.rank_strict_mono u v hu)) hv
+   induction n with
+   | zero =>
+-    rw [jointUpTo_zero_apply, extendOverList_apply_prod M ∅ _ _ _ (Finset.nodup_toList _)
++    rw [jointUpTo_zero_apply]
++    erw [extendOverList_apply_prod M ∅ _ _ _ (Finset.nodup_toList _)
+       (fun v _ h => by simp at h)]
+     have hemp : ∀ x y : Assignment (α := α) (∅ : Finset V), x = y :=
+       fun x y => funext fun t => by obtain ⟨u, hu⟩ := t; simp at hu
+-    rw [if_pos (hemp _ _), one_mul,
++    erw [if_pos (hemp _ _), one_mul,
+       list_attach_prod_eq _ _ (kfac M (G.verticesUpTo 0) a) (Finset.nodup_toList _),
+       Finset.toList_toFinset]
+     intro w hw
+@@ -1291,7 +1299,7 @@
+   unfold kfac
+   rw [dif_pos ⟨hv, hpaN⟩, dif_pos ⟨hv, hpaM⟩]
+   simp only [CausalModel.restrictTo, dif_pos hv]
+-  rw [mpr_kernel_apply (DAG.induce_parents_eq A hA v hv)]
++  erw [mpr_kernel_apply (DAG.induce_parents_eq A hA v hv)]
+   all_goals rfl
+ 
+ /--
+--- a/PearlDoCalculus/BayesBall.lean	2026-10-19 19:37:18.760873028 +0200
++++ b/PearlDoCalculus/BayesBall.lean	2026-10-19 20:34:23.613223932 +0200
+@@ -6,7 +6,9 @@
+ inductive BallDir where
+   | fromChild  : BallDir
+   | fromParent : BallDir
+-  deriving DecidableEq, Repr, Fintype
++  deriving DecidableEq, Repr
++
++instance : Fintype BallDir := ⟨{.fromChild, .fromParent}, by intro x; cases x <;> simp⟩
+ 
+ structure BallState (V : Type*) where
+   node : V
+--- a/PearlDoCalculus/DSepSound.lean	2026-10-19 19:37:18.760873028 +0200
++++ b/PearlDoCalculus/DSepSound.lean	2026-10-19 20:34:38.297024511 +0200
+@@ -141,7 +141,7 @@
+     (fun r z => if r.restrict hY = w.restrict (subset_union3_mid X Y Z) then Gf r z else 0))
+   apply tsum_congr
+   intro u
+-  dsimp only
++  try dsimp only
+   rw [hF u]
+   by_cases hw : w = u.restrict hSB
+   · obtain ⟨h1, h2, h3⟩ := (hiff u).mp hw

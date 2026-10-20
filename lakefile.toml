@@ -1,0 +1,14 @@
+name = "causalphys"
+defaultTargets = ["CausalPhys"]
+
+[[require]]
+name = "mathlib"
+git = "https://github.com/leanprover-community/mathlib4"
+rev = "807d3836b165983210ee2ecf3cd28f239436949c"
+
+[[lean_lib]]
+name = "CausalPhys"
+
+[[lean_lib]]
+name = "PearlDoCalculus"
+leanOptions = {autoImplicit = false}
