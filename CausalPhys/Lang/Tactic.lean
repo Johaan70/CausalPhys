@@ -555,6 +555,11 @@ elab "secant_unique" : tactic =>
 
 /-! ## Which criterion applies? -/
 
+/-- Runs `x` with a fixed heartbeat budget (in thousands), counted from now. -/
+def withBudget {α : Type} (n : Nat) (x : TermElabM α) : TermElabM α :=
+  withTheReader Core.Context (fun ctx => { ctx with maxHeartbeats := n * 1000 }) <|
+    withCurrHeartbeats x
+
 /-- `#causal_check S` says how the question "exactly one outcome?" is settled
     for a setup: by structure (acyclic), by the linear criterion (and what is
     left to show), or that a domain-specific argument is needed. -/
@@ -577,8 +582,9 @@ elab "#causal_check " t:term : command => runTermElabM fun _ => do
       let sol ← mkAppM ``CausalPhys.SCM.Solves #[scm, u, s]
       mkLambdaFVars #[s] sol
     mkForallFVars #[u] (← mkAppM ``ExistsUnique #[body])
+  let timedOut ← IO.mkRef false
   let saved ← saveState
-  let result ← try
+  let result ← withBudget 200000 <| tryCatchRuntimeEx (do
       Core.resetMessageLog
       let g ← mkFreshExprMVar goalTy
       let gs ← Term.withoutErrToSorry <| Tactic.run g.mvarId! <| Tactic.withoutRecover (do
@@ -592,8 +598,9 @@ elab "#causal_check " t:term : command => runTermElabM fun _ => do
         return (← instantiateMVars (← g.getType)).isConstOf ``False
       let rest ← gs.mapM fun g => g.withContext do
         return toMessageData (← ppExpr (← instantiateMVars (← g.getType)))
-      pure (some (if singular then [m!"__singular__"] else rest))
-    catch _ => pure none
+      pure (some (if singular then [m!"__singular__"] else rest)))
+    (fun e => do if e.isRuntime then timedOut.set true
+                 pure none)
   saved.restore
   match result with
   | some [m] =>
@@ -623,7 +630,8 @@ elab "#causal_check " t:term : command => runTermElabM fun _ => do
         let body ← mkArrow hx (← mkArrow hy (← mkArrow dx (← mkArrow dy (← mkEq x y))))
         mkForallFVars #[u, x, y] body
     let saved ← saveState
-    let res2 ← try
+    -- `secant_unique` multiplies this budget by 20
+    let res2 ← withBudget 50000 <| tryCatchRuntimeEx (do
         Core.resetMessageLog
         let g ← mkFreshExprMVar uniqTy
         let gs ← Term.withoutErrToSorry <| Tactic.run g.mvarId! <| Tactic.withoutRecover (do
@@ -632,8 +640,9 @@ elab "#causal_check " t:term : command => runTermElabM fun _ => do
         if (← instantiateMVars g).hasSorry then throwError "failed"
         let rest ← gs.mapM fun g => g.withContext do
           return toMessageData (← ppExpr (← instantiateMVars (← g.getType)))
-        pure (some rest)
-      catch _ => pure none
+        pure (some rest))
+      (fun e => do if e.isRuntime then timedOut.set true
+                   pure none)
     saved.restore
     match res2 with
     | some [] => logInfo m!"cyclic, not linear in its own block, but multi-affine: at most \
@@ -641,10 +650,16 @@ elab "#causal_check " t:term : command => runTermElabM fun _ => do
     | some rest => logInfo m!"cyclic, not linear in its own block, but multi-affine: at most \
         one outcome in the domain provided that these principal minors are positive:\n  \
         {MessageData.joinSep rest "\n  "}\n(finish `secant_unique` with proofs of these)"
-    | none => logInfo m!"cyclic: neither criterion applies (some formula is not affine in \
-        its own block, and not affine in each variable separately); uniqueness needs a \
-        domain-specific argument (monotonicity, Gale–Nikaido, Minty–Browder), plugged in \
-        with Setup.unique_of_laws"
+    | none =>
+      if ← timedOut.get then
+        logInfo m!"cyclic: no criterion succeeded within its time limit (block_linear: \
+          200000 heartbeats, secant_unique: 1000000); uniqueness is not decided here. Try \
+          the tactics directly with a larger `maxHeartbeats`, or give a domain-specific \
+          argument with Setup.unique_of_laws"
+      else logInfo m!"cyclic: neither criterion applies (some formula is not affine in \
+          its own block, and not affine in each variable separately); uniqueness needs a \
+          domain-specific argument (monotonicity, Gale–Nikaido, Minty–Browder), plugged in \
+          with Setup.unique_of_laws"
 
 /-! ## The domain: consistency and outcomes inside it -/
 

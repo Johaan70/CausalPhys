@@ -204,12 +204,93 @@ input[type="range"] { width: 100%; accent-color: var(--do); }
 .bar-C { fill: var(--do); }
 .ghost { stroke: var(--ink); stroke-width: 1.5; stroke-dasharray: 3 3; opacity: 0.6; }
 
+[hidden] { display: none !important; }
+/* Byggesett */
+.mpick { display: flex; flex-wrap: wrap; gap: 0.4rem 0.4rem; align-items: center; }
+.mpick .grp { font: 600 0.7rem/1 var(--font-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-inline: 0.4rem 0.1rem; }
+.mpick .grp:first-child { margin-left: 0; }
+.mpick button {
+  font: 600 0.88rem/1.2 var(--font-display); padding: 0.5rem 0.8rem; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+}
+.mpick button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.bstory { display: grid; gap: 0.3rem; }
+.bstory h3 { font-size: 1.25rem; }
+.bstory p { font-size: 0.98rem; }
+.bsub { font: 600 0.72rem/1.2 var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.blaws { display: grid; gap: 0.5rem; }
+.blaw { display: grid; gap: 0.2rem; padding: 0.55rem 0.7rem; border: 1px solid var(--line); border-radius: 4px; min-width: 0; }
+.blaw .eq { font: 400 0.95rem/1.45 var(--font-mono); overflow-wrap: anywhere; }
+.blaw .meta { font: 400 0.75rem/1.35 var(--font-mono); color: var(--muted); }
+.blaw .lname { font: 600 0.72rem/1 var(--font-mono); color: var(--accent); }
+.blaw.off { border-style: dashed; border-color: var(--warn); }
+.blaw.off .eq { text-decoration: line-through; color: var(--muted); }
+.vchips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.vchip {
+  display: grid; gap: 0.1rem; text-align: left; cursor: pointer; min-width: 4.6rem;
+  padding: 0.4rem 0.65rem; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+}
+.vchip b { font: 600 0.98rem/1.1 var(--font-mono); }
+.vchip small { font: 400 0.68rem/1.25 var(--font-body); color: var(--muted); max-width: 9rem; }
+.vchip[aria-pressed="true"] { border: 2px solid var(--fixed); background: var(--paper); padding: calc(0.4rem - 1px) calc(0.65rem - 1px); }
+.vchip[aria-pressed="true"] b::after { content: " ■"; font-size: 0.6rem; color: var(--fixed); vertical-align: middle; }
+.bcount { font: 400 0.82rem/1.4 var(--font-mono); color: var(--muted); }
+.bcount.need { color: var(--warn); }
+.bnamed { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.bnamed button { font: 600 0.82rem/1.2 var(--font-display); padding: 0.45rem 0.7rem; border-radius: 4px; border: 1px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; }
+.bnamed button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+.bpred { font-size: 0.92rem; display: flex; gap: 0.5rem; align-items: center; cursor: pointer; }
+.bpred input { accent-color: var(--accent); width: 1rem; height: 1rem; }
+.bsrc summary { cursor: pointer; font: 600 0.85rem/1.3 var(--font-display); }
+.bsrc pre, .rcard pre { margin: 0.6rem 0 0; font: 400 0.78rem/1.5 var(--font-mono); background: var(--paper); border: 1px solid var(--line); border-radius: 4px; padding: 0.7rem; overflow-x: auto; white-space: pre; }
+.bsrc table { margin-top: 0.6rem; }
+.bgraph { overflow-x: auto; }
+.bgraph svg { width: 100%; height: auto; display: block; min-width: 260px; }
+.verdict-box { display: grid; gap: 0.45rem; padding: 0.8rem 0.9rem; border-radius: 6px; border: 1px solid var(--line); }
+.verdict-box.ok { border-color: var(--ok); }
+.verdict-box.cyc { border-color: var(--accent); }
+.verdict-box.bad { border-color: var(--warn); }
+.verdict-box h3 { font-size: 1rem; }
+.verdict-box.ok h3 { color: var(--ok); }
+.verdict-box.cyc h3 { color: var(--accent); }
+.verdict-box.bad h3 { color: var(--warn); }
+.verdict-box p { font-size: 0.95rem; }
+.verdict-box code.cond { display: block; font: 400 0.8rem/1.45 var(--font-mono); overflow-x: auto; white-space: pre; padding: 0.4rem 0; }
+.olist { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.25rem; font-size: 0.95rem; }
+.olist li { min-width: 0; }
+.olist .lname { font: 600 0.8rem/1 var(--font-mono); color: var(--accent); }
+.thms { display: grid; gap: 0.3rem; margin-top: 0.2rem; }
+.thm { display: grid; gap: 0.05rem; padding-top: 0.35rem; border-top: 1px solid var(--line); }
+.thm code { font: 600 0.78rem/1.3 var(--font-mono); color: var(--accent); overflow-wrap: anywhere; }
+.thm span { font-size: 0.92rem; }
+.bdo { display: grid; gap: 0.55rem; }
+.bdo .row { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.bdo button.dov { font: 600 0.85rem/1.2 var(--font-mono); padding: 0.45rem 0.7rem; border-radius: 4px; cursor: pointer; border: 1px solid var(--do); background: transparent; color: var(--do); }
+.bdo button.dov[aria-pressed="true"] { background: var(--do); color: var(--on-do); }
+.bdo .alts { display: grid; gap: 0.4rem; }
+.bdo .alt { text-align: left; display: grid; gap: 0.15rem; padding: 0.55rem 0.7rem; border-radius: 4px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; font: inherit; }
+.bdo .alt b { font: 600 0.88rem/1.25 var(--font-display); }
+.bdo .alt small { font-size: 0.85rem; color: var(--muted); }
+.bdo .alt[aria-pressed="true"] { border-color: var(--do); box-shadow: inset 3px 0 0 var(--do); }
+.qrow { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; font-size: 0.95rem; }
+.qrow select { font: 400 0.9rem/1.2 var(--font-mono); padding: 0.3rem 0.4rem; border-radius: 4px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+.qrow .mark { font: 600 0.8rem/1 var(--font-mono); }
+.qrow .mark.right { color: var(--ok); }
+.qrow .mark.wrong { color: var(--warn); }
+.node-block rect { fill: none; stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: 6 4; }
+.rgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 1rem; }
+.rcard { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 1rem; display: grid; gap: 0.6rem; align-content: start; min-width: 0; }
+.rcard h3 { font-size: 1.02rem; }
+.rcard p { font-size: 0.95rem; }
+.rcard .err { font: 400 0.8rem/1.5 var(--font-mono); color: var(--warn); border-left: 2px solid var(--warn); padding-left: 0.6rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+.rcard .btn { justify-self: start; }
+
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 
 <div class="wrap">
   <header class="hero">
-    <div class="eyebrow">Kausalitet i fysikk og kjemi · VG1–VG3</div>
+    <div class="eyebrow">Kausalitet i fysikk, kjemi og økonomi · VG1–VG3</div>
     <h1>Samme lov. Ulike forsøk. <em>Hva holder labben fast?</em></h1>
     <p class="lede">pV = nRT sier ikke hva som er årsak og hva som er virkning. Det er forsøksoppsettet som gjør det. Her spår du først, gjør så inngrepet, og ser til slutt hvorfor det gikk som det gikk.</p>
     <ol class="steps">
@@ -441,6 +522,62 @@ input[type="range"] { width: 100%; accent-color: var(--do); }
     </div>
   </section>
 
+  <!-- ============ BYGGESETT ============ -->
+  <section class="exp" id="byggesett" aria-labelledby="bygg-h">
+    <div class="exp-head">
+      <div class="eyebrow">Byggesett · fysikk, kjemi og økonomi</div>
+      <h2 id="bygg-h">Bygg forsøket selv. Lean regner ut rekkefølgen.</h2>
+      <p>Velg en modell og bestem hva labben holder fast. Da finner Lean ut hvilken lov som bestemmer hvilken størrelse, om noe henger sammen i en sløyfe, og hva som skjer når du griper inn. Alt du ser her, er regnet ut av Lean på forhånd. Siden slår bare opp svaret.</p>
+    </div>
+
+    <div class="mpick" role="group" aria-label="Velg modell" id="bModels"></div>
+
+    <div class="bench">
+      <div class="panel">
+        <div class="bstory" id="bStory"></div>
+        <div class="bsub">Lovene</div>
+        <div id="bLaws" class="blaws"></div>
+        <div class="bsub" id="bFixHead">Hva holder labben fast?</div>
+        <div class="vchips" id="bVars" role="group" aria-label="Størrelser labben kan holde fast"></div>
+        <div class="bcount" id="bCount" aria-live="polite"></div>
+        <div class="bnamed" id="bNamed"></div>
+        <label class="bpred"><input type="checkbox" id="bPredict"> Spå først: skjul svaret til jeg har gjettet</label>
+        <details class="bsrc">
+          <summary>Modellen slik den står i Lean</summary>
+          <pre id="bSource"></pre>
+          <table class="readout" aria-label="Enheter">
+            <thead><tr><th>Navn</th><th>Oppgitt enhet</th><th>SI-dimensjon (regnet av Lean)</th></tr></thead>
+            <tbody id="bUnits"></tbody>
+          </table>
+        </details>
+      </div>
+
+      <div class="panel">
+        <figure class="fig">
+          <figcaption id="bGraphCap">Kausal rekkefølge</figcaption>
+          <div class="bgraph"><svg id="bGraph" role="img" aria-label="Kausal graf for oppsettet"></svg></div>
+        </figure>
+        <div id="bQuiz" class="predict" hidden></div>
+        <div id="bResult" aria-live="polite"></div>
+        <div id="bDo" class="bdo"></div>
+        <details class="bsrc" id="bLeanBox">
+          <summary>Slik svarer Lean</summary>
+          <pre id="bLean"></pre>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FINN FEILEN ============ -->
+  <section class="exp" id="feil" aria-labelledby="feil-h">
+    <div class="exp-head">
+      <div class="eyebrow">Finn feilen</div>
+      <h2 id="feil-h">Lean sier nei. Ser du hvorfor?</h2>
+      <p>Hver modell under har én feil. Les koden, gjett hva som er galt, og se så hva Lean svarer. Feilmeldingene er de Lean faktisk gir; testsamlingen sjekker at de ikke endrer seg.</p>
+    </div>
+    <div class="rgrid" id="rGrid"></div>
+  </section>
+
   <!-- ============ FASIT ============ -->
   <section class="proof" aria-labelledby="proof-h">
     <div class="exp-head">
@@ -466,11 +603,23 @@ input[type="range"] { width: 100%; accent-color: var(--do); }
       <div class="proof-item"><code>voltage_doR_unique</code><span>Et inngrep på R gir ett entydig utfall i kretsen.</span></div>
       <div class="proof-item"><code>setupA_T_indep_V</code><span>Varierer T og V tilfeldig fra forsøk til forsøk i oppsett A, er de statistisk uavhengige.</span></div>
       <div class="proof-item"><code>setupB_T_indep_p</code><span>I oppsett B er det T og p som er uavhengige.</span></div>
+      <div class="proof-item"><code>scripts/Export.lean</code><span>Byggesettets svar er regnet ut av Lean for alle mulige oppsett i hver modell. CI kjører eksporten på nytt og feiler hvis siden avviker.</span></div>
+      <div class="proof-item"><code>Setup.do_existsUnique</code><span>Uten sløyfer har hvert inngrep nøyaktig ett utfall.</span></div>
+      <div class="proof-item"><code>block_linear</code><span>Lineære sløyfer: Lean regner determinanten og viser entydighet, eller sier hva som gjenstår.</span></div>
+      <div class="proof-item"><code>secant_unique</code><span>Ikke-lineære sløyfer som er lineære i hver størrelse: høyst ett utfall (sekant-kriteriet).</span></div>
+      <div class="proof-item"><code>Setup.intervene_iff_doI</code><span>Å slå av loven som bestemmer x og holde x fast, er Pearls do(x).</span></div>
+      <div class="proof-item"><code>Market.ceiling_excess_demand</code><span>Et pristak slår av markedsklareringen, ikke etterspørselen, og gir etterspørselsoverskudd.</span></div>
+      <div class="proof-item"><code>Tests/Rejects.lean</code><span>Feilmeldingene i «Finn feilen» er festet i testsamlingen.</span></div>
       <div class="proof-item open"><code>ikke bevist ennå</code><span>Tilsatt B følger av symmetri. Tilsatt C og tallverdiene i kretsen er regnet ut på siden, men ikke bevist i Lean. Retningene i kretsen er bevist.</span></div>
     </div>
   </section>
 </div>
 
+<script>
+/*LEAN-DATA-BEGIN*/
+const LEAN = {"models":{"gas":{"key":"gas","vars":["p","vol","n","T"],"laws":["gas"],"solvable":{"gas":["p","vol","T","n"]},"setups":[{"fixed":["p","vol","n"],"valid":true,"acyclic":true,"order":[{"law":"gas","var":"T","reads":["p","vol","n"],"rank":0,"block":["gas"]}]},{"fixed":["p","vol","T"],"valid":true,"acyclic":true,"order":[{"law":"gas","var":"n","reads":["p","vol","T"],"rank":0,"block":["gas"]}]},{"fixed":["p","n","T"],"valid":true,"acyclic":true,"order":[{"law":"gas","var":"vol","reads":["n","T","p"],"rank":0,"block":["gas"]}]},{"fixed":["vol","n","T"],"valid":true,"acyclic":true,"order":[{"law":"gas","var":"p","reads":["n","T","vol"],"rank":0,"block":["gas"]}]}],"without":{"gas":[{"fixed":["p","vol","n","T"],"valid":true,"acyclic":true,"order":[]}]},"units":{"p":"kg·m⁻¹·s⁻² (Pa)","vol":"m³","n":"mol","T":"K","R":"kg·m²·s⁻²·K⁻¹·mol⁻¹"},"name":"Gas","lawText":[{"name":"gas","eq":"p * vol = n * R * T","solve":[{"var":"p","formula":"n * R * T / vol"},{"var":"vol","formula":"n * R * T / p"},{"var":"T","formula":"p * vol / (n * R)"},{"var":"n","formula":"p * vol / (R * T)"}]}],"named":[{"name":"locked","fixed":["vol","n","T"],"comment":"locked piston, heat bath, closed vessel"},{"name":"weighted","fixed":["p","n","T"],"comment":"weighted piston, heat bath, closed vessel"}],"domain":"0 < p ∧ 0 < vol ∧ 0 < n ∧ 0 < T","unitsClause":"p : Pa, vol : m^3, n : mol, T : K, R : J/(mol*K)","units_declared":[["p","Pa"],["vol","m^3"],["n","mol"],["T","K"],["R","J/(mol*K)"]],"source":"causal_model Gas where\n  variables p vol n T\n  units p : Pa, vol : m^3, n : mol, T : K, R : J/(mol*K)\n  domain 0 < p ∧ 0 < vol ∧ 0 < n ∧ 0 < T\n  law gas : p * vol = n * R * T\n    solve p := n * R * T / vol\n    solve vol := n * R * T / p\n    solve T := p * vol / (n * R) by have := R_pos.ne'; law_solve\n    solve n := p * vol / (R * T) by have := R_pos.ne'; law_solve\n  witness p := 1, vol := 1, n := 1, T := 1 / R by have := R_pos; witness_check\n  setup locked fixes vol n T      -- locked piston, heat bath, closed vessel\n  setup weighted fixes p n T      -- weighted piston, heat bath, closed vessel","pinned":{"locked":{"causal_order":"gas determines p, reading [n, T, vol]\nacyclic: every intervention has exactly one outcome of the causal model"}}},"circuit":{"key":"circuit","vars":["U","Rr","I","P","T","Ta","k"],"laws":["joule","ohm","newton"],"solvable":{"joule":["P","I"],"ohm":["I","U"],"newton":["T"]},"setups":[{"fixed":["U","Rr","I","P"],"valid":false},{"fixed":["U","Rr","I","T"],"valid":false},{"fixed":["U","Rr","I","Ta"],"valid":false},{"fixed":["U","Rr","I","k"],"valid":false},{"fixed":["U","Rr","P","T"],"valid":false},{"fixed":["U","Rr","P","Ta"],"valid":false},{"fixed":["U","Rr","P","k"],"valid":false},{"fixed":["U","Rr","T","Ta"],"valid":false},{"fixed":["U","Rr","T","k"],"valid":false},{"fixed":["U","Rr","Ta","k"],"valid":true,"acyclic":true,"order":[{"law":"joule","var":"P","reads":["U","I"],"rank":1,"block":["joule"]},{"law":"ohm","var":"I","reads":["U","Rr"],"rank":0,"block":["ohm"]},{"law":"newton","var":"T","reads":["Ta","k","P"],"rank":2,"block":["newton"]}]},{"fixed":["U","I","P","T"],"valid":false},{"fixed":["U","I","P","Ta"],"valid":false},{"fixed":["U","I","P","k"],"valid":false},{"fixed":["U","I","T","Ta"],"valid":false},{"fixed":["U","I","T","k"],"valid":false},{"fixed":["U","I","Ta","k"],"valid":false},{"fixed":["U","P","T","Ta"],"valid":false},{"fixed":["U","P","T","k"],"valid":false},{"fixed":["U","P","Ta","k"],"valid":false},{"fixed":["U","T","Ta","k"],"valid":false},{"fixed":["Rr","I","P","T"],"valid":false},{"fixed":["Rr","I","P","Ta"],"valid":false},{"fixed":["Rr","I","P","k"],"valid":false},{"fixed":["Rr","I","T","Ta"],"valid":false},{"fixed":["Rr","I","T","k"],"valid":false},{"fixed":["Rr","I","Ta","k"],"valid":true,"acyclic":true,"order":[{"law":"joule","var":"P","reads":["U","I"],"rank":1,"block":["joule"]},{"law":"ohm","var":"U","reads":["Rr","I"],"rank":0,"block":["ohm"]},{"law":"newton","var":"T","reads":["Ta","k","P"],"rank":2,"block":["newton"]}]},{"fixed":["Rr","P","T","Ta"],"valid":false},{"fixed":["Rr","P","T","k"],"valid":false},{"fixed":["Rr","P","Ta","k"],"valid":true,"acyclic":false,"order":[{"law":"joule","var":"I","reads":["P","U"],"rank":3,"block":["joule","ohm"]},{"law":"ohm","var":"U","reads":["Rr","I"],"rank":3,"block":["joule","ohm"]},{"law":"newton","var":"T","reads":["Ta","k","P"],"rank":0,"block":["newton"]}],"check":"cyclic: neither criterion applies (some formula is not affine in its own block, and not affine in each variable separately); uniqueness needs a domain-specific argument (monotonicity, Gale–Nikaido, Minty–Browder), plugged in with Setup.unique_of_laws"},{"fixed":["Rr","T","Ta","k"],"valid":false},{"fixed":["I","P","T","Ta"],"valid":false},{"fixed":["I","P","T","k"],"valid":false},{"fixed":["I","P","Ta","k"],"valid":false},{"fixed":["I","T","Ta","k"],"valid":false},{"fixed":["P","T","Ta","k"],"valid":false}],"without":{"joule":[{"fixed":["U","Rr","I","P","T"],"valid":false},{"fixed":["U","Rr","I","P","Ta"],"valid":false},{"fixed":["U","Rr","I","P","k"],"valid":false},{"fixed":["U","Rr","I","T","Ta"],"valid":false},{"fixed":["U","Rr","I","T","k"],"valid":false},{"fixed":["U","Rr","I","Ta","k"],"valid":false},{"fixed":["U","Rr","P","T","Ta"],"valid":false},{"fixed":["U","Rr","P","T","k"],"valid":false},{"fixed":["U","Rr","P","Ta","k"],"valid":true,"acyclic":true,"order":[{"law":"ohm","var":"I","reads":["U","Rr"],"rank":0,"block":["ohm"]},{"law":"newton","var":"T","reads":["Ta","k","P"],"rank":0,"block":["newton"]}]},{"fixed":["U","Rr","T","Ta","k"],"valid":false},{"fixed":["U","I","P","T","Ta"],"valid":false},{"fixed":["U","I","P","T","k"],"valid":false},{"fixed":["U","I","P","Ta","k"],"valid":false},{"fixed":["U","I","T","Ta","k"],"valid":false},{"fixed":["U","P","T","Ta","k"],"valid":false},{"fixed":["Rr","I","P","T","Ta"],"valid":false},{"fixed":["Rr","I","P","T","k"],"valid":false},{"fixed":["Rr","I","P","Ta","k"],"valid":true,"acyclic":true,"order":[{"law":"ohm","var":"U","reads":["Rr","I"],"rank":0,"block":["ohm"]},{"law":"newton","var":"T","reads":["Ta","k","P"],"rank":0,"block":["newton"]}]},{"fixed":["Rr","I","T","Ta","k"],"valid":false},{"fixed":["Rr","P","T","Ta","k"],"valid":false},{"fixed":["I","P","T","Ta","k"],"valid":false}],"ohm":[{"fixed":["U","Rr","I","P","T"],"valid":false},{"fixed":["U","Rr","I","P","Ta"],"valid":false},{"fixed":["U","Rr","I","P","k"],"valid":false},{"fixed":["U","Rr","I","T","Ta"],"valid":false},{"fixed":["U","Rr","I","T","k"],"valid":false},{"fixed":["U","Rr","I","Ta","k"],"valid":true,"acyclic":true,"order":[{"law":"joule","var":"P","reads":["U","I"],"rank":0,"block":["joule"]},{"law":"newton","var":"T","reads":["Ta","k","P"],"rank":1,"block":["newton"]}]},{"fixed":["U","Rr","P","T","Ta"],"valid":false},{"fixed":["U","Rr","P","T","k"],"valid":false},{"fixed":["U","Rr","P","Ta","k"],"valid":true,"acyclic":true,"order":[{"law":"joule","var":"I","reads":["P","U"],"rank":0,"block":["joule"]},{"law":"newton","var":"T","reads":["Ta","k","P"],"rank":0,"block":["newton"]}]},{"fixed":["U","Rr","T","Ta","k"],"valid":false},{"fixed":["U","I","P","T","Ta"],"valid":false},{"fixed":["U","I","P","T","k"],"valid":false},{"fixed":["U","I","P","Ta","k"],"valid":false},{"fixed":["U","I","T","Ta","k"],"valid":false},{"fixed":["U","P","T","Ta","k"],"valid":false},{"fixed":["Rr","I","P","T","Ta"],"valid":false},{"fixed":["Rr","I","P","T","k"],"valid":false},{"fixed":["Rr","I","P","Ta","k"],"valid":false},{"fixed":["Rr","I","T","Ta","k"],"valid":false},{"fixed":["Rr","P","T","Ta","k"],"valid":false},{"fixed":["I","P","T","Ta","k"],"valid":false}],"newton":[{"fixed":["U","Rr","I","P","T"],"valid":false},{"fixed":["U","Rr","I","P","Ta"],"valid":false},{"fixed":["U","Rr","I","P","k"],"valid":false},{"fixed":["U","Rr","I","T","Ta"],"valid":false},{"fixed":["U","Rr","I","T","k"],"valid":false},{"fixed":["U","Rr","I","Ta","k"],"valid":false},{"fixed":["U","Rr","P","T","Ta"],"valid":false},{"fixed":["U","Rr","P","T","k"],"valid":false},{"fixed":["U","Rr","P","Ta","k"],"valid":false},{"fixed":["U","Rr","T","Ta","k"],"valid":true,"acyclic":true,"order":[{"law":"joule","var":"P","reads":["U","I"],"rank":1,"block":["joule"]},{"law":"ohm","var":"I","reads":["U","Rr"],"rank":0,"block":["ohm"]}]},{"fixed":["U","I","P","T","Ta"],"valid":false},{"fixed":["U","I","P","T","k"],"valid":false},{"fixed":["U","I","P","Ta","k"],"valid":false},{"fixed":["U","I","T","Ta","k"],"valid":false},{"fixed":["U","P","T","Ta","k"],"valid":false},{"fixed":["Rr","I","P","T","Ta"],"valid":false},{"fixed":["Rr","I","P","T","k"],"valid":false},{"fixed":["Rr","I","P","Ta","k"],"valid":false},{"fixed":["Rr","I","T","Ta","k"],"valid":true,"acyclic":true,"order":[{"law":"joule","var":"P","reads":["U","I"],"rank":1,"block":["joule"]},{"law":"ohm","var":"U","reads":["Rr","I"],"rank":0,"block":["ohm"]}]},{"fixed":["Rr","P","T","Ta","k"],"valid":true,"acyclic":false,"order":[{"law":"joule","var":"I","reads":["P","U"],"rank":2,"block":["joule","ohm"]},{"law":"ohm","var":"U","reads":["Rr","I"],"rank":2,"block":["joule","ohm"]}],"check":"cyclic: neither criterion applies (some formula is not affine in its own block, and not affine in each variable separately); uniqueness needs a domain-specific argument (monotonicity, Gale–Nikaido, Minty–Browder), plugged in with Setup.unique_of_laws"},{"fixed":["I","P","T","Ta","k"],"valid":false}]},"units":{"U":"kg·m²·s⁻³·A⁻¹ (V)","Rr":"kg·m²·s⁻³·A⁻² (ohm)","I":"A","P":"kg·m²·s⁻³ (W)","T":"K","Ta":"K","k":"kg⁻¹·m⁻²·s³·K"},"name":"Circuit","lawText":[{"name":"joule","eq":"P = U * I","solve":[{"var":"P","formula":"U * I"},{"var":"I","formula":"P / U"}]},{"name":"ohm","eq":"U = Rr * I","solve":[{"var":"I","formula":"U / Rr"},{"var":"U","formula":"Rr * I"}]},{"name":"newton","eq":"T = Ta + k * P","solve":[{"var":"T","formula":"Ta + k * P"}]}],"named":[{"name":"voltageSource","fixed":["U","Rr","Ta","k"],"comment":""},{"name":"currentSource","fixed":["Rr","I","Ta","k"],"comment":""}],"domain":"0 < U ∧ 0 < Rr","unitsClause":"U : V, Rr : ohm, I : A, P : W, T : K, Ta : K, k : K/W","units_declared":[["U","V"],["Rr","ohm"],["I","A"],["P","W"],["T","K"],["Ta","K"],["k","K/W"]],"source":"causal_model Circuit where\n  variables U Rr I P T Ta k      -- voltage, resistance, current, power, temperature,\n                                 -- ambient temperature, heat-transfer coefficient\n  units U : V, Rr : ohm, I : A, P : W, T : K, Ta : K, k : K/W\n  domain 0 < U ∧ 0 < Rr\n  law joule : P = U * I\n    solve P := U * I\n    solve I := P / U\n  law ohm : U = Rr * I\n    solve I := U / Rr\n    solve U := Rr * I\n  law newton : T = Ta + k * P\n    solve T := Ta + k * P\n  witness U := 1, Rr := 1, I := 1, P := 1\n  setup voltageSource fixes U Rr Ta k\n  setup currentSource fixes I Rr Ta k","pinned":{"voltageSource":{"causal_order":"joule determines P, reading [U, I]\nohm determines I, reading [U, Rr]\nnewton determines T, reading [Ta, k, P]\nacyclic: every intervention has exactly one outcome of the causal model"}}},"divider":{"key":"divider","vars":["I","I1","I2","U","R1","R2"],"laws":["kcl","ohm1","ohm2"],"solvable":{"kcl":["I","I1","I2"],"ohm1":["U","I1"],"ohm2":["U","I2"]},"setups":[{"fixed":["I","I1","I2"],"valid":false},{"fixed":["I","I1","U"],"valid":false},{"fixed":["I","I1","R1"],"valid":false},{"fixed":["I","I1","R2"],"valid":false},{"fixed":["I","I2","U"],"valid":false},{"fixed":["I","I2","R1"],"valid":false},{"fixed":["I","I2","R2"],"valid":false},{"fixed":["I","U","R1"],"valid":false},{"fixed":["I","U","R2"],"valid":false},{"fixed":["I","R1","R2"],"valid":true,"acyclic":false,"order":[{"law":"kcl","var":"I2","reads":["I","I1"],"rank":3,"block":["kcl","ohm1","ohm2"]},{"law":"ohm1","var":"I1","reads":["U","R1"],"rank":3,"block":["kcl","ohm1","ohm2"]},{"law":"ohm2","var":"U","reads":["R2","I2"],"rank":3,"block":["kcl","ohm1","ohm2"]}],"check":"cyclic, linear in each block: exactly one outcome of the causal model provided that\n  ¬1 + (u V.R1)⁻¹ * u V.R2 = 0\n(finish `block_linear` with a proof of this)"},{"fixed":["I1","I2","U"],"valid":false},{"fixed":["I1","I2","R1"],"valid":false},{"fixed":["I1","I2","R2"],"valid":false},{"fixed":["I1","U","R1"],"valid":false},{"fixed":["I1","U","R2"],"valid":false},{"fixed":["I1","R1","R2"],"valid":true,"acyclic":true,"order":[{"law":"kcl","var":"I","reads":["I1","I2"],"rank":2,"block":["kcl"]},{"law":"ohm1","var":"U","reads":["R1","I1"],"rank":0,"block":["ohm1"]},{"law":"ohm2","var":"I2","reads":["U","R2"],"rank":1,"block":["ohm2"]}]},{"fixed":["I2","U","R1"],"valid":false},{"fixed":["I2","U","R2"],"valid":false},{"fixed":["I2","R1","R2"],"valid":true,"acyclic":true,"order":[{"law":"kcl","var":"I","reads":["I1","I2"],"rank":2,"block":["kcl"]},{"law":"ohm1","var":"I1","reads":["U","R1"],"rank":1,"block":["ohm1"]},{"law":"ohm2","var":"U","reads":["R2","I2"],"rank":0,"block":["ohm2"]}]},{"fixed":["U","R1","R2"],"valid":true,"acyclic":true,"order":[{"law":"kcl","var":"I","reads":["I1","I2"],"rank":2,"block":["kcl"]},{"law":"ohm1","var":"I1","reads":["U","R1"],"rank":0,"block":["ohm1"]},{"law":"ohm2","var":"I2","reads":["U","R2"],"rank":0,"block":["ohm2"]}]}],"without":{"kcl":[{"fixed":["I","I1","I2","U"],"valid":false},{"fixed":["I","I1","I2","R1"],"valid":false},{"fixed":["I","I1","I2","R2"],"valid":false},{"fixed":["I","I1","U","R1"],"valid":false},{"fixed":["I","I1","U","R2"],"valid":false},{"fixed":["I","I1","R1","R2"],"valid":true,"acyclic":true,"order":[{"law":"ohm1","var":"U","reads":["R1","I1"],"rank":0,"block":["ohm1"]},{"law":"ohm2","var":"I2","reads":["U","R2"],"rank":1,"block":["ohm2"]}]},{"fixed":["I","I2","U","R1"],"valid":false},{"fixed":["I","I2","U","R2"],"valid":false},{"fixed":["I","I2","R1","R2"],"valid":true,"acyclic":true,"order":[{"law":"ohm1","var":"I1","reads":["U","R1"],"rank":1,"block":["ohm1"]},{"law":"ohm2","var":"U","reads":["R2","I2"],"rank":0,"block":["ohm2"]}]},{"fixed":["I","U","R1","R2"],"valid":true,"acyclic":true,"order":[{"law":"ohm1","var":"I1","reads":["U","R1"],"rank":0,"block":["ohm1"]},{"law":"ohm2","var":"I2","reads":["U","R2"],"rank":0,"block":["ohm2"]}]},{"fixed":["I1","I2","U","R1"],"valid":false},{"fixed":["I1","I2","U","R2"],"valid":false},{"fixed":["I1","I2","R1","R2"],"valid":false},{"fixed":["I1","U","R1","R2"],"valid":false},{"fixed":["I2","U","R1","R2"],"valid":false}],"ohm1":[{"fixed":["I","I1","I2","U"],"valid":false},{"fixed":["I","I1","I2","R1"],"valid":false},{"fixed":["I","I1","I2","R2"],"valid":false},{"fixed":["I","I1","U","R1"],"valid":false},{"fixed":["I","I1","U","R2"],"valid":false},{"fixed":["I","I1","R1","R2"],"valid":true,"acyclic":true,"order":[{"law":"kcl","var":"I2","reads":["I","I1"],"rank":0,"block":["kcl"]},{"law":"ohm2","var":"U","reads":["R2","I2"],"rank":1,"block":["ohm2"]}]},{"fixed":["I","I2","U","R1"],"valid":false},{"fixed":["I","I2","U","R2"],"valid":false},{"fixed":["I","I2","R1","R2"],"valid":true,"acyclic":true,"order":[{"law":"kcl","var":"I1","reads":["I","I2"],"rank":0,"block":["kcl"]},{"law":"ohm2","var":"U","reads":["R2","I2"],"rank":0,"block":["ohm2"]}]},{"fixed":["I","U","R1","R2"],"valid":true,"acyclic":true,"order":[{"law":"kcl","var":"I1","reads":["I","I2"],"rank":1,"block":["kcl"]},{"law":"ohm2","var":"I2","reads":["U","R2"],"rank":0,"block":["ohm2"]}]},{"fixed":["I1","I2","U","R1"],"valid":false},{"fixed":["I1","I2","U","R2"],"valid":false},{"fixed":["I1","I2","R1","R2"],"valid":true,"acyclic":true,"order":[{"law":"kcl","var":"I","reads":["I1","I2"],"rank":0,"block":["kcl"]},{"law":"ohm2","var":"U","reads":["R2","I2"],"rank":0,"block":["ohm2"]}]},{"fixed":["I1","U","R1","R2"],"valid":true,"acyclic":true,"order":[{"law":"kcl","var":"I","reads":["I1","I2"],"rank":1,"block":["kcl"]},{"law":"ohm2","var":"I2","reads":["U","R2"],"rank":0,"block":["ohm2"]}]},{"fixed":["I2","U","R1","R2"],"valid":false}],"ohm2":[{"fixed":["I","I1","I2","U"],"valid":false},{"fixed":["I","I1","I2","R1"],"valid":false},{"fixed":["I","I1","I2","R2"],"valid":false},{"fixed":["I","I1","U","R1"],"valid":false},{"fixed":["I","I1","U","R2"],"valid":false},{"fixed":["I","I1","R1","R2"],"valid":true,"acyclic":true,"order":[{"law":"kcl","var":"I2","reads":["I","I1"],"rank":0,"block":["kcl"]},{"law":"ohm1","var":"U","reads":["R1","I1"],"rank":0,"block":["ohm1"]}]},{"fixed":["I","I2","U","R1"],"valid":false},{"fixed":["I","I2","U","R2"],"valid":false},{"fixed":["I","I2","R1","R2"],"valid":true,"acyclic":true,"order":[{"law":"kcl","var":"I1","reads":["I","I2"],"rank":0,"block":["kcl"]},{"law":"ohm1","var":"U","reads":["R1","I1"],"rank":1,"block":["ohm1"]}]},{"fixed":["I","U","R1","R2"],"valid":true,"acyclic":true,"order":[{"law":"kcl","var":"I2","reads":["I","I1"],"rank":1,"block":["kcl"]},{"law":"ohm1","var":"I1","reads":["U","R1"],"rank":0,"block":["ohm1"]}]},{"fixed":["I1","I2","U","R1"],"valid":false},{"fixed":["I1","I2","U","R2"],"valid":false},{"fixed":["I1","I2","R1","R2"],"valid":true,"acyclic":true,"order":[{"law":"kcl","var":"I","reads":["I1","I2"],"rank":0,"block":["kcl"]},{"law":"ohm1","var":"U","reads":["R1","I1"],"rank":0,"block":["ohm1"]}]},{"fixed":["I1","U","R1","R2"],"valid":false},{"fixed":["I2","U","R1","R2"],"valid":true,"acyclic":true,"order":[{"law":"kcl","var":"I","reads":["I1","I2"],"rank":1,"block":["kcl"]},{"law":"ohm1","var":"I1","reads":["U","R1"],"rank":0,"block":["ohm1"]}]}]},"units":{"I":"A","I1":"A","I2":"A","U":"kg·m²·s⁻³·A⁻¹ (V)","R1":"kg·m²·s⁻³·A⁻² (ohm)","R2":"kg·m²·s⁻³·A⁻² (ohm)"},"name":"Divider","lawText":[{"name":"kcl","eq":"I = I1 + I2","solve":[{"var":"I","formula":"I1 + I2"},{"var":"I1","formula":"I - I2"},{"var":"I2","formula":"I - I1"}]},{"name":"ohm1","eq":"U = R1 * I1","solve":[{"var":"U","formula":"R1 * I1"},{"var":"I1","formula":"U / R1"}]},{"name":"ohm2","eq":"U = R2 * I2","solve":[{"var":"U","formula":"R2 * I2"},{"var":"I2","formula":"U / R2"}]}],"named":[{"name":"currentSource","fixed":["I","R1","R2"],"comment":""},{"name":"voltageSource","fixed":["U","R1","R2"],"comment":""}],"domain":"0 < R1 ∧ 0 < R2","unitsClause":"I : A, I1 : A, I2 : A, U : V, R1 : ohm, R2 : ohm","units_declared":[["I","A"],["I1","A"],["I2","A"],["U","V"],["R1","ohm"],["R2","ohm"]],"source":"causal_model Divider where\n  variables I I1 I2 U R1 R2\n  units I : A, I1 : A, I2 : A, U : V, R1 : ohm, R2 : ohm\n  domain 0 < R1 ∧ 0 < R2\n  law kcl : I = I1 + I2\n    solve I := I1 + I2\n    solve I1 := I - I2\n    solve I2 := I - I1\n  law ohm1 : U = R1 * I1\n    solve U := R1 * I1\n    solve I1 := U / R1\n  law ohm2 : U = R2 * I2\n    solve U := R2 * I2\n    solve I2 := U / R2\n  witness I := 2, I1 := 1, I2 := 1, U := 1, R1 := 1, R2 := 1\n  setup currentSource fixes I R1 R2\n  setup voltageSource fixes U R1 R2","pinned":{"currentSource":{"causal_order":"kcl determines I2, reading [I, I1]\nohm1 determines I1, reading [U, R1]\nohm2 determines U, reading [R2, I2]\ncyclic block: [kcl, ohm1, ohm2]"}}},"complexation":{"key":"complexation","vars":["M","L","ML","ML2","m0","l0"],"laws":["k1","k2","metal","ligand"],"solvable":{"k1":["ML"],"k2":["ML2"],"metal":["M","m0"],"ligand":["L","l0"]},"setups":[{"fixed":["M","L"],"valid":true,"acyclic":true,"order":[{"law":"k1","var":"ML","reads":["M","L"],"rank":0,"block":["k1"]},{"law":"k2","var":"ML2","reads":["ML","L"],"rank":1,"block":["k2"]},{"law":"metal","var":"m0","reads":["M","ML","ML2"],"rank":2,"block":["metal"]},{"law":"ligand","var":"l0","reads":["L","ML","ML2"],"rank":2,"block":["ligand"]}]},{"fixed":["M","ML"],"valid":false},{"fixed":["M","ML2"],"valid":false},{"fixed":["M","m0"],"valid":false},{"fixed":["M","l0"],"valid":true,"acyclic":false,"order":[{"law":"k1","var":"ML","reads":["M","L"],"rank":4,"block":["k1","k2","ligand"]},{"law":"k2","var":"ML2","reads":["ML","L"],"rank":4,"block":["k1","k2","ligand"]},{"law":"metal","var":"m0","reads":["M","ML","ML2"],"rank":4,"block":["metal"]},{"law":"ligand","var":"L","reads":["l0","ML","ML2"],"rank":4,"block":["k1","k2","ligand"]}],"check":"cyclic, not linear in its own block, but multi-affine: at most one outcome in the domain (secant P-matrix criterion, proved by secant_unique)"},{"fixed":["L","ML"],"valid":false},{"fixed":["L","ML2"],"valid":false},{"fixed":["L","m0"],"valid":true,"acyclic":false,"order":[{"law":"k1","var":"ML","reads":["M","L"],"rank":4,"block":["k1","k2","metal"]},{"law":"k2","var":"ML2","reads":["ML","L"],"rank":4,"block":["k1","k2","metal"]},{"law":"metal","var":"M","reads":["m0","ML","ML2"],"rank":4,"block":["k1","k2","metal"]},{"law":"ligand","var":"l0","reads":["L","ML","ML2"],"rank":4,"block":["ligand"]}],"check":"cyclic, linear in each block: exactly one outcome of the causal model provided that\n  ¬1 + c.K1 * u V.L + c.K1 * u V.L ^ 2 * c.K2 = 0\n(finish `block_linear` with a proof of this)"},{"fixed":["L","l0"],"valid":false},{"fixed":["ML","ML2"],"valid":false},{"fixed":["ML","m0"],"valid":false},{"fixed":["ML","l0"],"valid":false},{"fixed":["ML2","m0"],"valid":false},{"fixed":["ML2","l0"],"valid":false},{"fixed":["m0","l0"],"valid":true,"acyclic":false,"order":[{"law":"k1","var":"ML","reads":["M","L"],"rank":4,"block":["k1","k2","metal","ligand"]},{"law":"k2","var":"ML2","reads":["ML","L"],"rank":4,"block":["k1","k2","metal","ligand"]},{"law":"metal","var":"M","reads":["m0","ML","ML2"],"rank":4,"block":["k1","k2","metal","ligand"]},{"law":"ligand","var":"L","reads":["l0","ML","ML2"],"rank":4,"block":["k1","k2","metal","ligand"]}],"check":"cyclic, not linear in its own block, but multi-affine: at most one outcome in the domain (secant P-matrix criterion, proved by secant_unique)"}],"without":{"k1":[{"fixed":["M","L","ML"],"valid":true,"acyclic":true,"order":[{"law":"k2","var":"ML2","reads":["ML","L"],"rank":0,"block":["k2"]},{"law":"metal","var":"m0","reads":["M","ML","ML2"],"rank":1,"block":["metal"]},{"law":"ligand","var":"l0","reads":["L","ML","ML2"],"rank":1,"block":["ligand"]}]},{"fixed":["M","L","ML2"],"valid":false},{"fixed":["M","L","m0"],"valid":false},{"fixed":["M","L","l0"],"valid":false},{"fixed":["M","ML","ML2"],"valid":false},{"fixed":["M","ML","m0"],"valid":false},{"fixed":["M","ML","l0"],"valid":true,"acyclic":false,"order":[{"law":"k2","var":"ML2","reads":["ML","L"],"rank":3,"block":["k2","ligand"]},{"law":"metal","var":"m0","reads":["M","ML","ML2"],"rank":3,"block":["metal"]},{"law":"ligand","var":"L","reads":["l0","ML","ML2"],"rank":3,"block":["k2","ligand"]}],"check":"cyclic, linear in each block: exactly one outcome of the causal model provided that\n  ¬1 + u V.ML * c.K2 * 2 = 0\n(finish `block_linear` with a proof of this)"},{"fixed":["M","ML2","m0"],"valid":false},{"fixed":["M","ML2","l0"],"valid":false},{"fixed":["M","m0","l0"],"valid":false},{"fixed":["L","ML","ML2"],"valid":false},{"fixed":["L","ML","m0"],"valid":true,"acyclic":true,"order":[{"law":"k2","var":"ML2","reads":["ML","L"],"rank":0,"block":["k2"]},{"law":"metal","var":"M","reads":["m0","ML","ML2"],"rank":1,"block":["metal"]},{"law":"ligand","var":"l0","reads":["L","ML","ML2"],"rank":1,"block":["ligand"]}]},{"fixed":["L","ML","l0"],"valid":false},{"fixed":["L","ML2","m0"],"valid":false},{"fixed":["L","ML2","l0"],"valid":false},{"fixed":["L","m0","l0"],"valid":false},{"fixed":["ML","ML2","m0"],"valid":false},{"fixed":["ML","ML2","l0"],"valid":false},{"fixed":["ML","m0","l0"],"valid":true,"acyclic":false,"order":[{"law":"k2","var":"ML2","reads":["ML","L"],"rank":3,"block":["k2","ligand"]},{"law":"metal","var":"M","reads":["m0","ML","ML2"],"rank":3,"block":["metal"]},{"law":"ligand","var":"L","reads":["l0","ML","ML2"],"rank":3,"block":["k2","ligand"]}],"check":"cyclic, linear in each block: exactly one outcome of the causal model provided that\n  ¬1 + u V.ML * c.K2 * 2 = 0\n(finish `block_linear` with a proof of this)"},{"fixed":["ML2","m0","l0"],"valid":false}],"k2":[{"fixed":["M","L","ML"],"valid":false},{"fixed":["M","L","ML2"],"valid":true,"acyclic":true,"order":[{"law":"k1","var":"ML","reads":["M","L"],"rank":0,"block":["k1"]},{"law":"metal","var":"m0","reads":["M","ML","ML2"],"rank":1,"block":["metal"]},{"law":"ligand","var":"l0","reads":["L","ML","ML2"],"rank":1,"block":["ligand"]}]},{"fixed":["M","L","m0"],"valid":false},{"fixed":["M","L","l0"],"valid":false},{"fixed":["M","ML","ML2"],"valid":false},{"fixed":["M","ML","m0"],"valid":false},{"fixed":["M","ML","l0"],"valid":false},{"fixed":["M","ML2","m0"],"valid":false},{"fixed":["M","ML2","l0"],"valid":true,"acyclic":false,"order":[{"law":"k1","var":"ML","reads":["M","L"],"rank":3,"block":["k1","ligand"]},{"law":"metal","var":"m0","reads":["M","ML","ML2"],"rank":3,"block":["metal"]},{"law":"ligand","var":"L","reads":["l0","ML","ML2"],"rank":3,"block":["k1","ligand"]}],"check":"cyclic, linear in each block: exactly one outcome of the causal model provided that\n  ¬1 + c.K1 * u V.M = 0\n(finish `block_linear` with a proof of this)"},{"fixed":["M","m0","l0"],"valid":false},{"fixed":["L","ML","ML2"],"valid":false},{"fixed":["L","ML","m0"],"valid":false},{"fixed":["L","ML","l0"],"valid":false},{"fixed":["L","ML2","m0"],"valid":true,"acyclic":false,"order":[{"law":"k1","var":"ML","reads":["M","L"],"rank":3,"block":["k1","metal"]},{"law":"metal","var":"M","reads":["m0","ML","ML2"],"rank":3,"block":["k1","metal"]},{"law":"ligand","var":"l0","reads":["L","ML","ML2"],"rank":3,"block":["ligand"]}],"check":"cyclic, linear in each block: exactly one outcome of the causal model provided that\n  ¬1 + c.K1 * u V.L = 0\n(finish `block_linear` with a proof of this)"},{"fixed":["L","ML2","l0"],"valid":false},{"fixed":["L","m0","l0"],"valid":false},{"fixed":["ML","ML2","m0"],"valid":false},{"fixed":["ML","ML2","l0"],"valid":false},{"fixed":["ML","m0","l0"],"valid":false},{"fixed":["ML2","m0","l0"],"valid":true,"acyclic":false,"order":[{"law":"k1","var":"ML","reads":["M","L"],"rank":3,"block":["k1","metal","ligand"]},{"law":"metal","var":"M","reads":["m0","ML","ML2"],"rank":3,"block":["k1","metal","ligand"]},{"law":"ligand","var":"L","reads":["l0","ML","ML2"],"rank":3,"block":["k1","metal","ligand"]}],"check":"cyclic, not linear in its own block, but multi-affine: at most one outcome in the domain (secant P-matrix criterion, proved by secant_unique)"}],"metal":[{"fixed":["M","L","ML"],"valid":false},{"fixed":["M","L","ML2"],"valid":false},{"fixed":["M","L","m0"],"valid":true,"acyclic":true,"order":[{"law":"k1","var":"ML","reads":["M","L"],"rank":0,"block":["k1"]},{"law":"k2","var":"ML2","reads":["ML","L"],"rank":1,"block":["k2"]},{"law":"ligand","var":"l0","reads":["L","ML","ML2"],"rank":2,"block":["ligand"]}]},{"fixed":["M","L","l0"],"valid":false},{"fixed":["M","ML","ML2"],"valid":false},{"fixed":["M","ML","m0"],"valid":false},{"fixed":["M","ML","l0"],"valid":false},{"fixed":["M","ML2","m0"],"valid":false},{"fixed":["M","ML2","l0"],"valid":false},{"fixed":["M","m0","l0"],"valid":true,"acyclic":false,"order":[{"law":"k1","var":"ML","reads":["M","L"],"rank":3,"block":["k1","k2","ligand"]},{"law":"k2","var":"ML2","reads":["ML","L"],"rank":3,"block":["k1","k2","ligand"]},{"law":"ligand","var":"L","reads":["l0","ML","ML2"],"rank":3,"block":["k1","k2","ligand"]}],"check":"cyclic, not linear in its own block, but multi-affine: at most one outcome in the domain (secant P-matrix criterion, proved by secant_unique)"},{"fixed":["L","ML","ML2"],"valid":false},{"fixed":["L","ML","m0"],"valid":false},{"fixed":["L","ML","l0"],"valid":false},{"fixed":["L","ML2","m0"],"valid":false},{"fixed":["L","ML2","l0"],"valid":false},{"fixed":["L","m0","l0"],"valid":false},{"fixed":["ML","ML2","m0"],"valid":false},{"fixed":["ML","ML2","l0"],"valid":false},{"fixed":["ML","m0","l0"],"valid":false},{"fixed":["ML2","m0","l0"],"valid":false}],"ligand":[{"fixed":["M","L","ML"],"valid":false},{"fixed":["M","L","ML2"],"valid":false},{"fixed":["M","L","m0"],"valid":false},{"fixed":["M","L","l0"],"valid":true,"acyclic":true,"order":[{"law":"k1","var":"ML","reads":["M","L"],"rank":0,"block":["k1"]},{"law":"k2","var":"ML2","reads":["ML","L"],"rank":1,"block":["k2"]},{"law":"metal","var":"m0","reads":["M","ML","ML2"],"rank":2,"block":["metal"]}]},{"fixed":["M","ML","ML2"],"valid":false},{"fixed":["M","ML","m0"],"valid":false},{"fixed":["M","ML","l0"],"valid":false},{"fixed":["M","ML2","m0"],"valid":false},{"fixed":["M","ML2","l0"],"valid":false},{"fixed":["M","m0","l0"],"valid":false},{"fixed":["L","ML","ML2"],"valid":false},{"fixed":["L","ML","m0"],"valid":false},{"fixed":["L","ML","l0"],"valid":false},{"fixed":["L","ML2","m0"],"valid":false},{"fixed":["L","ML2","l0"],"valid":false},{"fixed":["L","m0","l0"],"valid":true,"acyclic":false,"order":[{"law":"k1","var":"ML","reads":["M","L"],"rank":3,"block":["k1","k2","metal"]},{"law":"k2","var":"ML2","reads":["ML","L"],"rank":3,"block":["k1","k2","metal"]},{"law":"metal","var":"M","reads":["m0","ML","ML2"],"rank":3,"block":["k1","k2","metal"]}],"check":"cyclic, linear in each block: exactly one outcome of the causal model provided that\n  ¬1 + c.K1 * u V.L + c.K1 * u V.L ^ 2 * c.K2 = 0\n(finish `block_linear` with a proof of this)"},{"fixed":["ML","ML2","m0"],"valid":false},{"fixed":["ML","ML2","l0"],"valid":false},{"fixed":["ML","m0","l0"],"valid":false},{"fixed":["ML2","m0","l0"],"valid":false}]},"units":{"M":"m⁻³·mol","L":"m⁻³·mol","ML":"m⁻³·mol","ML2":"m⁻³·mol","m0":"m⁻³·mol","l0":"m⁻³·mol","c.K1":"m³·mol⁻¹","c.K2":"m³·mol⁻¹"},"name":"Complexation","lawText":[{"name":"k1","eq":"ML = c.K1 * M * L","solve":[{"var":"ML","formula":"c.K1 * M * L"}]},{"name":"k2","eq":"ML2 = c.K2 * ML * L","solve":[{"var":"ML2","formula":"c.K2 * ML * L"}]},{"name":"metal","eq":"m0 = M + ML + ML2","solve":[{"var":"M","formula":"m0 - ML - ML2"},{"var":"m0","formula":"M + ML + ML2"}]},{"name":"ligand","eq":"l0 = L + ML + 2 * ML2","solve":[{"var":"L","formula":"l0 - ML - 2 * ML2"},{"var":"l0","formula":"L + ML + 2 * ML2"}]}],"named":[{"name":"closed","fixed":["m0","l0"],"comment":"closed flask: the amounts added are fixed"},{"name":"buffered","fixed":["L","m0"],"comment":"ligand buffer: free ligand held fixed"}],"domain":"0 < M ∧ 0 < L ∧ 0 < ML ∧ 0 < ML2","unitsClause":"M : M, L : M, ML : M, ML2 : M, m0 : M, l0 : M, c.K1 : 1/M, c.K2 : 1/M","units_declared":[["M","M"],["L","M"],["ML","M"],["ML2","M"],["m0","M"],["l0","M"],["c.K1","1/M"],["c.K2","1/M"]],"source":"causal_model Complexation (c : Complexation.Consts) where\n  variables M L ML ML2 m0 l0\n  units M : M, L : M, ML : M, ML2 : M, m0 : M, l0 : M, c.K1 : 1/M, c.K2 : 1/M\n  domain 0 < M ∧ 0 < L ∧ 0 < ML ∧ 0 < ML2\n  law k1 : ML = c.K1 * M * L\n    solve ML := c.K1 * M * L\n  law k2 : ML2 = c.K2 * ML * L\n    solve ML2 := c.K2 * ML * L\n  law metal : m0 = M + ML + ML2\n    solve M := m0 - ML - ML2\n    solve m0 := M + ML + ML2\n  law ligand : l0 = L + ML + 2 * ML2\n    solve L := l0 - ML - 2 * ML2\n    solve l0 := L + ML + 2 * ML2\n  witness M := 1, L := 1, ML := c.K1, ML2 := c.K2 * c.K1, m0 := 1 + c.K1 + c.K2 * c.K1,\n    l0 := 1 + c.K1 + 2 * (c.K2 * c.K1)\n  setup closed fixes m0 l0        -- closed flask: the amounts added are fixed\n  setup buffered fixes m0 L       -- ligand buffer: free ligand held fixed","pinned":{"closed":{"causal_order":"k1 determines ML, reading [M, L]\nk2 determines ML2, reading [ML, L]\nmetal determines M, reading [m0, ML, ML2]\nligand determines L, reading [l0, ML, ML2]\ncyclic block: [k1, k2, metal, ligand]"}}},"weakacid":{"key":"weakacid","vars":["H","A","HA","Na","C","Ka"],"laws":["acid","mass","charge"],"solvable":{"acid":["A","HA"],"mass":["HA","A","C"],"charge":["Na","H"]},"setups":[{"fixed":["H","A","HA"],"valid":false},{"fixed":["H","A","Na"],"valid":false},{"fixed":["H","A","C"],"valid":false},{"fixed":["H","A","Ka"],"valid":true,"acyclic":true,"order":[{"law":"acid","var":"HA","reads":["H","A","Ka"],"rank":0,"block":["acid"]},{"law":"mass","var":"C","reads":["HA","A"],"rank":1,"block":["mass"]},{"law":"charge","var":"Na","reads":["A","H"],"rank":0,"block":["charge"]}]},{"fixed":["H","HA","Na"],"valid":false},{"fixed":["H","HA","C"],"valid":false},{"fixed":["H","HA","Ka"],"valid":true,"acyclic":true,"order":[{"law":"acid","var":"A","reads":["Ka","HA","H"],"rank":0,"block":["acid"]},{"law":"mass","var":"C","reads":["HA","A"],"rank":1,"block":["mass"]},{"law":"charge","var":"Na","reads":["A","H"],"rank":1,"block":["charge"]}]},{"fixed":["H","Na","C"],"valid":false},{"fixed":["H","Na","Ka"],"valid":false},{"fixed":["H","C","Ka"],"valid":true,"acyclic":false,"order":[{"law":"acid","var":"A","reads":["Ka","HA","H"],"rank":3,"block":["acid","mass"]},{"law":"mass","var":"HA","reads":["C","A"],"rank":3,"block":["acid","mass"]},{"law":"charge","var":"Na","reads":["A","H"],"rank":3,"block":["charge"]}],"check":"cyclic, linear in each block: exactly one outcome of the causal model provided that\n  ¬1 + (u V.H)⁻¹ * u V.Ka = 0\n(finish `block_linear` with a proof of this)"},{"fixed":["A","HA","Na"],"valid":false},{"fixed":["A","HA","C"],"valid":false},{"fixed":["A","HA","Ka"],"valid":false},{"fixed":["A","Na","C"],"valid":false},{"fixed":["A","Na","Ka"],"valid":true,"acyclic":true,"order":[{"law":"acid","var":"HA","reads":["H","A","Ka"],"rank":1,"block":["acid"]},{"law":"mass","var":"C","reads":["HA","A"],"rank":2,"block":["mass"]},{"law":"charge","var":"H","reads":["A","Na"],"rank":0,"block":["charge"]}]},{"fixed":["A","C","Ka"],"valid":false},{"fixed":["HA","Na","C"],"valid":false},{"fixed":["HA","Na","Ka"],"valid":true,"acyclic":false,"order":[{"law":"acid","var":"A","reads":["Ka","HA","H"],"rank":3,"block":["acid","charge"]},{"law":"mass","var":"C","reads":["HA","A"],"rank":3,"block":["mass"]},{"law":"charge","var":"H","reads":["A","Na"],"rank":3,"block":["acid","charge"]}],"check":"cyclic: neither criterion applies (some formula is not affine in its own block, and not affine in each variable separately); uniqueness needs a domain-specific argument (monotonicity, Gale–Nikaido, Minty–Browder), plugged in with Setup.unique_of_laws"},{"fixed":["HA","C","Ka"],"valid":false},{"fixed":["Na","C","Ka"],"valid":true,"acyclic":false,"order":[{"law":"acid","var":"A","reads":["Ka","HA","H"],"rank":3,"block":["acid","mass","charge"]},{"law":"mass","var":"HA","reads":["C","A"],"rank":3,"block":["acid","mass","charge"]},{"law":"charge","var":"H","reads":["A","Na"],"rank":3,"block":["acid","mass","charge"]}],"check":"cyclic: neither criterion applies (some formula is not affine in its own block, and not affine in each variable separately); uniqueness needs a domain-specific argument (monotonicity, Gale–Nikaido, Minty–Browder), plugged in with Setup.unique_of_laws"}],"without":{"acid":[{"fixed":["H","A","HA","Na"],"valid":false},{"fixed":["H","A","HA","C"],"valid":false},{"fixed":["H","A","HA","Ka"],"valid":true,"acyclic":true,"order":[{"law":"mass","var":"C","reads":["HA","A"],"rank":0,"block":["mass"]},{"law":"charge","var":"Na","reads":["A","H"],"rank":0,"block":["charge"]}]},{"fixed":["H","A","Na","C"],"valid":false},{"fixed":["H","A","Na","Ka"],"valid":false},{"fixed":["H","A","C","Ka"],"valid":true,"acyclic":true,"order":[{"law":"mass","var":"HA","reads":["C","A"],"rank":0,"block":["mass"]},{"law":"charge","var":"Na","reads":["A","H"],"rank":0,"block":["charge"]}]},{"fixed":["H","HA","Na","C"],"valid":false},{"fixed":["H","HA","Na","Ka"],"valid":false},{"fixed":["H","HA","C","Ka"],"valid":true,"acyclic":true,"order":[{"law":"mass","var":"A","reads":["C","HA"],"rank":0,"block":["mass"]},{"law":"charge","var":"Na","reads":["A","H"],"rank":1,"block":["charge"]}]},{"fixed":["H","Na","C","Ka"],"valid":false},{"fixed":["A","HA","Na","C"],"valid":false},{"fixed":["A","HA","Na","Ka"],"valid":true,"acyclic":true,"order":[{"law":"mass","var":"C","reads":["HA","A"],"rank":0,"block":["mass"]},{"law":"charge","var":"H","reads":["A","Na"],"rank":0,"block":["charge"]}]},{"fixed":["A","HA","C","Ka"],"valid":false},{"fixed":["A","Na","C","Ka"],"valid":true,"acyclic":true,"order":[{"law":"mass","var":"HA","reads":["C","A"],"rank":0,"block":["mass"]},{"law":"charge","var":"H","reads":["A","Na"],"rank":0,"block":["charge"]}]},{"fixed":["HA","Na","C","Ka"],"valid":true,"acyclic":true,"order":[{"law":"mass","var":"A","reads":["C","HA"],"rank":0,"block":["mass"]},{"law":"charge","var":"H","reads":["A","Na"],"rank":1,"block":["charge"]}]}],"mass":[{"fixed":["H","A","HA","Na"],"valid":false},{"fixed":["H","A","HA","C"],"valid":false},{"fixed":["H","A","HA","Ka"],"valid":false},{"fixed":["H","A","Na","C"],"valid":false},{"fixed":["H","A","Na","Ka"],"valid":false},{"fixed":["H","A","C","Ka"],"valid":true,"acyclic":true,"order":[{"law":"acid","var":"HA","reads":["H","A","Ka"],"rank":0,"block":["acid"]},{"law":"charge","var":"Na","reads":["A","H"],"rank":0,"block":["charge"]}]},{"fixed":["H","HA","Na","C"],"valid":false},{"fixed":["H","HA","Na","Ka"],"valid":false},{"fixed":["H","HA","C","Ka"],"valid":true,"acyclic":true,"order":[{"law":"acid","var":"A","reads":["Ka","HA","H"],"rank":0,"block":["acid"]},{"law":"charge","var":"Na","reads":["A","H"],"rank":1,"block":["charge"]}]},{"fixed":["H","Na","C","Ka"],"valid":false},{"fixed":["A","HA","Na","C"],"valid":false},{"fixed":["A","HA","Na","Ka"],"valid":false},{"fixed":["A","HA","C","Ka"],"valid":false},{"fixed":["A","Na","C","Ka"],"valid":true,"acyclic":true,"order":[{"law":"acid","var":"HA","reads":["H","A","Ka"],"rank":1,"block":["acid"]},{"law":"charge","var":"H","reads":["A","Na"],"rank":0,"block":["charge"]}]},{"fixed":["HA","Na","C","Ka"],"valid":true,"acyclic":false,"order":[{"law":"acid","var":"A","reads":["Ka","HA","H"],"rank":2,"block":["acid","charge"]},{"law":"charge","var":"H","reads":["A","Na"],"rank":2,"block":["acid","charge"]}],"check":"cyclic: neither criterion applies (some formula is not affine in its own block, and not affine in each variable separately); uniqueness needs a domain-specific argument (monotonicity, Gale–Nikaido, Minty–Browder), plugged in with Setup.unique_of_laws"}],"charge":[{"fixed":["H","A","HA","Na"],"valid":false},{"fixed":["H","A","HA","C"],"valid":false},{"fixed":["H","A","HA","Ka"],"valid":false},{"fixed":["H","A","Na","C"],"valid":false},{"fixed":["H","A","Na","Ka"],"valid":true,"acyclic":true,"order":[{"law":"acid","var":"HA","reads":["H","A","Ka"],"rank":0,"block":["acid"]},{"law":"mass","var":"C","reads":["HA","A"],"rank":1,"block":["mass"]}]},{"fixed":["H","A","C","Ka"],"valid":false},{"fixed":["H","HA","Na","C"],"valid":false},{"fixed":["H","HA","Na","Ka"],"valid":true,"acyclic":true,"order":[{"law":"acid","var":"A","reads":["Ka","HA","H"],"rank":0,"block":["acid"]},{"law":"mass","var":"C","reads":["HA","A"],"rank":1,"block":["mass"]}]},{"fixed":["H","HA","C","Ka"],"valid":false},{"fixed":["H","Na","C","Ka"],"valid":true,"acyclic":false,"order":[{"law":"acid","var":"A","reads":["Ka","HA","H"],"rank":2,"block":["acid","mass"]},{"law":"mass","var":"HA","reads":["C","A"],"rank":2,"block":["acid","mass"]}],"check":"cyclic, linear in each block: exactly one outcome of the causal model provided that\n  ¬1 + (u V.H)⁻¹ * u V.Ka = 0\n(finish `block_linear` with a proof of this)"},{"fixed":["A","HA","Na","C"],"valid":false},{"fixed":["A","HA","Na","Ka"],"valid":false},{"fixed":["A","HA","C","Ka"],"valid":false},{"fixed":["A","Na","C","Ka"],"valid":false},{"fixed":["HA","Na","C","Ka"],"valid":false}]},"units":{"H":"m⁻³·mol","A":"m⁻³·mol","HA":"m⁻³·mol","Na":"m⁻³·mol","C":"m⁻³·mol","Ka":"m⁻³·mol"},"name":"WeakAcid","lawText":[{"name":"acid","eq":"Ka * HA = H * A","solve":[{"var":"A","formula":"Ka * HA / H"},{"var":"HA","formula":"H * A / Ka"}]},{"name":"mass","eq":"C = HA + A","solve":[{"var":"HA","formula":"C - A"},{"var":"A","formula":"C - HA"},{"var":"C","formula":"HA + A"}]},{"name":"charge","eq":"H + Na = A","solve":[{"var":"Na","formula":"A - H"},{"var":"H","formula":"A - Na"}]}],"named":[{"name":"titration","fixed":["Na","C","Ka"],"comment":""},{"name":"buffer","fixed":["H","C","Ka"],"comment":""}],"domain":"0 < H ∧ 0 < Ka","unitsClause":"H : M, A : M, HA : M, Na : M, C : M, Ka : M","units_declared":[["H","M"],["A","M"],["HA","M"],["Na","M"],["C","M"],["Ka","M"]],"source":"causal_model WeakAcid where\n  variables H A HA Na C Ka\n  units H : M, A : M, HA : M, Na : M, C : M, Ka : M\n  domain 0 < H ∧ 0 < Ka\n  law acid : Ka * HA = H * A\n    solve A := Ka * HA / H\n    solve HA := H * A / Ka\n  law mass : C = HA + A\n    solve HA := C - A\n    solve A := C - HA\n    solve C := HA + A\n  law charge : H + Na = A\n    solve Na := A - H\n    solve H := A - Na\n  witness H := 1, A := 1, HA := 1, C := 2, Ka := 1\n  setup titration fixes C Na Ka\n  setup buffer fixes C H Ka","pinned":{"titration":{"causal_order":"acid determines A, reading [Ka, HA, H]\nmass determines HA, reading [C, A]\ncharge determines H, reading [A, Na]\ncyclic block: [acid, mass, charge]"}}},"market":{"key":"market","vars":["P","Qd","Qs","Imp","t","y","w"],"laws":["demand","supply","clearing"],"solvable":{"demand":["Qd","P"],"supply":["Qs","P"],"clearing":["Qd","Qs","Imp"]},"setups":[{"fixed":["P","Qd","Qs","Imp"],"valid":false},{"fixed":["P","Qd","Qs","t"],"valid":false},{"fixed":["P","Qd","Qs","y"],"valid":false},{"fixed":["P","Qd","Qs","w"],"valid":false},{"fixed":["P","Qd","Imp","t"],"valid":false},{"fixed":["P","Qd","Imp","y"],"valid":false},{"fixed":["P","Qd","Imp","w"],"valid":false},{"fixed":["P","Qd","t","y"],"valid":false},{"fixed":["P","Qd","t","w"],"valid":false},{"fixed":["P","Qd","y","w"],"valid":false},{"fixed":["P","Qs","Imp","t"],"valid":false},{"fixed":["P","Qs","Imp","y"],"valid":false},{"fixed":["P","Qs","Imp","w"],"valid":false},{"fixed":["P","Qs","t","y"],"valid":false},{"fixed":["P","Qs","t","w"],"valid":false},{"fixed":["P","Qs","y","w"],"valid":false},{"fixed":["P","Imp","t","y"],"valid":false},{"fixed":["P","Imp","t","w"],"valid":false},{"fixed":["P","Imp","y","w"],"valid":false},{"fixed":["P","t","y","w"],"valid":true,"acyclic":true,"order":[{"law":"demand","var":"Qd","reads":["P","y"],"rank":0,"block":["demand"]},{"law":"supply","var":"Qs","reads":["P","t","w"],"rank":0,"block":["supply"]},{"law":"clearing","var":"Imp","reads":["Qd","Qs"],"rank":2,"block":["clearing"]}]},{"fixed":["Qd","Qs","Imp","t"],"valid":false},{"fixed":["Qd","Qs","Imp","y"],"valid":false},{"fixed":["Qd","Qs","Imp","w"],"valid":false},{"fixed":["Qd","Qs","t","y"],"valid":false},{"fixed":["Qd","Qs","t","w"],"valid":false},{"fixed":["Qd","Qs","y","w"],"valid":false},{"fixed":["Qd","Imp","t","y"],"valid":false},{"fixed":["Qd","Imp","t","w"],"valid":false},{"fixed":["Qd","Imp","y","w"],"valid":false},{"fixed":["Qd","t","y","w"],"valid":true,"acyclic":true,"order":[{"law":"demand","var":"P","reads":["y","Qd"],"rank":0,"block":["demand"]},{"law":"supply","var":"Qs","reads":["P","t","w"],"rank":1,"block":["supply"]},{"law":"clearing","var":"Imp","reads":["Qd","Qs"],"rank":2,"block":["clearing"]}]},{"fixed":["Qs","Imp","t","y"],"valid":false},{"fixed":["Qs","Imp","t","w"],"valid":false},{"fixed":["Qs","Imp","y","w"],"valid":false},{"fixed":["Qs","t","y","w"],"valid":true,"acyclic":true,"order":[{"law":"demand","var":"Qd","reads":["P","y"],"rank":1,"block":["demand"]},{"law":"supply","var":"P","reads":["Qs","w","t"],"rank":0,"block":["supply"]},{"law":"clearing","var":"Imp","reads":["Qd","Qs"],"rank":2,"block":["clearing"]}]},{"fixed":["Imp","t","y","w"],"valid":true,"acyclic":false,"order":[{"law":"demand","var":"P","reads":["y","Qd"],"rank":3,"block":["demand","supply","clearing"]},{"law":"supply","var":"Qs","reads":["P","t","w"],"rank":3,"block":["demand","supply","clearing"]},{"law":"clearing","var":"Qd","reads":["Qs","Imp"],"rank":3,"block":["demand","supply","clearing"]}],"check":"cyclic, linear in each block: exactly one outcome of the causal model for every choice of the exogenous values (proved by block_linear)"}],"without":{"demand":[{"fixed":["P","Qd","Qs","Imp","t"],"valid":false},{"fixed":["P","Qd","Qs","Imp","y"],"valid":false},{"fixed":["P","Qd","Qs","Imp","w"],"valid":false},{"fixed":["P","Qd","Qs","t","y"],"valid":false},{"fixed":["P","Qd","Qs","t","w"],"valid":false},{"fixed":["P","Qd","Qs","y","w"],"valid":false},{"fixed":["P","Qd","Imp","t","y"],"valid":false},{"fixed":["P","Qd","Imp","t","w"],"valid":false},{"fixed":["P","Qd","Imp","y","w"],"valid":false},{"fixed":["P","Qd","t","y","w"],"valid":true,"acyclic":true,"order":[{"law":"supply","var":"Qs","reads":["P","t","w"],"rank":0,"block":["supply"]},{"law":"clearing","var":"Imp","reads":["Qd","Qs"],"rank":1,"block":["clearing"]}]},{"fixed":["P","Qs","Imp","t","y"],"valid":false},{"fixed":["P","Qs","Imp","t","w"],"valid":false},{"fixed":["P","Qs","Imp","y","w"],"valid":false},{"fixed":["P","Qs","t","y","w"],"valid":false},{"fixed":["P","Imp","t","y","w"],"valid":true,"acyclic":true,"order":[{"law":"supply","var":"Qs","reads":["P","t","w"],"rank":0,"block":["supply"]},{"law":"clearing","var":"Qd","reads":["Qs","Imp"],"rank":1,"block":["clearing"]}]},{"fixed":["Qd","Qs","Imp","t","y"],"valid":false},{"fixed":["Qd","Qs","Imp","t","w"],"valid":false},{"fixed":["Qd","Qs","Imp","y","w"],"valid":false},{"fixed":["Qd","Qs","t","y","w"],"valid":true,"acyclic":true,"order":[{"law":"supply","var":"P","reads":["Qs","w","t"],"rank":0,"block":["supply"]},{"law":"clearing","var":"Imp","reads":["Qd","Qs"],"rank":0,"block":["clearing"]}]},{"fixed":["Qd","Imp","t","y","w"],"valid":true,"acyclic":true,"order":[{"law":"supply","var":"P","reads":["Qs","w","t"],"rank":1,"block":["supply"]},{"law":"clearing","var":"Qs","reads":["Qd","Imp"],"rank":0,"block":["clearing"]}]},{"fixed":["Qs","Imp","t","y","w"],"valid":true,"acyclic":true,"order":[{"law":"supply","var":"P","reads":["Qs","w","t"],"rank":0,"block":["supply"]},{"law":"clearing","var":"Qd","reads":["Qs","Imp"],"rank":0,"block":["clearing"]}]}],"supply":[{"fixed":["P","Qd","Qs","Imp","t"],"valid":false},{"fixed":["P","Qd","Qs","Imp","y"],"valid":false},{"fixed":["P","Qd","Qs","Imp","w"],"valid":false},{"fixed":["P","Qd","Qs","t","y"],"valid":false},{"fixed":["P","Qd","Qs","t","w"],"valid":false},{"fixed":["P","Qd","Qs","y","w"],"valid":false},{"fixed":["P","Qd","Imp","t","y"],"valid":false},{"fixed":["P","Qd","Imp","t","w"],"valid":false},{"fixed":["P","Qd","Imp","y","w"],"valid":false},{"fixed":["P","Qd","t","y","w"],"valid":false},{"fixed":["P","Qs","Imp","t","y"],"valid":false},{"fixed":["P","Qs","Imp","t","w"],"valid":false},{"fixed":["P","Qs","Imp","y","w"],"valid":false},{"fixed":["P","Qs","t","y","w"],"valid":true,"acyclic":true,"order":[{"law":"demand","var":"Qd","reads":["P","y"],"rank":0,"block":["demand"]},{"law":"clearing","var":"Imp","reads":["Qd","Qs"],"rank":1,"block":["clearing"]}]},{"fixed":["P","Imp","t","y","w"],"valid":true,"acyclic":true,"order":[{"law":"demand","var":"Qd","reads":["P","y"],"rank":0,"block":["demand"]},{"law":"clearing","var":"Qs","reads":["Qd","Imp"],"rank":1,"block":["clearing"]}]},{"fixed":["Qd","Qs","Imp","t","y"],"valid":false},{"fixed":["Qd","Qs","Imp","t","w"],"valid":false},{"fixed":["Qd","Qs","Imp","y","w"],"valid":false},{"fixed":["Qd","Qs","t","y","w"],"valid":true,"acyclic":true,"order":[{"law":"demand","var":"P","reads":["y","Qd"],"rank":0,"block":["demand"]},{"law":"clearing","var":"Imp","reads":["Qd","Qs"],"rank":0,"block":["clearing"]}]},{"fixed":["Qd","Imp","t","y","w"],"valid":true,"acyclic":true,"order":[{"law":"demand","var":"P","reads":["y","Qd"],"rank":0,"block":["demand"]},{"law":"clearing","var":"Qs","reads":["Qd","Imp"],"rank":0,"block":["clearing"]}]},{"fixed":["Qs","Imp","t","y","w"],"valid":true,"acyclic":true,"order":[{"law":"demand","var":"P","reads":["y","Qd"],"rank":1,"block":["demand"]},{"law":"clearing","var":"Qd","reads":["Qs","Imp"],"rank":0,"block":["clearing"]}]}],"clearing":[{"fixed":["P","Qd","Qs","Imp","t"],"valid":false},{"fixed":["P","Qd","Qs","Imp","y"],"valid":false},{"fixed":["P","Qd","Qs","Imp","w"],"valid":false},{"fixed":["P","Qd","Qs","t","y"],"valid":false},{"fixed":["P","Qd","Qs","t","w"],"valid":false},{"fixed":["P","Qd","Qs","y","w"],"valid":false},{"fixed":["P","Qd","Imp","t","y"],"valid":false},{"fixed":["P","Qd","Imp","t","w"],"valid":false},{"fixed":["P","Qd","Imp","y","w"],"valid":false},{"fixed":["P","Qd","t","y","w"],"valid":false},{"fixed":["P","Qs","Imp","t","y"],"valid":false},{"fixed":["P","Qs","Imp","t","w"],"valid":false},{"fixed":["P","Qs","Imp","y","w"],"valid":false},{"fixed":["P","Qs","t","y","w"],"valid":false},{"fixed":["P","Imp","t","y","w"],"valid":true,"acyclic":true,"order":[{"law":"demand","var":"Qd","reads":["P","y"],"rank":0,"block":["demand"]},{"law":"supply","var":"Qs","reads":["P","t","w"],"rank":0,"block":["supply"]}]},{"fixed":["Qd","Qs","Imp","t","y"],"valid":false},{"fixed":["Qd","Qs","Imp","t","w"],"valid":false},{"fixed":["Qd","Qs","Imp","y","w"],"valid":false},{"fixed":["Qd","Qs","t","y","w"],"valid":false},{"fixed":["Qd","Imp","t","y","w"],"valid":true,"acyclic":true,"order":[{"law":"demand","var":"P","reads":["y","Qd"],"rank":0,"block":["demand"]},{"law":"supply","var":"Qs","reads":["P","t","w"],"rank":1,"block":["supply"]}]},{"fixed":["Qs","Imp","t","y","w"],"valid":true,"acyclic":true,"order":[{"law":"demand","var":"Qd","reads":["P","y"],"rank":1,"block":["demand"]},{"law":"supply","var":"P","reads":["Qs","w","t"],"rank":0,"block":["supply"]}]}]},"units":{"P":"NOK·item⁻¹","Qd":"item·yr⁻¹","Qs":"item·yr⁻¹","Imp":"item·yr⁻¹","t":"NOK·item⁻¹","y":"NOK·yr⁻¹","w":"1 (dimensionless)","m.a":"item·yr⁻¹","m.b":"NOK⁻¹·item²·yr⁻¹","m.c":"NOK⁻¹·item","m.d":"item·yr⁻¹","m.e":"NOK⁻¹·item²·yr⁻¹","m.f":"item·yr⁻¹"},"name":"Market","lawText":[{"name":"demand","eq":"Qd = m.a - m.b * P + m.c * y","solve":[{"var":"Qd","formula":"m.a - m.b * P + m.c * y"},{"var":"P","formula":"(m.a + m.c * y - Qd) / m.b"}]},{"name":"supply","eq":"Qs = m.d + m.e * (P - t) + m.f * w","solve":[{"var":"Qs","formula":"m.d + m.e * (P - t) + m.f * w"},{"var":"P","formula":"(Qs - m.d - m.f * w) / m.e + t"}]},{"name":"clearing","eq":"Qd = Qs + Imp","solve":[{"var":"Qd","formula":"Qs + Imp"},{"var":"Qs","formula":"Qd - Imp"},{"var":"Imp","formula":"Qd - Qs"}]}],"named":[{"name":"closed","fixed":["Imp","t","y","w"],"comment":"closed economy: imports fixed (normally 0)"},{"name":"open_","fixed":["P","t","y","w"],"comment":"small open economy: the world price is given"}],"domain":null,"unitsClause":"P : NOK/item, Qd : item/yr, Qs : item/yr, Imp : item/yr, t : NOK/item, y : NOK/yr, w : 1, m.a : item/yr, m.b : item^2/(NOK*yr), m.c : item/NOK, m.d : item/yr, m.e : item^2/(NOK*yr), m.f : item/yr","units_declared":[["P","NOK/item"],["Qd","item/yr"],["Qs","item/yr"],["Imp","item/yr"],["t","NOK/item"],["y","NOK/yr"],["w","1"],["m.a","item/yr"],["m.b","item^2/(NOK*yr)"],["m.c","item/NOK"],["m.d","item/yr"],["m.e","item^2/(NOK*yr)"],["m.f","item/yr"]],"source":"causal_model Market (m : Market.Params) where\n  variables P Qd Qs Imp t y w\n  units P : NOK/item, Qd : item/yr, Qs : item/yr, Imp : item/yr, t : NOK/item,\n    y : NOK/yr, w : 1, m.a : item/yr, m.b : item^2/(NOK*yr), m.c : item/NOK,\n    m.d : item/yr, m.e : item^2/(NOK*yr), m.f : item/yr\n  law demand : Qd = m.a - m.b * P + m.c * y\n    solve Qd := m.a - m.b * P + m.c * y\n    solve P := (m.a + m.c * y - Qd) / m.b by have := m.hb.ne'; law_solve\n  law supply : Qs = m.d + m.e * (P - t) + m.f * w\n    solve Qs := m.d + m.e * (P - t) + m.f * w\n    solve P := (Qs - m.d - m.f * w) / m.e + t by have := m.he.ne'; law_solve\n  law clearing : Qd = Qs + Imp\n    solve Qd := Qs + Imp\n    solve Qs := Qd - Imp\n    solve Imp := Qd - Qs\n  witness Qd := m.a, Qs := m.d, Imp := m.a - m.d\n  setup closed fixes Imp t y w    -- closed economy: imports fixed (normally 0)\n  setup open_ fixes P t y w       -- small open economy: the world price is given","pinned":{"closed":{"causal_order":"demand determines P, reading [y, Qd]\nsupply determines Qs, reading [P, t, w]\nclearing determines Qd, reading [Qs, Imp]\ncyclic block: [demand, supply, clearing]"}}},"keynes":{"key":"keynes","vars":["Y","C","I","G","Tax"],"laws":["income","consumption"],"solvable":{"income":["Y","G"],"consumption":["C"]},"setups":[{"fixed":["Y","C","I"],"valid":false},{"fixed":["Y","C","G"],"valid":false},{"fixed":["Y","C","Tax"],"valid":false},{"fixed":["Y","I","G"],"valid":false},{"fixed":["Y","I","Tax"],"valid":true,"acyclic":true,"order":[{"law":"income","var":"G","reads":["Y","C","I"],"rank":1,"block":["income"]},{"law":"consumption","var":"C","reads":["Y","Tax"],"rank":0,"block":["consumption"]}]},{"fixed":["Y","G","Tax"],"valid":false},{"fixed":["C","I","G"],"valid":false},{"fixed":["C","I","Tax"],"valid":false},{"fixed":["C","G","Tax"],"valid":false},{"fixed":["I","G","Tax"],"valid":true,"acyclic":false,"order":[{"law":"income","var":"Y","reads":["C","I","G"],"rank":2,"block":["income","consumption"]},{"law":"consumption","var":"C","reads":["Y","Tax"],"rank":2,"block":["income","consumption"]}],"check":"cyclic, linear in each block: exactly one outcome of the causal model for every choice of the exogenous values (proved by block_linear)"}],"without":{"income":[{"fixed":["Y","C","I","G"],"valid":false},{"fixed":["Y","C","I","Tax"],"valid":false},{"fixed":["Y","C","G","Tax"],"valid":false},{"fixed":["Y","I","G","Tax"],"valid":true,"acyclic":true,"order":[{"law":"consumption","var":"C","reads":["Y","Tax"],"rank":0,"block":["consumption"]}]},{"fixed":["C","I","G","Tax"],"valid":false}],"consumption":[{"fixed":["Y","C","I","G"],"valid":false},{"fixed":["Y","C","I","Tax"],"valid":true,"acyclic":true,"order":[{"law":"income","var":"G","reads":["Y","C","I"],"rank":0,"block":["income"]}]},{"fixed":["Y","C","G","Tax"],"valid":false},{"fixed":["Y","I","G","Tax"],"valid":false},{"fixed":["C","I","G","Tax"],"valid":true,"acyclic":true,"order":[{"law":"income","var":"Y","reads":["C","I","G"],"rank":0,"block":["income"]}]}]},"units":{"Y":"NOK·yr⁻¹","C":"NOK·yr⁻¹","I":"NOK·yr⁻¹","G":"NOK·yr⁻¹","Tax":"NOK·yr⁻¹","k.c0":"NOK·yr⁻¹","k.c1":"1 (dimensionless)"},"name":"Keynes","lawText":[{"name":"income","eq":"Y = C + I + G","solve":[{"var":"Y","formula":"C + I + G"},{"var":"G","formula":"Y - C - I"}]},{"name":"consumption","eq":"C = k.c0 + k.c1 * (Y - Tax)","solve":[{"var":"C","formula":"k.c0 + k.c1 * (Y - Tax)"}]}],"named":[{"name":"shortRun","fixed":["I","G","Tax"],"comment":""},{"name":"target","fixed":["Y","I","Tax"],"comment":""}],"domain":null,"unitsClause":"Y : NOK/yr, C : NOK/yr, I : NOK/yr, G : NOK/yr, Tax : NOK/yr, k.c0 : NOK/yr, k.c1 : 1","units_declared":[["Y","NOK/yr"],["C","NOK/yr"],["I","NOK/yr"],["G","NOK/yr"],["Tax","NOK/yr"],["k.c0","NOK/yr"],["k.c1","1"]],"source":"causal_model Keynes (k : Keynes.Params) where\n  variables Y C I G Tax\n  units Y : NOK/yr, C : NOK/yr, I : NOK/yr, G : NOK/yr, Tax : NOK/yr, k.c0 : NOK/yr, k.c1 : 1\n  law income : Y = C + I + G\n    solve Y := C + I + G\n    solve G := Y - C - I\n  law consumption : C = k.c0 + k.c1 * (Y - Tax)\n    solve C := k.c0 + k.c1 * (Y - Tax)\n  witness C := k.c0, G := -k.c0\n  setup shortRun fixes I G Tax\n  setup target fixes Y I Tax","pinned":{"shortRun":{"causal_order":"income determines Y, reading [C, I, G]\nconsumption determines C, reading [Y, Tax]\ncyclic block: [income, consumption]"}}},"quantity":{"key":"quantity","vars":["M","Vel","P","Y"],"laws":["fisher"],"solvable":{"fisher":["P","Y"]},"setups":[{"fixed":["M","Vel","P"],"valid":true,"acyclic":true,"order":[{"law":"fisher","var":"Y","reads":["M","Vel","P"],"rank":0,"block":["fisher"]}]},{"fixed":["M","Vel","Y"],"valid":true,"acyclic":true,"order":[{"law":"fisher","var":"P","reads":["M","Vel","Y"],"rank":0,"block":["fisher"]}]},{"fixed":["M","P","Y"],"valid":false},{"fixed":["Vel","P","Y"],"valid":false}],"without":{"fisher":[{"fixed":["M","Vel","P","Y"],"valid":true,"acyclic":true,"order":[]}]},"units":{"M":"NOK","Vel":"yr⁻¹","P":"NOK·item⁻¹","Y":"item·yr⁻¹"},"name":"Quantity","lawText":[{"name":"fisher","eq":"M * Vel = P * Y","solve":[{"var":"P","formula":"M * Vel / Y"},{"var":"Y","formula":"M * Vel / P"}]}],"named":[{"name":"classical","fixed":["M","Vel","Y"],"comment":""},{"name":"fixedPrice","fixed":["M","Vel","P"],"comment":""}],"domain":"0 < P ∧ 0 < Y","unitsClause":"M : NOK, Vel : 1/yr, P : NOK/item, Y : item/yr","units_declared":[["M","NOK"],["Vel","1/yr"],["P","NOK/item"],["Y","item/yr"]],"source":"causal_model Quantity where\n  variables M Vel P Y\n  units M : NOK, Vel : 1/yr, P : NOK/item, Y : item/yr\n  domain 0 < P ∧ 0 < Y\n  law fisher : M * Vel = P * Y\n    solve P := M * Vel / Y\n    solve Y := M * Vel / P\n  witness M := 1, Vel := 1, P := 1, Y := 1\n  setup classical fixes M Vel Y\n  setup fixedPrice fixes M Vel P","pinned":{}}},"rejects":[{"name":"WrongFormula","code":"causal_model WrongFormula where\n  variables U R I\n  domain 0 < R\n  law ohm : U = R * I\n    solve I := R / U\n  witness R := 1\n  setup s fixes U R","error":"law_solve: could not show that this formula solves the law on the domain. Check the formula, add what is needed to the domain, or give a proof after `by`.\n⊢ U = R * I ↔ I = R / U"},{"name":"UnknownVariable","code":"causal_model UnknownVariable where\n  variables U R I\n  law ohm : U = R * I\n    solve P := R * I\n  witness U := 0\n  setup s fixes R I","error":"P is not a variable of the model"},{"name":"OverFixed","code":"causal_model OverFixed where\n  variables U R I\n  law ohm : U = R * I\n    solve U := R * I\n  witness U := 0\n  setup s fixes U R I","error":"this setup has no valid causal reading: the laws cannot be matched one-to-one with the variables that are not fixed (fix fewer or other variables)"},{"name":"GasWithoutR","code":"causal_model GasWithoutR where\n  variables p vol n T\n  units p : Pa, vol : m^3, n : mol, T : K\n  law gas : p * vol = n * T\n    solve p := n * T / vol\n  witness T := 0\n  setup locked fixes vol n T","error":"units: the two sides of this law have different units: kg·m²·s⁻² (J) vs K·mol"},{"name":"GasWrongFormula","code":"causal_model GasWrongFormula where\n  variables p vol n T\n  units p : Pa, vol : m^3, n : mol, T : K, R : J/(mol*K)\n  law gas : p * vol = n * R * T\n    solve p := n * R * T * vol\n  witness T := 0\n  setup locked fixes vol n T","error":"units: this formula for p has unit kg·m⁵·s⁻², but p has unit kg·m⁻¹·s⁻² (Pa)"},{"name":"ArrheniusWithoutR","code":"causal_model ArrheniusWithoutR where\n  variables k A Ea T\n  units k : 1/s, A : 1/s, Ea : J/mol, T : K\n  law arrhenius : k = A * Real.exp (-(Ea / T))\n    solve k := A * Real.exp (-(Ea / T))\n  witness T := 1\n  setup lab fixes A Ea T","error":"units: the argument of Real.exp must be dimensionless, but it has unit kg·m²·s⁻²·K⁻¹·mol⁻¹"},{"name":"UndeclaredConstant","code":"causal_model UndeclaredConstant where\n  variables p vol n T\n  units p : Pa, vol : m^3, n : mol, T : K\n  law gas : p * vol = n * R * T\n    solve p := n * R * T / vol\n  witness T := 0\n  setup locked fixes vol n T","error":"units: no unit declared for R; add it to `units`"},{"name":"MissingUnit","code":"causal_model MissingUnit where\n  variables U R I\n  units U : V, R : ohm\n  law ohm : U = R * I\n    solve U := R * I\n  witness U := 0\n  setup s fixes R I","error":"units: no unit declared for the variable I"}]};
+/*LEAN-DATA-END*/
+</script>
 <script>
 (function () {
   "use strict";
@@ -1019,5 +1168,403 @@ input[type="range"] { width: 100%; accent-color: var(--do); }
   eqStart();
   setSrc("V");
   if (!reduceMotion) requestAnimationFrame(loop);
+})();
+</script>
+<script>
+/* Byggesettet: slår opp i dataene Lean har regnet ut (LEAN, skrevet av scripts/build_lab.py). */
+(function () {
+  if (typeof LEAN === "undefined") return;
+  const $ = (id) => document.getElementById(id);
+  const NS = "http://www.w3.org/2000/svg";
+
+  /* ---------- Tekst om modellene (alt det strukturelle kommer fra Lean) ---------- */
+  const META = {
+    gas: {
+      group: "Fysikk", title: "Ideell gass",
+      story: "Én lov, pV = nRT. Hvilken størrelse som er effekten, avhenger av stempelet.",
+      syms: { p: ["p", "trykk"], vol: ["V", "volum"], n: ["n", "stoffmengde"], T: ["T", "temperatur"], R: ["R", "gasskonstanten"] },
+      named: {
+        locked: { label: "Låst stempel", thms: [["Gas.locked_heat", "Varmer du gassen, står volumet stille og trykket blir nRT/V."]] },
+        weighted: { label: "Lodd på stempelet", thms: [["Gas.weighted_heat", "Varmer du gassen, står trykket stille og volumet blir nRT/p."], ["Gas.same_data", "Målinger alene kan ikke skille de to oppsettene. Det er inngrepene som gjør det."]] }
+      }
+    },
+    circuit: {
+      group: "Fysikk", title: "Motstand som varmes",
+      story: "Ohms lov, Joules lov og Newtons avkjølingslov. Blir en større motstand varmere eller kaldere?",
+      syms: { U: ["U", "spenning"], Rr: ["R", "motstand"], I: ["I", "strøm"], P: ["P", "effekt"], T: ["T", "temperatur i motstanden"], Ta: ["T_a", "temperatur rundt"], k: ["k", "varmemotstand"] },
+      named: {
+        voltageSource: { label: "Spenningskilde", thms: [["Circuit.voltage_larger_R_cooler", "Med spenningskilde blir en større motstand kaldere (P = U²/R)."]] },
+        currentSource: { label: "Strømkilde", thms: [["Circuit.current_larger_R_hotter", "Med strømkilde blir en større motstand varmere (P = RI²)."]] }
+      }
+    },
+    divider: {
+      group: "Fysikk", title: "Strømdeler",
+      story: "To motstander i parallell. Med strømkilde må strømmene og spenningen finnes samtidig.",
+      syms: { I: ["I", "total strøm"], I1: ["I_1", "strøm i R₁"], I2: ["I_2", "strøm i R₂"], U: ["U", "spenning"], R1: ["R_1", "motstand 1"], R2: ["R_2", "motstand 2"] },
+      named: {
+        currentSource: { label: "Strømkilde", thms: [["Divider.currentSource_existsUnique", "Nøyaktig én tilstand når motstandene er positive."], ["Divider.divider_rule", "Strømdelerregelen: I₁ = R₂/(R₁ + R₂) · I."]] },
+        voltageSource: { label: "Spenningskilde", thms: [["Divider.voltageSource_acyclic", "Ingen sløyfe: hver gren følger Ohms lov for seg."]] }
+      }
+    },
+    complexation: {
+      group: "Kjemi", title: "Kompleksdannelse",
+      story: "Metall M binder ligand L i to trinn: M + L ⇌ ML og ML + L ⇌ ML₂.",
+      syms: { M: ["M", "fritt metall"], L: ["L", "fri ligand"], ML: ["ML", "kompleks ML"], ML2: ["ML_2", "kompleks ML₂"], m0: ["m_0", "metall tilsatt"], l0: ["l_0", "ligand tilsatt"], "c.K1": ["K_1", "likevektskonstant 1"], "c.K2": ["K_2", "likevektskonstant 2"] },
+      named: {
+        closed: { label: "Lukket kolbe", thms: [["Complexation.closed_atMostOne", "Høyst én likevekt med positive konsentrasjoner, bevist automatisk med sekant-kriteriet."], ["Complexation.le_chatelier", "Le Chatelier: mer metall gir mindre fri ligand."]] },
+        buffered: { label: "Ligandbuffer", thms: [["Complexation.buffered_existsUnique", "Med buffer er blokken lineær og har nøyaktig én løsning (determinant 1 + K₁L + K₁K₂L²)."]] }
+      },
+      interventions: {
+        "ligand+L": ["Hold fri ligand fast", "Pearls do(L): ligandbalansen slås av, som med en buffer.", [["Complexation.fixL_is_do", "Å slå av ligandbalansen er Pearls do(L)."], ["Complexation.fixL_metal", "Fritt metall blir m₀/(1 + K₁L + K₁K₂L²), som med buffer."]]]
+      }
+    },
+    weakacid: {
+      group: "Kjemi", title: "Svak syre",
+      story: "Syrekonstant, massebalanse og ladningsbalanse. Titrering og buffer gir ulike rekkefølger.",
+      syms: { H: ["H⁺", "oksoniumioner"], A: ["A⁻", "syreanion"], HA: ["HA", "udissosiert syre"], Na: ["Na⁺", "tilsatt base"], C: ["C", "total syre"], Ka: ["K_a", "syrekonstant"] },
+      named: {
+        titration: { label: "Titrering", thms: [["WeakAcid.titration_cyclic", "Ved titrering henger alle tre lovene sammen i én ikke-lineær blokk."]] },
+        buffer: { label: "Buffer (pH holdt fast)", thms: [["WeakAcid.dissociated", "Henderson–Hasselbalch: [A⁻] = C·Kₐ/([H⁺] + Kₐ)."], ["WeakAcid.buffer_charge_determines_Na", "Ladningsbalansen forteller hvor mye base bufferen har brukt."]] }
+      }
+    },
+    market: {
+      group: "Økonomi", title: "Marked med avgift",
+      story: "Etterspørsel, tilbud og markedsklarering. Lukket økonomi eller liten åpen økonomi?",
+      syms: { P: ["P", "pris"], Qd: ["Q_d", "etterspurt mengde"], Qs: ["Q_s", "tilbudt mengde"], Imp: ["Imp", "import"], t: ["t", "avgift per enhet"], y: ["y", "inntekt"], w: ["w", "vær"], "m.a": ["a", ""], "m.b": ["b", ""], "m.c": ["c", ""], "m.d": ["d", ""], "m.e": ["e", ""], "m.f": ["f", ""] },
+      named: {
+        closed: { label: "Lukket økonomi", thms: [["Market.closed_existsUnique", "Nøyaktig én likevekt."], ["Market.closed_tax", "Avgiften øker prisen med e/(b + e) · Δ."]] },
+        open_: { label: "Liten åpen økonomi", thms: [["Market.open_tax", "Prisen står stille. Importen øker med e · Δ."]] }
+      },
+      interventions: {
+        "clearing+P": ["Pristak", "Kjøperne følger fortsatt etterspørselen og selgerne tilbudet. Markedet klareres ikke: det blir etterspørselsoverskudd.", [["Market.ceiling_excess_demand", "Overskuddet er (b + e) · (P* − P̄), positivt når taket biter."]]],
+        "demand+P": ["Pearls do(P)", "Slår av loven som bestemmer P i Leans lesning, altså etterspørselen. Kjøperne tar det som tilbys.", [["Market.demand_reading_is_do", "Å slå av etterspørselen er do(P) i dette oppsettet."], ["Market.do_reading_no_excess", "Da blir det ikke noe etterspørselsoverskudd."]]]
+      }
+    },
+    keynes: {
+      group: "Økonomi", title: "Keynes-krysset",
+      story: "Inntektsidentiteten og konsumfunksjonen. På kort sikt bestemmer de Y og C sammen.",
+      syms: { Y: ["Y", "BNP"], C: ["C", "konsum"], I: ["I", "investering"], G: ["G", "offentlig kjøp"], Tax: ["T", "skatt"], "k.c0": ["c_0", ""], "k.c1": ["c_1", "konsumtilbøyelighet"] },
+      named: {
+        shortRun: { label: "Kort sikt", thms: [["Keynes.multiplier", "Øker G med Δ, øker Y med Δ/(1 − c₁)."]] },
+        target: { label: "Mål for BNP", thms: [["Keynes.target_G", "Inntektsidentiteten gir hvor mye G som trengs for å nå målet."]] }
+      }
+    },
+    quantity: {
+      group: "Økonomi", title: "Kvantitetsteorien",
+      story: "MV = PY. Øker pengemengden prisene eller produksjonen?",
+      syms: { M: ["M", "pengemengde"], Vel: ["V", "omløpshastighet"], P: ["P", "prisnivå"], Y: ["Y", "realt BNP"] },
+      named: {
+        classical: { label: "Fleksible priser", thms: [["Quantity.classical_money", "Dobbel pengemengde gir dobbelt prisnivå."]] },
+        fixedPrice: { label: "Faste priser", thms: [["Quantity.fixedPrice_money", "Dobbel pengemengde gir dobbel produksjon."]] }
+      }
+    }
+  };
+
+  const REJ = {
+    WrongFormula: ["Ohms lov, løst for I", "Står formelen for I riktig?", "Fra U = R·I følger I = U/R, ikke R/U. Lean prøver å bevise at formelen løser loven, og det går ikke."],
+    UnknownVariable: ["Ohms lov og effekt", "Hva løses loven for?", "Modellen har bare U, R og I. P er ingen størrelse i modellen, så Lean vet ikke hva formelen skal gi."],
+    OverFixed: ["Labben holder alt fast", "Hva er igjen for loven å bestemme?", "Holder labben U, R og I fast, har Ohms lov ingenting å bestemme. Lovene må kunne pares én-til-én med størrelsene som ikke holdes fast."],
+    GasWithoutR: ["Gassloven uten R", "Stemmer enhetene på begge sider?", "pV har enhet joule, nT har enhet K·mol. Gasskonstanten R, i J/(mol·K), er det som gjør enhetene like."],
+    GasWrongFormula: ["Trykket, løst feil", "Hvilken enhet får formelen for p?", "nRT·V har enhet J·m³, ikke pascal. Det skulle stått nRT/V."],
+    ArrheniusWithoutR: ["Arrhenius uten R", "Hva må gjelde for det som står inni exp?", "Eksponenten må være uten enhet. Eₐ/T har enhet J/(mol·K), så det mangler en R: Eₐ/(RT)."],
+    UndeclaredConstant: ["Gassloven uten enhet for R", "Vet Lean hvilken enhet R har?", "Lean sjekker bare det den kjenner enheten til. R er brukt, men ikke gitt noen enhet."],
+    MissingUnit: ["Ohms lov uten enhet for I", "Har alle størrelsene enhet?", "Strømmen I mangler enhet. Lean sjekker ingenting før alle størrelser har en."]
+  };
+
+  /* ---------- Hjelpere ---------- */
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const symOf = (key, v) => ((META[key].syms[v] || [v])[0]);
+  const descOf = (key, v) => ((META[key].syms[v] || [v, ""])[1]);
+  const html = (sym) => { const i = sym.indexOf("_"); return i < 0 ? esc(sym) : esc(sym.slice(0, i)) + "<sub>" + esc(sym.slice(i + 1)) + "</sub>"; };
+  function pretty(key, expr) {
+    return esc(expr).replace(/Real\.(exp|log|sqrt)/g, "$1")
+      .replace(/[A-Za-z][A-Za-z0-9]*(?:\.[A-Za-z][A-Za-z0-9]*)?/g, (w) => (META[key].syms[w] ? html(symOf(key, w)) : w))
+      .replace(/ \* /g, " · ").replace(/\*/g, "·");
+  }
+  const sameSet = (a, b) => a.length === b.length && a.every((x) => b.includes(x));
+  const find = (list, fixed) => list.find((s) => sameSet(s.fixed, fixed));
+
+  /* ---------- Tilstand ---------- */
+  const keys = Object.keys(META).filter((k) => LEAN.models[k]);
+  const st = { key: keys[0], fixed: [], doVar: null, doLaw: null, guessed: false, guesses: {} };
+  try { const k = localStorage.getItem("kausal.bygg"); if (k && LEAN.models[k]) st.key = k; } catch (e) {}
+
+  function model() { return LEAN.models[st.key]; }
+  function need() { return model().vars.length - model().laws.length; }
+
+  function selectModel(key) {
+    st.key = key;
+    try { localStorage.setItem("kausal.bygg", key); } catch (e) {}
+    const first = model().named[0];
+    setFixed(first ? first.fixed.slice() : []);
+  }
+  function setFixed(f) { st.fixed = f; st.doVar = null; st.doLaw = null; st.guessed = false; st.guesses = {}; render(); }
+
+  /* ---------- Modellvelger ---------- */
+  function renderPicker() {
+    const box = $("bModels"); box.textContent = "";
+    let grp = "";
+    for (const k of keys) {
+      if (META[k].group !== grp) { grp = META[k].group; const s = document.createElement("span"); s.className = "grp"; s.textContent = grp; box.appendChild(s); }
+      const b = document.createElement("button"); b.type = "button"; b.textContent = META[k].title;
+      b.setAttribute("aria-pressed", String(k === st.key)); b.onclick = () => selectModel(k); box.appendChild(b);
+    }
+  }
+
+  /* ---------- Venstre panel ---------- */
+  function renderLeft(cur) {
+    const d = model(), m = META[st.key];
+    $("bStory").innerHTML = "<h3>" + esc(m.title) + "</h3><p>" + esc(m.story) + "</p>";
+    $("bLaws").innerHTML = d.lawText.map((l) => {
+      const off = st.doLaw === l.name ? " off" : "";
+      const sv = d.solvable[l.name].map((v) => html(symOf(st.key, v))).join(", ");
+      return '<div class="blaw' + off + '"><span class="lname">' + esc(l.name) + (off ? " · slått av" : "") + '</span><span class="eq">' + pretty(st.key, l.eq) +
+        '</span><span class="meta">Lean kan løse den for ' + sv + "</span></div>";
+    }).join("") + (d.domain ? '<div class="blaw"><span class="lname">domene</span><span class="eq">' + pretty(st.key, d.domain).replace(/ ∧ /g, " og ") + "</span></div>" : "");
+
+    const vb = $("bVars"); vb.textContent = "";
+    for (const v of d.vars) {
+      const b = document.createElement("button"); b.type = "button"; b.className = "vchip";
+      b.setAttribute("aria-pressed", String(st.fixed.includes(v)));
+      b.innerHTML = "<b>" + html(symOf(st.key, v)) + "</b><small>" + esc(descOf(st.key, v)) + (d.units[v] ? " · " + esc(d.units[v].replace(/ \(.*\)$/, "")) : "") + "</small>";
+      b.title = (d.units[v] || "");
+      b.onclick = () => setFixed(st.fixed.includes(v) ? st.fixed.filter((x) => x !== v) : d.vars.filter((x) => st.fixed.includes(x) || x === v));
+      vb.appendChild(b);
+    }
+    const n = need(), c = $("bCount");
+    c.className = "bcount" + (st.fixed.length === n ? "" : " need");
+    c.textContent = d.vars.length + " størrelser og " + d.laws.length + (d.laws.length === 1 ? " lov" : " lover") +
+      ": labben må holde fast " + n + ". Nå holdes " + st.fixed.length + " fast.";
+
+    const nb = $("bNamed"); nb.textContent = "";
+    for (const s of d.named) {
+      const lab = (m.named[s.name] || {}).label || s.name;
+      const b = document.createElement("button"); b.type = "button"; b.textContent = lab;
+      b.setAttribute("aria-pressed", String(sameSet(s.fixed, st.fixed)));
+      b.onclick = () => setFixed(s.fixed.slice()); nb.appendChild(b);
+    }
+    $("bSource").textContent = d.source;
+    $("bUnits").innerHTML = d.units ? d.units_declared.map(([k, u]) => "<tr><td>" + html(symOf(st.key, k)) + " <span class=\"note\">" + esc(k) + "</span></td><td>" + esc(u) + "</td><td>" + esc(d.units[k]) + "</td></tr>").join("") : "";
+  }
+
+  /* ---------- Graf ---------- */
+  function drawGraph(s, doVar) {
+    const svg = $("bGraph"); svg.textContent = "";
+    const d = model();
+    const exo = s ? s.fixed : st.fixed;
+    const level = {}, byLaw = {};
+    if (s && s.valid) {
+      const ranks = [...new Set(s.order.map((r) => r.rank))].sort((a, b) => a - b);
+      for (const r of s.order) { level[r.var] = 1 + ranks.indexOf(r.rank); byLaw[r.var] = r; }
+    }
+    for (const v of exo) level[v] = 0;
+    const vars = d.vars.filter((v) => level[v] !== undefined);
+    const rows = {};
+    for (const v of d.vars) { const L = level[v] === undefined ? 0 : level[v]; (rows[L] = rows[L] || []).push(v); }
+    const levels = Object.keys(rows).map(Number).sort((a, b) => a - b);
+    const maxW = Math.max(...Object.values(rows).map((r) => r.length));
+    const W = Math.max(300, maxW * 84 + 40);
+    const pos = {};
+    let y = 48;
+    for (const L of levels) {
+      const vs = rows[L];
+      // keep block members together
+      vs.sort((a, b) => ((byLaw[a] && byLaw[a].block.join()) || "").localeCompare((byLaw[b] && byLaw[b].block.join()) || "") || d.vars.indexOf(a) - d.vars.indexOf(b));
+      const step = W / (vs.length + 1);
+      // members of a block of three or more zigzag, so the loop is visible
+      let zig = false, k = 0;
+      vs.forEach((v, i) => {
+        const big = byLaw[v] && byLaw[v].block.length > 2;
+        if (big) zig = true;
+        pos[v] = [step * (i + 1), y + (big && (k++ % 2) ? 64 : 0)];
+      });
+      y += zig ? 156 : 92;
+    }
+    const H = y - 30;
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+    const el = (t, a, parent) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); (parent || svg).appendChild(e); return e; };
+    const defs = el("defs", {});
+    const mk = el("marker", { id: "bArrow", viewBox: "0 0 10 10", refX: "9", refY: "5", markerWidth: "7", markerHeight: "7", orient: "auto-start-reverse" }, defs);
+    el("path", { d: "M0,0 L10,5 L0,10 z", class: "arrowhead" }, mk);
+    // blocks
+    if (s && s.valid) {
+      const seen = new Set();
+      for (const r of s.order) {
+        if (r.block.length < 2 || seen.has(r.block.join())) continue;
+        seen.add(r.block.join());
+        const vs = s.order.filter((x) => r.block.includes(x.law)).map((x) => pos[x.var]);
+        const xs = vs.map((p) => p[0]), ys = vs.map((p) => p[1]);
+        const g = el("g", { class: "node-block" });
+        el("rect", { x: Math.min(...xs) - 34, y: Math.min(...ys) - 44, width: Math.max(...xs) - Math.min(...xs) + 68, height: Math.max(...ys) - Math.min(...ys) + 74, rx: 10 }, g);
+        const t = el("text", { x: Math.min(...xs) - 28, y: Math.max(...ys) + 25, class: "svg-small f-block-label" }, g);
+        t.textContent = "sløyfe";
+      }
+      // edges
+      for (const r of s.order) {
+        for (const p of r.reads) {
+          if (!pos[p] || !pos[r.var]) continue;
+          const [x1, y1] = pos[p], [x2, y2] = pos[r.var];
+          const dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy) || 1;
+          const ax = x1 + dx / len * 21, ay = y1 + dy / len * 21, bx = x2 - dx / len * 23, by = y2 - dy / len * 23;
+          const back = s.order.some((o) => o.var === p && o.reads.includes(r.var));
+          const off = y1 === y2 ? 28 : back ? 12 : 0;
+          const mx = (ax + bx) / 2 - dy / len * off, my = (ay + by) / 2 + dx / len * off;
+          el("path", { d: "M" + ax + "," + ay + " Q" + mx + "," + my + " " + bx + "," + by, class: "edge", "marker-end": "url(#bArrow)" });
+        }
+      }
+    }
+    for (const v of d.vars) {
+      if (!pos[v]) continue;
+      const cls = v === doVar ? "node-do" : exo.includes(v) ? "node-fixed" : (s && s.valid ? "node-effect" : "node-plain");
+      const g = el("g", { class: cls, transform: "translate(" + pos[v][0] + "," + pos[v][1] + ")" });
+      el("circle", { r: 20 }, g);
+      const sym = symOf(st.key, v), i = sym.indexOf("_");
+      const t = el("text", { class: "svg-label n", "text-anchor": "middle", y: 5 }, g);
+      if (i < 0) t.textContent = sym;
+      else { t.textContent = sym.slice(0, i); const sub = el("tspan", { "baseline-shift": "sub", "font-size": "10" }, t); sub.textContent = sym.slice(i + 1); }
+      const r = el("text", { class: "svg-small r", "text-anchor": "middle", y: -26 }, g);
+      r.textContent = v === doVar ? "do" : exo.includes(v) ? "fast" : (byLaw[v] ? byLaw[v].law : "");
+      const tt = el("title", {}, g); tt.textContent = descOf(st.key, v);
+    }
+  }
+
+  /* ---------- Svar fra Lean ---------- */
+  function orderText(s) {
+    const lines = s.order.map((r) => r.law + " determines " + r.var + ", reading [" + r.reads.join(", ") + "]");
+    if (s.acyclic) lines.push("acyclic: every intervention has exactly one outcome of the causal model");
+    else { const seen = []; for (const r of s.order) { if (seen.includes(r.law)) continue; seen.push(...r.block); if (r.block.length > 1) lines.push("cyclic block: [" + r.block.join(", ") + "]"); } }
+    return lines.join("\n");
+  }
+  function prettyCond(t) {
+    t = t.replace(/u (?:[A-Za-z]+\.)*V\.([A-Za-z0-9]+)/g, (_, v) => symOf(st.key, v).replace("_", ""))
+      .replace(/\b([a-z])\.([A-Za-z0-9]+)/g, (w) => (META[st.key].syms[w] ? symOf(st.key, w).replace("_", "") : w))
+      .replace(/ \* /g, "·").replace(/\)⁻¹·/g, ")⁻¹·");
+    const m = t.match(/^¬(.*) = 0$/);
+    return m ? m[1] + " ≠ 0" : t;
+  }
+  function verdict(s) {
+    if (s.acyclic) return ["ok", "Ingen sløyfer", "<p>Hver lov bestemmer én størrelse ut fra størrelser som ligger over i grafen. Da har hvert inngrep nøyaktig ett utfall.</p>", "Setup.do_existsUnique"];
+    const c = s.check || "";
+    const cond = c.split("\n").slice(1).filter((l) => l.startsWith("  ")).map((l) => prettyCond(l.trim())).join("\n");
+    if (c.startsWith("cyclic, linear in each block, singular")) return ["bad", "Sløyfe, lineær, men singulær", "<p>Determinanten er null. Lovene i sløyfen gir enten ingen løsning eller uendelig mange.</p>", ""];
+    if (c.startsWith("cyclic, linear in each block") && c.includes("for every choice")) return ["cyc", "Sløyfe, men lineær: nøyaktig ett utfall", "<p>Størrelsene i sløyfen må finnes samtidig, som et lineært likningssett. Lean har vist at settet har nøyaktig én løsning for alle verdier labben velger.</p>", "block_linear"];
+    if (c.startsWith("cyclic, linear in each block")) return ["cyc", "Sløyfe, lineær: nøyaktig ett utfall hvis", "<p>Lean har regnet ut determinanten. Det gjenstår å vise at den ikke er null:</p><code class=\"cond\">" + esc(cond) + "</code><p class=\"note\">Symbolene står for verdiene labben holder fast. At uttrykket ikke er null, er fagkunnskap og ikke algebra: for eksempel at motstander og konsentrasjoner er positive.</p>", "block_linear"];
+    if (c.startsWith("cyclic, not linear") && c.includes("provided")) return ["cyc", "Sløyfe, ikke lineær: høyst ett utfall hvis", "<p>Lovene er lineære i hver størrelse for seg. Lean trenger at disse underdeterminantene er positive:</p><code class=\"cond\">" + esc(cond) + "</code>", "secant_unique"];
+    if (c.startsWith("cyclic, not linear")) return ["cyc", "Sløyfe, ikke lineær: høyst ett utfall", "<p>Lovene er ikke lineære, men lineære i hver størrelse for seg. Da viser sekant-kriteriet at det finnes høyst én løsning i domenet.</p>", "secant_unique"];
+    if (c.startsWith("cyclic: neither")) return ["bad", "Sløyfe som Lean ikke klarer alene", "<p>Ingen av de automatiske kriteriene passer. Entydighet må bevises med et eget faglig argument, for eksempel monotoni.</p>", ""];
+    return ["cyc", "Sløyfe", "", ""];
+  }
+
+  function resultFor() {
+    const d = model();
+    if (st.fixed.length !== need()) return { s: null };
+    const base = find(d.setups, st.fixed);
+    if (!st.doVar || !base || !base.valid) return { s: base, base };
+    const s = find(d.without[st.doLaw] || [], st.fixed.concat(st.doVar));
+    return { s, base };
+  }
+
+  function renderRight() {
+    const d = model(), m = META[st.key];
+    const { s, base } = resultFor();
+    const res = $("bResult"), quiz = $("bQuiz"), doBox = $("bDo");
+    quiz.hidden = true; doBox.textContent = "";
+    $("bLeanBox").hidden = !(s && s.valid);
+    const hide = $("bPredict").checked && !st.guessed && s && s.valid && !st.doVar;
+    drawGraph(hide ? null : s, st.doVar);
+    $("bGraphCap").textContent = st.doVar ? "Etter inngrepet" : "Kausal rekkefølge";
+
+    if (!s) {
+      res.innerHTML = '<div class="verdict-box"><h3>Velg ' + need() + " størrelser</h3><p>Hver lov skal bestemme én størrelse. Med " + d.vars.length + " størrelser og " + d.laws.length + (d.laws.length === 1 ? " lov" : " lover") + " må labben holde fast " + need() + " av dem.</p></div>";
+      return;
+    }
+    if (!s.valid) {
+      const stuck = d.laws.filter((l) => d.solvable[l].every((v) => s.fixed.includes(v)));
+      const why = stuck.length
+        ? stuck.map((l) => "Loven <b>" + esc(l) + "</b> kan bare løses for " + d.solvable[l].map((v) => html(symOf(st.key, v))).join(" eller ") + ", og " + (d.solvable[l].length > 1 ? "alle" : "den") + " holdes fast.").join(" ")
+        : "Lovene kan ikke pares én-til-én med størrelsene labben ikke holder fast. Noen lover konkurrerer om de samme størrelsene.";
+      res.innerHTML = '<div class="verdict-box bad"><h3>' + (st.doVar ? "Dette inngrepet går ikke" : "Ingen kausal lesning") + "</h3><p>" + why + "</p><p class=\"note\">Lean avviser oppsettet med <code>Setup</code>-sjekken: «this setup has no valid causal reading».</p></div>";
+      return;
+    }
+    $("bLean").textContent = "#causal_order\n" + orderText(s) + (s.check ? "\n\n#causal_check\n" + s.check : "");
+
+    if (hide) {
+      quiz.hidden = false;
+      quiz.innerHTML = "<h3>Spå først</h3><p class=\"note\">Hvilken størrelse bestemmer hver lov i dette oppsettet?</p>" +
+        s.order.map((r) => '<div class="qrow"><span class="lname">' + esc(r.law) + '</span> bestemmer <select id="q_' + esc(r.law) + '"><option value="">velg</option>' +
+          d.solvable[r.law].map((v) => '<option value="' + esc(v) + '">' + esc(symOf(st.key, v).replace("_", "")) + "</option>").join("") + "</select></div>").join("") +
+        '<div class="actions"><button type="button" class="btn" id="qCheck">Sjekk og vis grafen</button></div>';
+      $("qCheck").onclick = () => { for (const r of s.order) st.guesses[r.law] = $("q_" + r.law).value; st.guessed = true; renderRight(); };
+      res.textContent = "";
+      return;
+    }
+
+    const [cls, head, body, thm] = verdict(s);
+    let out = '<div class="verdict-box ' + cls + '"><h3>' + head + "</h3>" + body;
+    out += '<ul class="olist">' + s.order.map((r) => {
+      const g = st.guesses[r.law];
+      const mark = g === undefined ? "" : g === r.var ? ' <span class="qrow"><span class="mark right">riktig</span></span>' : ' <span class="qrow"><span class="mark wrong">du gjettet ' + esc(symOf(st.key, g || "?").replace("_", "")) + "</span></span>";
+      return '<li><span class="lname">' + esc(r.law) + "</span> bestemmer <b>" + html(symOf(st.key, r.var)) + "</b> ut fra " + (r.reads.map((v) => html(symOf(st.key, v))).join(", ") || "ingenting") + mark + "</li>";
+    }).join("") + "</ul>";
+    // theorems
+    const thms = [];
+    if (thm) thms.push([thm, "Den generelle setningen Lean bruker for dette svaret."]);
+    if (st.doVar) {
+      const iv = (m.interventions || {})[st.doLaw + "+" + st.doVar];
+      if (iv && sameSet(base.fixed, (d.named.find((n) => n.name === "closed") || d.named[0]).fixed)) thms.push(...iv[2]);
+      thms.push(["Setup.intervene", "Inngrepet slår av én lov og lar labben holde størrelsen fast."]);
+    } else {
+      const nm = d.named.find((n) => sameSet(n.fixed, s.fixed));
+      if (nm && m.named[nm.name]) thms.push(...m.named[nm.name].thms);
+    }
+    if (thms.length) out += '<div class="thms">' + thms.map(([t, x]) => '<div class="thm"><code>' + esc(t) + "</code><span>" + esc(x) + "</span></div>").join("") + "</div>";
+    res.innerHTML = out + "</div>";
+
+    /* Inngrep */
+    const endo = base.order.map((r) => r.var);
+    let h = '<div class="bsub">Gjør et inngrep: hold én av effektene fast</div><div class="row">' +
+      endo.map((v) => '<button type="button" class="dov" data-v="' + esc(v) + '" aria-pressed="' + (st.doVar === v) + '">do(' + html(symOf(st.key, v)) + ")</button>").join("") +
+      (st.doVar ? '<button type="button" class="btn ghost" id="doUndo">Fjern inngrepet</button>' : "") + "</div>";
+    if (st.doVar) {
+      const row = base.order.find((r) => r.var === st.doVar);
+      const opts = row.block.length > 1 ? row.block : [row.law];
+      h += '<div class="alts">' + opts.map((L) => {
+        const ok = find(d.without[L] || [], base.fixed.concat(st.doVar));
+        const iv = (m.interventions || {})[L + "+" + st.doVar];
+        const title = L === row.law ? "Slå av " + L + " (Pearls do: loven som bestemte " + symOf(st.key, st.doVar).replace("_", "") + ")" : "Slå av " + L + " i stedet";
+        const sub = iv ? "<b>" + esc(iv[0]) + ".</b> " + esc(iv[1]) : ok && ok.valid ? "De andre lovene gjelder fortsatt." : "Gir ingen gyldig lesning.";
+        return '<button type="button" class="alt" data-l="' + esc(L) + '" aria-pressed="' + (st.doLaw === L) + '"><b>' + esc(title) + "</b><small>" + sub + "</small></button>";
+      }).join("") + "</div>";
+      if (opts.length > 1) h += '<p class="note">' + html(symOf(st.key, st.doVar)) + " ligger i en sløyfe. Å holde den fast betyr ulike ting, avhengig av hvilken lov som slutter å gjelde. Velg selv.</p>";
+    }
+    doBox.innerHTML = h;
+    doBox.querySelectorAll("button.dov").forEach((b) => b.onclick = () => {
+      const v = b.dataset.v;
+      if (st.doVar === v) { st.doVar = null; st.doLaw = null; }
+      else { st.doVar = v; st.doLaw = base.order.find((r) => r.var === v).law; }
+      render();
+    });
+    doBox.querySelectorAll("button.alt").forEach((b) => b.onclick = () => { st.doLaw = b.dataset.l; render(); });
+    const u = $("doUndo"); if (u) u.onclick = () => { st.doVar = null; st.doLaw = null; render(); };
+  }
+
+  function render() { renderPicker(); renderLeft(); renderRight(); }
+
+  /* ---------- Finn feilen ---------- */
+  function renderRejects() {
+    const g = $("rGrid"); g.textContent = "";
+    for (const r of LEAN.rejects) {
+      const t = REJ[r.name] || [r.name, "", ""];
+      const c = document.createElement("article"); c.className = "rcard";
+      c.innerHTML = "<h3>" + esc(t[0]) + "</h3><pre>" + esc(r.code) + "</pre><p>" + esc(t[1]) + '</p><button type="button" class="btn ghost">Vis hva Lean sier</button><div hidden><div class="err">' + esc(r.error) + "</div><p>" + esc(t[2]) + "</p></div>";
+      const btn = c.querySelector("button"), ans = c.querySelector("div[hidden]");
+      btn.onclick = () => { ans.hidden = !ans.hidden; btn.textContent = ans.hidden ? "Vis hva Lean sier" : "Skjul svaret"; };
+      g.appendChild(c);
+    }
+  }
+
+  $("bPredict").addEventListener("change", () => { st.guessed = false; st.guesses = {}; renderRight(); });
+  selectModel(st.key);
+  renderRejects();
 })();
 </script>

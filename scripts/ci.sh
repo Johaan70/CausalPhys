@@ -22,5 +22,8 @@ echo "== 5. negative tests (errors the language must give)"
 out=$(lake env lean CausalPhys/Lang/Tests/Rejects.lean 2>&1 | grep -v "module system")
 if [ -n "$out" ]; then echo "$out"; fail=1; else echo "all pinned errors match"; fi
 
+echo "== 6. teaching page agrees with Lean (docs/kausal-lab.html)"
+python3 scripts/build_lab.py --check || fail=1
+
 if [ $fail -eq 0 ]; then echo "ALL CHECKS PASSED"; else echo "CHECKS FAILED"; fi
 exit $fail

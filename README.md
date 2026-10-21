@@ -18,12 +18,10 @@ A model is written the way it is written on a blackboard (`CausalPhys/Lang/Examp
 ```lean
 causal_model Gas where
   variables p vol n T
-  units p : Pa, vol : m^3, n : mol, T : K, R : J/(mol*K)
   domain 0 < p ∧ 0 < vol
   law gas : p * vol = n * R * T
     solve p := n * R * T / vol
     solve vol := n * R * T / p
-  witness p := 1, vol := 1, n := 1, T := 1 / R by have := R_pos.ne'; witness_check
   setup locked fixes vol n T      -- locked piston, heat bath, closed vessel
   setup weighted fixes p n T      -- weighted piston, heat bath, closed vessel
 
@@ -32,22 +30,18 @@ causal_model Gas where
 -- acyclic: every intervention has exactly one outcome
 ```
 
-What the user writes is only domain content: variables, laws, the domain where they make sense, how each law can be solved, a witness (one concrete state that lies in the domain and satisfies every law), and which variables a lab holds fixed. The witness is checked, so a domain that contradicts the laws is rejected. Everything else is field-independent machinery:
+What the user writes is only domain content: variables, laws, the domain where they make sense, how each law can be solved, and which variables a lab holds fixed. Everything else is field-independent machinery:
 
 - `causal_model` (`Lang/Syntax.lean`) collects what each formula reads from the formula itself, and proves with `law_solve` that each formula solves its law on the domain (a proof can be given after `by` when the algebra needs more, such as a positive parameter).
-- `Lang/Core.lean` computes the Simon order of each setup (`struct_decide`, checked by the kernel, also for models with symbolic parameters) and proves general theorems for every model: inside the domain, solutions of the causal model are the solutions of the laws (`solves_iff`), setups cannot be told apart by data (`obs_equiv`), do(x := c) is equation surgery (`do_iff`), and an acyclic setup gives exactly one outcome for every intervention (`do_existsUnique`). An outcome is a solution of the solved formulas; when it lies in the domain, `laws_existsUnique` turns it into a statement about the laws themselves. The tactic `laws_unique` does this in one step (structure or linear criterion, then `in_domain`, which shows that the outcome lies in the domain); for example `Gas.locked_laws`: with positive n, T and V the gas law has exactly one solution in the domain. For a cyclic block, uniqueness is the domain-specific part and is plugged in through `unique_of_laws`.
+- `Lang/Core.lean` computes the Simon order of each setup (`struct_decide`, checked by the kernel, also for models with symbolic parameters) and proves general theorems for every model: solutions of the causal model are the solutions of the laws (`solves_iff`), setups cannot be told apart by data (`obs_equiv`), do(x := c) is equation surgery (`do_iff`), and an acyclic setup gives exactly one outcome for every intervention (`do_existsUnique`). For a cyclic block, uniqueness is the domain-specific part and is plugged in through `unique_of_laws`.
 - `Lang/Tactic.lean` has `read_solution h`, which turns a solution, before or after an intervention, into one equation per variable, and `#causal_order`.
-- Cyclic blocks are handled by a toolbox. `Lang/Linear.lean` proves once for every model that affine formulas with det(I − C) ≠ 0 give exactly one outcome (`linear_existsUnique`). `Lang/Blockwise.lean` does the same block by block, in causal order (`block_existsUnique`): each formula only has to be affine in the variables of its own block, its coefficients may depend nonlinearly on lower blocks, and each block needs its own det(I − C_b) ≠ 0. The tactic `block_linear` computes the blocks, proves affinity, reduces each determinant to the block's own k×k determinant, substitutes the laws of lower blocks, and leaves only the conditions it cannot show. The tactic `linear_block` applies it: it enumerates the computed matching, checks that every formula is affine, computes the determinant, and tries to show it is nonzero; if it cannot, the determinant condition is left as the domain-specific goal. `Lang/Secant.lean` handles nonlinear blocks whose formulas are multi-affine (affine in each variable separately, as for mass action and balances): the exact secant identity F(x) − F(y) = A(x, y)(x − y) and a P-matrix A(x, y) on the domain give at most one solution (`secant_unique`, a derivative-free form of Gale–Nikaido). The tactic `secant_unique` checks multi-affinity and proves every principal minor positive; it settles the closed complexation flask on its own. Tactics also use the facts stored in parameter structures (such as `0 < K₁`) automatically. `#causal_check S` reports which case a setup is in: acyclic, cyclic and linear in each block (with the conditions still to show), singular, multi-affine with a secant P-matrix (uniqueness), or not covered (then a domain argument such as monotonicity, Gale–Nikaido or Minty–Browder goes in through `unique_of_laws`).
-
-Interventions inside a cyclic block are written `S.intervene e x`: switch off law `e`, and the lab now holds `x` fixed. Lean recomputes the causal order, and every tool above applies to the new setup. When `e` is the law that determines `x` in the computed reading, this is exactly Pearl's do(x := c) (`intervene_iff_doI`); otherwise it is a different intervention, and the difference matters. In the closed market, holding the price fixed by do(P) switches off demand (buyers absorb what is supplied), whereas a price ceiling switches off market clearing and leaves excess demand (b + e)·(P* − P̄) (`Market.ceiling_excess_demand`). In the closed flask, do([L]) leaves a linear block whose free metal is the buffer's closed form (`Complexation.fixL_metal`).
+- Cyclic blocks are handled by a toolbox. `Lang/Linear.lean` proves once for every model that affine formulas with det(I − C) ≠ 0 give exactly one outcome (`linear_existsUnique`). The tactic `linear_block` applies it: it enumerates the computed matching, checks that every formula is affine, computes the determinant, and tries to show it is nonzero; if it cannot, the determinant condition is left as the domain-specific goal. `#causal_check S` reports which case a setup is in: acyclic, cyclic and linear (with the condition still to show), linear but singular, or nonlinear (then a domain argument such as monotonicity, Gale–Nikaido or Minty–Browder goes in through `unique_of_laws`).
 
 For the closed market, `linear_block` leaves 1 + e/b ≠ 0, which is the economics; for the ligand buffer it leaves 1 + K₁L + K₁K₂L² ≠ 0, the familiar denominator of complexation chemistry; for the current divider it finishes on its own.
 
 `docs/test-suite.md` lists twelve textbook models (five physics, four chemistry, three economics) with the answers expected from the subject. In `CausalPhys/Lang/Tests` the expected answers are theorems and the computed causal orders are pinned with `#guard_msgs`, so the build fails if the language starts computing something else; negative tests pin the errors for wrong models.
 
-Every model declares units for its variables and constants, and Lean checks every law, domain condition and solving formula dimensionally (`Lang/Units.lean`). Write the gas law without R and Lean answers `the two sides of this law have different units: kg·m²·s⁻² (J) vs K·mol`. SI units, common derived units (N, Pa, J, W, V, ohm, L, M for mol/L) and any other name as a base unit of its own (NOK, item, yr for the economics models) are available.
-
-Mistakes are caught with plain messages: a formula that does not solve its law on the domain, a missing witness or a domain that contradicts the laws, units that do not match, an unknown variable, a setup that fixes too many variables, or a false claim about the causal order.
+Mistakes are caught with plain messages: a formula that does not solve its law, an unknown variable, a setup that fixes too many variables, or a false claim about the causal order.
 
 The examples are special cases, each a model plus two setups that give opposite answers to the same question:
 
@@ -93,8 +87,6 @@ Every push runs `.github/workflows/ci.yml`: a full build and then `scripts/ci.sh
 
 Run the same checks locally with `lake build 2>&1 | tee build.log && scripts/ci.sh build.log`.
 
-An independent review of the language (by a separate AI agent that had not seen the work) is summarised in `docs/review.md`, with what was changed in response.
-
 ## Building
 
 Requires Lean `v4.36.0-rc1` and Mathlib at commit `807d383`, both pinned in `lean-toolchain` and `lakefile.toml`.
@@ -110,15 +102,11 @@ The build prints warnings that Mathlib modules are "designed for use with the mo
 
 - `CausalPhys/` — the library (see `CausalPhys.lean` for the module list)
 - `PearlDoCalculus/` — a copy of PearlDoCalculus ported to this toolchain; the changes are in `docs/pearldocalculus-lean-4.36-port.patch`
-- `docs/kausal-lab.html` — an interactive teaching page (Norwegian) on causal ordering for secondary school
+- `docs/kausal-lab.html` — an interactive teaching page (Norwegian) on causal ordering for secondary school. Its builder section lets students pick a model, choose what the lab holds fixed and intervene; every answer (causal order, blocks, `#causal_check` verdict, units, interventions) was computed by Lean for every possible setup by `scripts/build_lab.py` (with `scripts/Export.lean`), and CI fails if the page differs from what Lean computes. Its "Finn feilen" section shows wrong models with the errors pinned in `Tests/Rejects.lean`.
 
 ## Known limitations
 
-- The witness shows that the domain and the laws are consistent at one state, not that the domain contains every meaningful solution; a domain that is too narrow still narrows what the formula check covers. `in_domain` handles acyclic setups and domain conditions on exogenous variables; for cyclic blocks the domain condition may need a hand proof.
-- Nonlinear blocks are covered only when the formulas are multi-affine and the secant matrix is a P-matrix, and that criterion gives uniqueness, not existence. Which formulas are used depends on the matching Lean finds; a block that would be multi-affine with other solved forms (for example a weak acid solved for [HA] instead of [A⁻]) is not yet tried both ways. Determinants and minors are computed up to 4 × 4.
-- Units are checked as dimensions only, not scale factors (a litre and a cubic metre are both length³), and functions other than exp, log, sin, cos, tanh and sqrt are not known to the checker.
-- In formulas, every identifier that names a variable is read as that variable, also inside `fun y => …`.
-- The surface language uses `variables`, `units`, `domain`, `law`, `solve`, `witness`, `setup` and `fixes` as keywords in files that import it, and values are real numbers.
+- The surface language uses `variables`, `domain`, `law`, `solve`, `setup` and `fixes` as keywords in files that import it, and values are real numbers.
 - The duality (Lᵖ)* ≅ L^q is proved for sequence spaces ℓᵖ but not for general measures (only the isometric embedding Lᵖ → (L^q)* that reflexivity needs).
 - Uniqueness for infinite models holds among square-summable solutions only.
 - Mechanisms have finitely many parents, so aggregates over infinitely many variables are not expressible.

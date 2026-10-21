@@ -63,6 +63,10 @@ Negative tests (`Tests/Rejects.lean`) pin the errors the language must give for 
 - units that do not match: the gas law without R, a solving formula with the wrong unit, an Arrhenius exponent that is not dimensionless, a constant or variable without a unit;
 - an intervention on a variable the lab already holds fixed (a law is left with nothing to determine).
 
+## The teaching page
+
+`scripts/build_lab.py` asks Lean (`scripts/Export.lean`) for the causal order of every possible lab setup of eight of these models, and of every setup with one law switched off (an intervention), and runs `#causal_check` on every setup with a cyclic block. The result is written into `docs/kausal-lab.html`. Before writing, the script compares the export with the pinned `#causal_order` output of every named setup. CI runs it again with `--check` and fails if the page differs from what Lean computes.
+
 ## What the tests do and do not show
 
 For acyclic setups, most answer theorems read the outcome off the solved formulas with `read_solution`; they check the formulas the user wrote and the causal order, not that the formulas were derived from the laws (that is what `law_solve` checks, on the domain). For cyclic setups the answers are derived from the laws through `solves_iff`. `Gas.locked_laws`, `Battery.circuit_laws`, `Divider.currentSource_laws` and `Market.closed_laws` state uniqueness for the laws themselves inside the domain. Every model carries a checked witness (`consistent`) and declares units, so every law and formula in the suite is dimensionally consistent.
