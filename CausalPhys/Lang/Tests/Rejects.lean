@@ -189,4 +189,69 @@ causal_model ClashingParam (x : ℝ) where
   witness y := 0
   setup s fixes x
 
+/-! Units. The gas law without the gas constant: the two sides do not match. -/
+/--
+error: units: the two sides of this law have different units: kg·m²·s⁻² (J) vs K·mol
+-/
+#guard_msgs in
+causal_model GasWithoutR where
+  variables p vol n T
+  units p : Pa, vol : m^3, n : mol, T : K
+  law gas : p * vol = n * T
+    solve p := n * T / vol
+  witness T := 0
+  setup locked fixes vol n T
+
+/-! Units. A solving formula with the wrong unit. -/
+/--
+error: units: this formula for p has unit kg·m⁵·s⁻², but p has unit kg·m⁻¹·s⁻² (Pa)
+-/
+#guard_msgs in
+causal_model GasWrongFormula where
+  variables p vol n T
+  units p : Pa, vol : m^3, n : mol, T : K, R : J/(mol*K)
+  law gas : p * vol = n * R * T
+    solve p := n * R * T * vol
+  witness T := 0
+  setup locked fixes vol n T
+
+/-! Units. The exponent in the Arrhenius law must be dimensionless (here R is missing). -/
+/--
+error: units: the argument of Real.exp must be dimensionless, but it has unit kg·m²·s⁻²·K⁻¹·mol⁻¹
+-/
+#guard_msgs in
+causal_model ArrheniusWithoutR where
+  variables k A Ea T
+  units k : 1/s, A : 1/s, Ea : J/mol, T : K
+  law arrhenius : k = A * Real.exp (-(Ea / T))
+    solve k := A * Real.exp (-(Ea / T))
+  witness T := 1
+  setup lab fixes A Ea T
+
+/-! Units. A constant without a declared unit. -/
+/--
+error: units: no unit declared for R; add it to `units`
+-/
+#guard_msgs in
+causal_model UndeclaredConstant where
+  variables p vol n T
+  units p : Pa, vol : m^3, n : mol, T : K
+  law gas : p * vol = n * R * T
+    solve p := n * R * T / vol
+  witness T := 0
+  setup locked fixes vol n T
+
+/-! Units. A variable without a unit. -/
+/--
+error: units: no unit declared for the variable I
+-/
+#guard_msgs in
+causal_model MissingUnit where
+  variables U R I
+  units U : V, R : ohm
+  law ohm : U = R * I
+    solve U := R * I
+  witness U := 0
+  setup s fixes R I
+
 end CausalPhys.Tests.Rejects

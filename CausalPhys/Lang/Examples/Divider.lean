@@ -16,6 +16,7 @@ namespace CausalPhys.Examples
 
 causal_model Divider where
   variables I I1 I2 U R1 R2
+  units I : A, I1 : A, I2 : A, U : V, R1 : ohm, R2 : ohm
   domain 0 < R1 ∧ 0 < R2
   law kcl : I = I1 + I2
     solve I := I1 + I2

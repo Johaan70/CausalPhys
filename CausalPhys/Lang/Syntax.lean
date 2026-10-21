@@ -28,11 +28,16 @@
   name: `causal_model Market (m : Params) where …`; then `model` and every
   setup take the same parameters.
 
+  Optional `units x : m/s, …` declares the unit of every variable and of the
+  constants the formulas use; then every law, domain condition and solving
+  formula is checked dimensionally (`CausalPhys.Lang.Units`).
+
   Formulas may use any Lean term; a bare identifier that names a variable is
   read as that variable. This also applies to identifiers bound inside a
   formula (`fun y => …`), so bound names must differ from the variable names.
 -/
 import CausalPhys.Lang.Tactic
+import CausalPhys.Lang.Units
 
 namespace CausalPhys.Lang
 
@@ -42,10 +47,13 @@ syntax solveClause := "solve " ident " := " term (" by " tacticSeq)?
 syntax lawClause := "law " ident " : " term (ppLine solveClause)*
 syntax setupClause := "setup " ident " fixes " ident+
 syntax witnessItem := ident " := " term
+syntax unitItem := ident " : " term
+syntax unitsClause := "units " sepBy1(unitItem, ", ")
 syntax witnessClause := "witness " sepBy1(witnessItem, ", ") (" by " tacticSeq)?
 
 syntax (name := causalModel) "causal_model " ident (ppSpace bracketedBinder)* " where"
   ppLine "variables " ident+
+  (ppLine unitsClause)?
   (ppLine "domain " term)?
   (ppLine lawClause)+
   (ppLine witnessClause)?
@@ -84,6 +92,7 @@ def lawIdent (n : Name) : Ident := mkIdent (`Law ++ n)
 macro_rules
   | `(causal_model $name:ident $bs:bracketedBinder* where
         variables $vs:ident*
+        $[$uc?:unitsClause]?
         $[domain $dom?]?
         $laws:lawClause*
         $[$wc?:witnessClause]?
@@ -98,6 +107,26 @@ macro_rules
       if vars.contains a.raw.getId.eraseMacroScopes then
         Macro.throwErrorAt a s!"causal_model: the parameter {a.raw.getId} has the same name as a variable"
     let s ← `(s)
+    -- units: dimensional analysis of laws, domain and solving formulas
+    let mut uenv : Units.Env := []
+    if let some uc := uc? then
+      let `(unitsClause| units $items:unitItem,*) := uc | Macro.throwUnsupported
+      for it in items.getElems do
+        let `(unitItem| $x:ident : $u:term) := it | Macro.throwUnsupported
+        uenv := (x.getId.eraseMacroScopes, ← Units.ofUnitSyntax u) :: uenv
+      for v in vs do
+        unless uenv.any (·.1 == v.getId.eraseMacroScopes) do
+          Macro.throwErrorAt v s!"units: no unit declared for the variable {v.getId}"
+      if let some d := dom? then Units.checkProp uenv d
+      for l in laws do
+        let `(lawClause| law $_:ident : $rel:term $sols:solveClause*) := l
+          | Macro.throwUnsupported
+        Units.checkProp uenv rel
+        for sol in sols do
+          match sol with
+          | `(solveClause| solve $x:ident := $f:term $[by $_]?) =>
+            Units.checkSolve uenv x.getId.eraseMacroScopes f
+          | _ => pure ()
     -- the law names and their contents
     let mut lawNames : Array Name := #[]
     let mut lawAlts : Array (TSyntax ``Lean.Parser.Term.matchAlt) := #[]

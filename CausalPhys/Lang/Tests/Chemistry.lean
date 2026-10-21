@@ -23,6 +23,7 @@ namespace CausalPhys.Tests
 
 causal_model WeakAcid where
   variables H A HA Na C Ka
+  units H : M, A : M, HA : M, Na : M, C : M, Ka : M
   domain 0 < H ∧ 0 < Ka
   law acid : Ka * HA = H * A
     solve A := Ka * HA / H
@@ -108,6 +109,7 @@ end WeakAcid
 
 causal_model BeerLambert where
   variables Abs eps l c n vol
+  units Abs : 1, eps : 1/(M*m), l : m, c : M, n : mol, vol : L
   domain 0 < vol
   law beer : Abs = eps * l * c
     solve Abs := eps * l * c
@@ -166,6 +168,7 @@ end BeerLambert
 
 causal_model Arrhenius where
   variables k Pre Ea T X rate
+  units k : 1/s, Pre : 1/s, Ea : J/mol, T : K, X : M, rate : M/s, R : J/(mol*K)
   domain 0 < T
   law arrhenius : k = Pre * Real.exp (-(Ea / (R * T)))
     solve k := Pre * Real.exp (-(Ea / (R * T)))

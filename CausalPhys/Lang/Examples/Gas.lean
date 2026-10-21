@@ -15,6 +15,7 @@ namespace CausalPhys.Examples
 
 causal_model Gas where
   variables p vol n T
+  units p : Pa, vol : m^3, n : mol, T : K, R : J/(mol*K)
   domain 0 < p ∧ 0 < vol
   law gas : p * vol = n * R * T
     solve p := n * R * T / vol

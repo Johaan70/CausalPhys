@@ -30,6 +30,9 @@ structure Market.Params where
 
 causal_model Market (m : Market.Params) where
   variables P Qd Qs Imp t y w
+  units P : NOK/item, Qd : item/yr, Qs : item/yr, Imp : item/yr, t : NOK/item,
+    y : NOK/yr, w : 1, m.a : item/yr, m.b : item^2/(NOK*yr), m.c : item/NOK,
+    m.d : item/yr, m.e : item^2/(NOK*yr), m.f : item/yr
   law demand : Qd = m.a - m.b * P + m.c * y
     solve Qd := m.a - m.b * P + m.c * y
     solve P := (m.a + m.c * y - Qd) / m.b by have := m.hb.ne'; law_solve

@@ -16,6 +16,7 @@ namespace CausalPhys.Examples
 causal_model Circuit where
   variables U Rr I P T Ta k      -- voltage, resistance, current, power, temperature,
                                  -- ambient temperature, heat-transfer coefficient
+  units U : V, Rr : ohm, I : A, P : W, T : K, Ta : K, k : K/W
   domain 0 < U ∧ 0 < Rr
   law joule : P = U * I
     solve P := U * I

@@ -18,6 +18,7 @@ namespace CausalPhys.Tests
 
 causal_model ThermalWall where
   variables Q Tm T1 T2 R1 R2
+  units Q : W, Tm : K, T1 : K, T2 : K, R1 : K/W, R2 : K/W
   domain 0 < R1 ∧ 0 < R2
   law wall1 : T1 - Tm = R1 * Q
     solve Q := (T1 - Tm) / R1
@@ -80,6 +81,7 @@ end ThermalWall
 
 causal_model Battery where
   variables I U eps r R
+  units I : A, U : V, eps : V, r : ohm, R : ohm
   domain 0 < r ∧ 0 < R
   law loop : eps = (R + r) * I
     solve I := eps / (R + r)

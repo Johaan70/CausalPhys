@@ -29,6 +29,7 @@ structure Complexation.Consts where
 
 causal_model Complexation (c : Complexation.Consts) where
   variables M L ML ML2 m0 l0
+  units M : M, L : M, ML : M, ML2 : M, m0 : M, l0 : M, c.K1 : 1/M, c.K2 : 1/M
   domain 0 < M ∧ 0 < L ∧ 0 < ML ∧ 0 < ML2
   law k1 : ML = c.K1 * M * L
     solve ML := c.K1 * M * L

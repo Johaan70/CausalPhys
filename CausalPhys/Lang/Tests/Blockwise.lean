@@ -16,6 +16,7 @@ namespace CausalPhys.Tests
 
 causal_model DividerPower where
   variables I I1 I2 U R1 R2 P1
+  units I : A, I1 : A, I2 : A, U : V, R1 : ohm, R2 : ohm, P1 : W
   domain 0 < R1 ∧ 0 < R2
   law kcl : I = I1 + I2
     solve I := I1 + I2
@@ -56,6 +57,8 @@ theorem DividerPower.existsUnique (u : DividerPower.V → ℝ) (h1 : 0 < u .R1) 
 
 causal_model HeatedDivider where
   variables Ta k Ph T R0 al R1 R2 I I1 I2 U
+  units Ta : K, k : K/W, Ph : W, T : K, R0 : ohm, al : 1/K, R1 : ohm, R2 : ohm, I : A,
+    I1 : A, I2 : A, U : V
   domain 0 < R1 ∧ 0 < R2
   law heat : T = Ta + k * Ph
     solve T := Ta + k * Ph

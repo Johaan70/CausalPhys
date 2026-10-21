@@ -18,6 +18,7 @@ A model is written the way it is written on a blackboard (`CausalPhys/Lang/Examp
 ```lean
 causal_model Gas where
   variables p vol n T
+  units p : Pa, vol : m^3, n : mol, T : K, R : J/(mol*K)
   domain 0 < p ∧ 0 < vol
   law gas : p * vol = n * R * T
     solve p := n * R * T / vol
@@ -44,7 +45,9 @@ For the closed market, `linear_block` leaves 1 + e/b ≠ 0, which is the economi
 
 `docs/test-suite.md` lists twelve textbook models (five physics, four chemistry, three economics) with the answers expected from the subject. In `CausalPhys/Lang/Tests` the expected answers are theorems and the computed causal orders are pinned with `#guard_msgs`, so the build fails if the language starts computing something else; negative tests pin the errors for wrong models.
 
-Mistakes are caught with plain messages: a formula that does not solve its law on the domain, a missing witness or a domain that contradicts the laws, an unknown variable, a setup that fixes too many variables, or a false claim about the causal order.
+Every model declares units for its variables and constants, and Lean checks every law, domain condition and solving formula dimensionally (`Lang/Units.lean`). Write the gas law without R and Lean answers `the two sides of this law have different units: kg·m²·s⁻² (J) vs K·mol`. SI units, common derived units (N, Pa, J, W, V, ohm, L, M for mol/L) and any other name as a base unit of its own (NOK, item, yr for the economics models) are available.
+
+Mistakes are caught with plain messages: a formula that does not solve its law on the domain, a missing witness or a domain that contradicts the laws, units that do not match, an unknown variable, a setup that fixes too many variables, or a false claim about the causal order.
 
 The examples are special cases, each a model plus two setups that give opposite answers to the same question:
 
@@ -113,8 +116,9 @@ The build prints warnings that Mathlib modules are "designed for use with the mo
 
 - The witness shows that the domain and the laws are consistent at one state, not that the domain contains every meaningful solution; a domain that is too narrow still narrows what the formula check covers. `in_domain` handles acyclic setups and domain conditions on exogenous variables; for cyclic blocks the domain condition may need a hand proof.
 - Nonlinear blocks are covered only when the formulas are multi-affine and the secant matrix is a P-matrix, and that criterion gives uniqueness, not existence. Which formulas are used depends on the matching Lean finds; a block that would be multi-affine with other solved forms (for example a weak acid solved for [HA] instead of [A⁻]) is not yet tried both ways. Determinants and minors are computed up to 4 × 4.
+- Units are checked as dimensions only, not scale factors (a litre and a cubic metre are both length³), and functions other than exp, log, sin, cos, tanh and sqrt are not known to the checker.
 - In formulas, every identifier that names a variable is read as that variable, also inside `fun y => …`.
-- The surface language uses `variables`, `domain`, `law`, `solve`, `witness`, `setup` and `fixes` as keywords in files that import it, and values are real numbers.
+- The surface language uses `variables`, `units`, `domain`, `law`, `solve`, `witness`, `setup` and `fixes` as keywords in files that import it, and values are real numbers.
 - The duality (Lᵖ)* ≅ L^q is proved for sequence spaces ℓᵖ but not for general measures (only the isometric embedding Lᵖ → (L^q)* that reflexivity needs).
 - Uniqueness for infinite models holds among square-summable solutions only.
 - Mechanisms have finitely many parents, so aggregates over infinitely many variables are not expressible.

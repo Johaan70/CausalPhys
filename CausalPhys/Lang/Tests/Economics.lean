@@ -29,6 +29,7 @@ structure Keynes.Params where
 
 causal_model Keynes (k : Keynes.Params) where
   variables Y C I G Tax
+  units Y : NOK/yr, C : NOK/yr, I : NOK/yr, G : NOK/yr, Tax : NOK/yr, k.c0 : NOK/yr, k.c1 : 1
   law income : Y = C + I + G
     solve Y := C + I + G
     solve G := Y - C - I
@@ -119,6 +120,7 @@ end Keynes
 
 causal_model Quantity where
   variables M Vel P Y
+  units M : NOK, Vel : 1/yr, P : NOK/item, Y : item/yr
   domain 0 < P ∧ 0 < Y
   law fisher : M * Vel = P * Y
     solve P := M * Vel / Y
