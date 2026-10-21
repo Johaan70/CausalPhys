@@ -15,7 +15,7 @@
   Lᵖ(μ) over et generelt målrom er IKKE dekket; der krever dualiteten
   Radon–Nikodym-teoremet anvendt på funksjonaler, som ikke er formalisert her.
 -/
-import CausalPhys.MintyBrowderHemi
+import CausalPhysAnalysis.MintyBrowderHemi
 import Mathlib.Analysis.Normed.Lp.lpSpace
 
 set_option linter.unusedSectionVars false

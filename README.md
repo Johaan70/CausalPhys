@@ -55,23 +55,23 @@ The examples are special cases, each a model plus two setups that give opposite 
 
 ## Functional analysis along the way
 
-Proving that cyclic blocks have solutions led to a sequence of results, several of which are not in Mathlib as far as we know:
+Proving that cyclic blocks have solutions led to a sequence of results, several of which are not in Mathlib as far as we know. The infinite-dimensional ones are not needed by the language and live in a separate library, `CausalPhysAnalysis`, so that a Mathlib update can move the language forward even when they need repair (CI builds and checks both):
 
 | Result | Module |
 |---|---|
 | Banach and Zarantonello (strongly monotone Lipschitz operators) | `Existence`, `BrowderMinty` |
 | Gale–Nikaido (P-matrix Jacobians give injectivity) | `GaleNikaido` |
 | Brouwer's fixed point theorem via Sperner's lemma | `Brouwer` |
-| Minty–Browder in finite dimensions, Hilbert spaces and reflexive Banach spaces | `MintyBrowder`, `MintyBrowderHilbert`, `MintyBrowderBanach` |
-| Minty–Browder with hemicontinuity only (via KKM) | `MintyBrowderHemi` |
-| (ℓᵖ)* ≅ ℓ^q and reflexivity of ℓᵖ and of finite-dimensional spaces | `LpReflexive` |
-| Goldstine and Milman–Pettis | `Reflexivity` |
-| Clarkson's inequality and reflexivity of Lᵖ(μ), 1 < p < ∞, arbitrary measures | `LpMeasure` |
-| Causal models with infinitely many variables on ℓ² | `InfiniteSCM` |
+| Minty–Browder in finite dimensions, Hilbert spaces and reflexive Banach spaces | `MintyBrowder`, `CausalPhysAnalysis.MintyBrowderHilbert`, `CausalPhysAnalysis.MintyBrowderBanach` |
+| Minty–Browder with hemicontinuity only (via KKM) | `CausalPhysAnalysis.MintyBrowderHemi` |
+| (ℓᵖ)* ≅ ℓ^q and reflexivity of ℓᵖ and of finite-dimensional spaces | `CausalPhysAnalysis.LpReflexive` |
+| Goldstine and Milman–Pettis | `CausalPhysAnalysis.Reflexivity` |
+| Clarkson's inequality and reflexivity of Lᵖ(μ), 1 < p < ∞, arbitrary measures | `CausalPhysAnalysis.LpMeasure` |
+| Causal models with infinitely many variables on ℓ² | `CausalPhysAnalysis.InfiniteSCM` |
 
 ## Status
 
-- 42 modules in `CausalPhys/`, about 11,000 lines.
+- 39 modules in `CausalPhys/` (about 11,000 lines) and 7 in `CausalPhysAnalysis/` (about 2,000 lines).
 - No `sorry`. `#print axioms` on the main theorems shows only `propext`, `Classical.choice` and `Quot.sound`.
 - **How it was made:** the code was developed together with Claude (Anthropic), an AI assistant, under the direction of the repository owner. It compiles, but it has not yet been reviewed by anyone else. Feedback is very welcome.
 
@@ -101,6 +101,8 @@ The build prints warnings that Mathlib modules are "designed for use with the mo
 ## Contents
 
 - `CausalPhys/` — the library (see `CausalPhys.lean` for the module list)
+- `CausalPhysAnalysis/` — functional analysis beyond what the language needs (Minty–Browder in Hilbert and Banach spaces, reflexivity of ℓᵖ and Lᵖ, infinite causal models)
+- `docs/roadmap.md` — the development plan
 - `PearlDoCalculus/` — a copy of PearlDoCalculus ported to this toolchain; the changes are in `docs/pearldocalculus-lean-4.36-port.patch`
 - `docs/kausal-lab.html` — an interactive teaching page (Norwegian) on causal ordering for secondary school. Its builder section lets students pick a model, choose what the lab holds fixed and intervene; every answer (causal order, blocks, `#causal_check` verdict, units, interventions) was computed by Lean for every possible setup by `scripts/build_lab.py` (with `scripts/Export.lean`), and CI fails if the page differs from what Lean computes. Its "Finn feilen" section shows wrong models with the errors pinned in `Tests/Rejects.lean`.
 

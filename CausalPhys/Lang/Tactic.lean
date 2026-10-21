@@ -555,6 +555,19 @@ elab "secant_unique" : tactic =>
 
 /-! ## Which criterion applies? -/
 
+/-- A setup written in place (`{ exo := … }`) gets an auxiliary name, so that the
+    tactics see the same shape as for a setup declared by `causal_model`
+    (otherwise they unfold the structure literal and its validity proof). -/
+def nameSetup (S : Expr) : MetaM Expr := do
+  if S.getAppFn.isConst && !S.getAppFn.isConstOf ``Setup.mk then return S
+  -- a plain name (no macro scopes), so that `simp` can unfold it
+  let mut i := 1
+  while (← getEnv).contains (Name.mkSimple s!"causalSetup{i}") do i := i + 1
+  let n := Name.mkSimple s!"causalSetup{i}"
+  let e ← mkAuxDefinition n (← inferType S) S (compile := false)
+  enableRealizationsForConst n
+  return e
+
 /-- Runs `x` with a fixed heartbeat budget (in thousands), counted from now. -/
 def withBudget {α : Type} (n : Nat) (x : TermElabM α) : TermElabM α :=
   withTheReader Core.Context (fun ctx => { ctx with maxHeartbeats := n * 1000 }) <|
@@ -566,7 +579,7 @@ def withBudget {α : Type} (n : Nat) (x : TermElabM α) : TermElabM α :=
 elab "#causal_check " t:term : command => runTermElabM fun _ => do
   let S ← Term.elabTerm t none
   Term.synthesizeSyntheticMVarsNoPostponing
-  let S ← instantiateMVars S
+  let S ← nameSetup (← instantiateMVars S)
   let acyclic ← kernelNorm (← mkDecide (← mkAppM ``Setup.Acyclic #[S]))
   if acyclic.isAppOf ``Bool.true then
     logInfo m!"acyclic: every intervention has exactly one outcome of the causal model \

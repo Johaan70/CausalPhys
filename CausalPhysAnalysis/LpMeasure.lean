@@ -15,7 +15,7 @@
 
   Ingen σ-endelighet eller andre antakelser om målet trengs.
 -/
-import CausalPhys.Reflexivity
+import CausalPhysAnalysis.Reflexivity
 import Mathlib.MeasureTheory.Function.LpSeminorm.LpNorm
 import Mathlib.MeasureTheory.Function.Holder
 import Mathlib.Analysis.MeanInequalitiesPow

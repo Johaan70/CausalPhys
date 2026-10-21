@@ -80,6 +80,13 @@ info: cyclic, linear in each block: exactly one outcome of the causal model prov
 -/
 #guard_msgs in
 #causal_check buffered c
+-- A setup written in place gets the same answer as the named one (regression:
+-- the tactics used to unfold the structure literal and time out).
+/--
+info: cyclic, not linear in its own block, but multi-affine: at most one outcome in the domain (secant P-matrix criterion, proved by secant_unique)
+-/
+#guard_msgs in
+#causal_check ({ exo := [.m0, .l0] } : Setup (model c))
 
 /-! ## Computed by Lean -/
 

@@ -21,7 +21,7 @@
   Lipschitz (kubikkleddet), så verken Banach eller Zarantonello gjelder.
   For hver b ∈ ℓ²(ℤ) finnes nøyaktig én likevekt i ℓ²(ℤ).
 -/
-import CausalPhys.MintyBrowderHemi
+import CausalPhysAnalysis.MintyBrowderHemi
 import Mathlib.Analysis.InnerProductSpace.l2Space
 
 set_option linter.unusedSectionVars false

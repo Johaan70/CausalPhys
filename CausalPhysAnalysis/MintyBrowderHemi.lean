@@ -22,7 +22,7 @@
   Lemmaet «monoton og hemikontinuerlig ⇒ demikontinuerlig» trengs dermed
   ikke: KKM-ruten omgår det.
 -/
-import CausalPhys.MintyBrowderBanach
+import CausalPhysAnalysis.MintyBrowderBanach
 
 set_option linter.unusedSectionVars false
 

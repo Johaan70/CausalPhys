@@ -20,13 +20,6 @@ import CausalPhys.BrowderMinty
 import CausalPhys.GaleNikaido
 import CausalPhys.Brouwer
 import CausalPhys.MintyBrowder
-import CausalPhys.MintyBrowderHilbert
-import CausalPhys.MintyBrowderBanach
-import CausalPhys.MintyBrowderHemi
-import CausalPhys.LpReflexive
-import CausalPhys.InfiniteSCM
-import CausalPhys.Reflexivity
-import CausalPhys.LpMeasure
 import CausalPhys.Lang.Core
 import CausalPhys.Lang.Linear
 import CausalPhys.Lang.Blockwise

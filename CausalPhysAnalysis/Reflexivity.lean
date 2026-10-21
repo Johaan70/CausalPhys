@@ -8,7 +8,7 @@
     4. Et rom som kan legges isometrisk inn som et lukket underrom av et
        refleksivt rom, er refleksivt.
 -/
-import CausalPhys.LpReflexive
+import CausalPhysAnalysis.LpReflexive
 import Mathlib.Analysis.LocallyConvex.WeakDual
 import Mathlib.Analysis.LocallyConvex.Separation
 import Mathlib.Analysis.Convex.Uniform

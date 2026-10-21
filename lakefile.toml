@@ -10,5 +10,8 @@ rev = "807d3836b165983210ee2ecf3cd28f239436949c"
 name = "CausalPhys"
 
 [[lean_lib]]
+name = "CausalPhysAnalysis"
+
+[[lean_lib]]
 name = "PearlDoCalculus"
 leanOptions = {autoImplicit = false}

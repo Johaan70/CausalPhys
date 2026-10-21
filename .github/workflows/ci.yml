@@ -31,8 +31,17 @@ jobs:
           lake update --keep-toolchain || true
           lake exe cache get || echo "no Mathlib cache for this commit; building from source"
 
-      - name: Build
-        run: lake build 2>&1 | tee build.log; test ${PIPESTATUS[0]} -eq 0
+      - name: Build the language (CausalPhys)
+        run: |
+          start=$SECONDS
+          lake build CausalPhys 2>&1 | tee build.log; test ${PIPESTATUS[0]} -eq 0
+          echo "CausalPhys built in $((SECONDS - start)) s"
+
+      - name: Build the analysis library (CausalPhysAnalysis)
+        run: |
+          start=$SECONDS
+          lake build CausalPhysAnalysis 2>&1 | tee -a build.log; test ${PIPESTATUS[0]} -eq 0
+          echo "CausalPhysAnalysis built in $((SECONDS - start)) s"
 
       - name: Checks (sorry, warnings, axioms, negative tests)
         run: scripts/ci.sh build.log

@@ -21,7 +21,7 @@
        snitt-egenskapen gir Φ, og refleksiviteten gir Φ = J x.
     4. Mintys triks gir F x = b.
 -/
-import CausalPhys.MintyBrowderHilbert
+import CausalPhysAnalysis.MintyBrowderHilbert
 import Mathlib.Analysis.Normed.Module.DoubleDual
 
 set_option linter.unusedSectionVars false
