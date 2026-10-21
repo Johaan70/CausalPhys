@@ -36,3 +36,7 @@ import CausalPhys.Lang.Examples.Circuit
 import CausalPhys.Lang.Examples.Complexation
 import CausalPhys.Lang.Examples.Market
 import CausalPhys.Lang.Examples.Divider
+import CausalPhys.Lang.Tests.Physics
+import CausalPhys.Lang.Tests.Chemistry
+import CausalPhys.Lang.Tests.Economics
+import CausalPhys.Lang.Tests.Rejects

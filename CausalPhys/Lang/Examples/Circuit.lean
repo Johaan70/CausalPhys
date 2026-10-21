@@ -28,7 +28,21 @@ causal_model Circuit where
   setup voltageSource fixes U Rr Ta k
   setup currentSource fixes I Rr Ta k
 
+/--
+info: joule determines P, reading [U, I]
+ohm determines I, reading [U, Rr]
+newton determines T, reading [Ta, k, P]
+acyclic: every intervention has exactly one outcome
+-/
+#guard_msgs in
 #causal_order Circuit.voltageSource
+/--
+info: joule determines P, reading [U, I]
+ohm determines U, reading [Rr, I]
+newton determines T, reading [Ta, k, P]
+acyclic: every intervention has exactly one outcome
+-/
+#guard_msgs in
 #causal_order Circuit.currentSource
 
 namespace Circuit

@@ -39,6 +39,8 @@ What the user writes is only domain content: variables, laws, the domain where t
 
 For the closed market, `linear_block` leaves 1 + e/b ≠ 0, which is the economics; for the ligand buffer it leaves 1 + K₁L + K₁K₂L² ≠ 0, the familiar denominator of complexation chemistry; for the current divider it finishes on its own.
 
+`docs/test-suite.md` lists twelve textbook models (five physics, four chemistry, three economics) with the answers expected from the subject. In `CausalPhys/Lang/Tests` the expected answers are theorems and the computed causal orders are pinned with `#guard_msgs`, so the build fails if the language starts computing something else; negative tests pin the errors for wrong models.
+
 Mistakes are caught with plain messages: a formula that does not solve its law, an unknown variable, a setup that fixes too many variables, or a false claim about the causal order.
 
 The examples are special cases, each a model plus two setups that give opposite answers to the same question:
@@ -69,7 +71,7 @@ Proving that cyclic blocks have solutions led to a sequence of results, several 
 
 ## Status
 
-- 38 modules in `CausalPhys/`, about 10,500 lines.
+- 42 modules in `CausalPhys/`, about 11,000 lines.
 - No `sorry`. `#print axioms` on the main theorems shows only `propext`, `Classical.choice` and `Quot.sound`.
 - **How it was made:** the code was developed together with Claude (Anthropic), an AI assistant, under the direction of the repository owner. It compiles, but it has not yet been reviewed by anyone else. Feedback is very welcome.
 

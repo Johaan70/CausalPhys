@@ -30,9 +30,33 @@ causal_model Divider where
   setup currentSource fixes I R1 R2
   setup voltageSource fixes U R1 R2
 
+/--
+info: kcl determines I2, reading [I, I1]
+ohm1 determines I1, reading [U, R1]
+ohm2 determines U, reading [R2, I2]
+cyclic block: [kcl, ohm1, ohm2]
+-/
+#guard_msgs in
 #causal_order Divider.currentSource
+/--
+info: cyclic, linear: exactly one outcome provided that
+  ¬1 + (u✝ Divider.V.R1)⁻¹ * u✝ Divider.V.R2 = 0
+(finish `linear_block` with a proof of this)
+-/
+#guard_msgs in
 #causal_check Divider.currentSource
+/--
+info: kcl determines I, reading [I1, I2]
+ohm1 determines I1, reading [U, R1]
+ohm2 determines I2, reading [U, R2]
+acyclic: every intervention has exactly one outcome
+-/
+#guard_msgs in
 #causal_order Divider.voltageSource
+/--
+info: acyclic: every intervention has exactly one outcome (Setup.do_existsUnique)
+-/
+#guard_msgs in
 #causal_check Divider.voltageSource
 
 namespace Divider

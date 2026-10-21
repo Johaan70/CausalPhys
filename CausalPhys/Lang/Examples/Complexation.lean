@@ -47,9 +47,35 @@ namespace Complexation
 
 variable (c : Consts)
 
+/--
+info: k1 determines ML, reading [M, L]
+k2 determines ML2, reading [ML, L]
+metal determines M, reading [m0, ML, ML2]
+ligand determines L, reading [l0, ML, ML2]
+cyclic block: [k1, k2, metal, ligand]
+-/
+#guard_msgs in
 #causal_order closed c
+/--
+info: k1 determines ML, reading [M, L]
+k2 determines ML2, reading [ML, L]
+metal determines M, reading [m0, ML, ML2]
+ligand determines l0, reading [L, ML, ML2]
+cyclic block: [k1, k2, metal]
+-/
+#guard_msgs in
 #causal_order buffered c
+/--
+info: cyclic, nonlinear: the linear criterion does not apply; uniqueness needs a domain-specific argument (monotonicity, Gale–Nikaido, Minty–Browder), plugged in with Setup.unique_of_laws
+-/
+#guard_msgs in
 #causal_check closed c
+/--
+info: cyclic, linear: exactly one outcome provided that
+  ¬1 + c.K1 * u✝ V.L + c.K1 * u✝ V.L ^ 2 * c.K2 = 0
+(finish `linear_block` with a proof of this)
+-/
+#guard_msgs in
 #causal_check buffered c
 
 /-! ## Computed by Lean -/

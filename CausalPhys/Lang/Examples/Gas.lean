@@ -22,7 +22,17 @@ causal_model Gas where
   setup locked fixes vol n T      -- locked piston, heat bath, closed vessel
   setup weighted fixes p n T      -- weighted piston, heat bath, closed vessel
 
+/--
+info: gas determines p, reading [n, T, vol]
+acyclic: every intervention has exactly one outcome
+-/
+#guard_msgs in
 #causal_order Gas.locked
+/--
+info: gas determines vol, reading [n, T, p]
+acyclic: every intervention has exactly one outcome
+-/
+#guard_msgs in
 #causal_order Gas.weighted
 
 namespace Gas

@@ -47,9 +47,33 @@ namespace Market
 
 variable (m : Params)
 
+/--
+info: demand determines P, reading [y, Qd]
+supply determines Qs, reading [P, t, w]
+clearing determines Qd, reading [Qs, Imp]
+cyclic block: [demand, supply, clearing]
+-/
+#guard_msgs in
 #causal_order closed m
+/--
+info: demand determines Qd, reading [P, y]
+supply determines Qs, reading [P, t, w]
+clearing determines Imp, reading [Qd, Qs]
+acyclic: every intervention has exactly one outcome
+-/
+#guard_msgs in
 #causal_order open_ m
+/--
+info: cyclic, linear: exactly one outcome provided that
+  ¬1 + m.b⁻¹ * m.e = 0
+(finish `linear_block` with a proof of this)
+-/
+#guard_msgs in
 #causal_check closed m
+/--
+info: acyclic: every intervention has exactly one outcome (Setup.do_existsUnique)
+-/
+#guard_msgs in
 #causal_check open_ m
 
 /-! ## Computed by Lean -/
