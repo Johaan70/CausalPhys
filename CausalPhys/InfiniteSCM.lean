@@ -183,7 +183,7 @@ theorem norm_le_of_le (f g : L2 V) {C : ℝ} (hC : 0 ≤ C) (h : ∀ n, |f n| �
 theorem inner_eq (x y : L2 V) : ⟪x, y⟫ = ∑' n, x n * y n := by
   rw [lp.inner_eq_tsum]
   congr 1; funext n
-  simp only [real_inner_eq_re_inner, RCLike.inner_apply, conj_trivial, RCLike.re_to_real]
+  simp only [RCLike.inner_apply, conj_trivial]
   ring
 
 end Tools

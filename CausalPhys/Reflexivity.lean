@@ -251,7 +251,7 @@ theorem reflexive_of_isometry {Y : Type*} [NormedAddCommGroup Y] [NormedSpace �
         _ = ‖h‖ * ‖z‖ := by
           congr 1
           have : (z : X) = e (eq.symm z) := by rw [← heq, LinearEquiv.apply_symm_apply]
-          rw [Submodule.coe_norm, this, LinearIsometry.norm_map])
+          rw [← Submodule.norm_coe, this, LinearIsometry.norm_map])
   obtain ⟨f, hf, -⟩ := exists_extension_norm_eq p hp
   have hRf : R f = h := by
     ext z

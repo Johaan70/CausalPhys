@@ -1,6 +1,9 @@
 /-
   Test suite, negative tests: mistakes the language must reject, with the
   message it must give. Each error is pinned with `#guard_msgs`.
+
+  Lean still adds the failed declarations (with `sorry`), so this file is not
+  imported by `CausalPhys.lean`; CI checks it on its own.
 -/
 import CausalPhys.Lang.Syntax
 

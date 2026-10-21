@@ -211,7 +211,7 @@ def up0 (S : Sx (n+1) k) (h : (S.1 (S.2⁻¹ 0) : ℕ) + 1 < k) : Sx (n+1) k :=
   (Function.update S.1 (S.2⁻¹ 0) ⟨_, h⟩, (finRotate (n+1))⁻¹ * S.2)
 
 /-- Nabo over fasetten uten det siste hjørnet. -/
-def dnL (S : Sx (n+1) k) (h : 0 < (S.1 (S.2⁻¹ (Fin.last n)) : ℕ)) : Sx (n+1) k :=
+def dnL (S : Sx (n+1) k) (_h : 0 < (S.1 (S.2⁻¹ (Fin.last n)) : ℕ)) : Sx (n+1) k :=
   (Function.update S.1 (S.2⁻¹ (Fin.last n))
     ⟨(S.1 (S.2⁻¹ (Fin.last n)) : ℕ) - 1, lt_of_le_of_lt (Nat.sub_le _ _) (S.1 _).isLt⟩,
     finRotate (n+1) * S.2)
@@ -364,7 +364,7 @@ theorem nb_invol (S : Sx (n+1) k) (j : Fin (n+2)) {T : Sx (n+1) k} {j' : Fin (n+
       simp only [Option.some.injEq, Prod.mk.injEq] at h
       obtain ⟨rfl, rfl⟩ := h
       have h' : 0 < ((up0 S hk).1 ((up0 S hk).2⁻¹ (Fin.last n)) : ℕ) := by
-        simp [up0, finRotate_last]
+        simp [up0]
       refine ⟨?_, ?_⟩
       · unfold nb
         rw [ite_eq_right last_ne_zero', dite_eq_left rfl, dite_eq_left h', up0_dnL, h0]
@@ -563,7 +563,7 @@ theorem vert_Φ (hk : 0 < k) (W : Sx n k) (t : Fin (n+1)) :
     simp only [show (0:ℕ) < (t:ℕ) + 1 by omega, ite_true]
     omega
   | cast i =>
-    simp only [vert, Φ, Fin.snoc_castSucc, lift_castSucc, Fin.val_succ, Fin.val_castSucc]
+    simp only [vert, Φ, Fin.snoc_castSucc, lift_castSucc, Fin.val_succ]
     simp only [Nat.add_lt_add_iff_right]
 
 theorem snoc_grid {w : Fin n → ℕ} (hw : ∀ i, w i ≤ k) :
@@ -620,7 +620,7 @@ theorem Φ_inj (hk : 0 < k) {W W' : Sx n k} (h : Φ hk W = Φ hk W') : W = W' :=
 /-! ### Hovedteoremet -/
 
 theorem card_Sx_zero (k : ℕ) : Fintype.card (Sx 0 k) = 1 := by
-  simp [Fintype.card_prod, Fintype.card_perm]
+  simp [Fintype.card_prod]
 
 /-- **Sperners lemma (kubeversjonen).** Antallet fullt merkede simplekser er odde. -/
 theorem sperner : ∀ (m k : ℕ), 0 < k → ∀ ℓ : (Fin m → ℕ) → ℕ, Labeling m k ℓ →

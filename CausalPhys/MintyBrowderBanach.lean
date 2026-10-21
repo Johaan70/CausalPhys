@@ -63,7 +63,7 @@ theorem minty_iff (F : X → StrongDual ℝ X) (hF : Continuous F)
     have h2 := hw (-w)
     rw [map_neg] at h2
     have : (F x - b) w = 0 := by linarith
-    rw [ContinuousLinearMap.sub_apply] at this
+    rw [sub_apply] at this
     linarith
 
 /-! ## 1. Galerkin-trinnet i et endeligdimensjonalt underrom -/
@@ -163,7 +163,7 @@ theorem surjective (hrefl : Function.Surjective (NormedSpace.inclusionInDoubleDu
     intro x hx
     have h1 := hRc x hx.ge
     have h2 : b x ≤ ‖b‖ * ‖x‖ := (le_abs_self _).trans (b.le_opNorm x)
-    rw [ContinuousLinearMap.sub_apply]
+    rw [sub_apply]
     rw [hx] at h1 h2
     nlinarith
   -- kula i X** (svakt*-kompakt)
@@ -191,7 +191,7 @@ theorem surjective (hrefl : Function.Surjective (NormedSpace.inclusionInDoubleDu
       have h1 := hmono y v
       have h2 := hvperp (y - v) (V.sub_mem hyV hvV)
       have e : (F y - b) (y - v) = (F y - F v) (y - v) + (F v - b) (y - v) := by
-        simp only [ContinuousLinearMap.sub_apply]; ring
+        simp only [sub_apply]; ring
       rw [map_sub] at e
       linarith
   obtain ⟨Φ, -, hΦ⟩ := hKc.inter_iInter_nonempty C hCc hfip
@@ -221,7 +221,7 @@ theorem exists_unique (hrefl : Function.Surjective (NormedSpace.inclusionInDoubl
   refine ⟨x, hx, fun y hy => ?_⟩
   by_contra hne
   have := hmono y x hne
-  rw [hy, hx, sub_self, ContinuousLinearMap.zero_apply] at this
+  rw [hy, hx, sub_self, zero_apply] at this
   exact lt_irrefl _ this
 
 end MintyBrowderBanach

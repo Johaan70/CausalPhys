@@ -72,7 +72,7 @@ theorem kkm {ι X : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
       rw [hμ.2, hν.2]; linarith
   have hΔne : Δ.Nonempty := by
     refine ⟨WithLp.toLp 2 (fun _ => 1 / (Fintype.card ι : ℝ)), fun i => by simp, ?_⟩
-    simp only [PiLp.toLp_apply, Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
+    simp only [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
     have : (0 : ℝ) < Fintype.card ι := by exact_mod_cast Fintype.card_pos
     field_simp
   let ψ : (EuclideanSpace ℝ ι) → X := fun μ => ∑ j, μ j • y j
@@ -85,11 +85,11 @@ theorem kkm {ι X : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
     intro k
     refine ⟨WithLp.toLp 2 (Pi.single k 1), ?_⟩
     obtain ⟨k', hk', hmem⟩ := hkkm (fun i => (WithLp.toLp 2 (Pi.single k (1:ℝ)) : (EuclideanSpace ℝ ι)) i)
-      (fun i => by simp only [PiLp.toLp_apply, Pi.single_apply]; split_ifs <;> norm_num)
+      (fun i => by simp only [Pi.single_apply]; split_ifs <;> norm_num)
       (by simp)
     have : k' = k := by
       by_contra hne
-      simp [Pi.single_apply, hne] at hk'
+      simp [hne] at hk'
     subst this
     exact hmem
   -- partisjon av enheten
@@ -113,14 +113,14 @@ theorem kkm {ι X : Type*} [Fintype ι] [DecidableEq ι] [Nonempty ι]
   have hfmap : Set.MapsTo f Δ Δ := by
     intro μ hμ
     refine ⟨fun k => div_nonneg (hd0 k μ) (hspos μ hμ).le, ?_⟩
-    simp only [f, PiLp.toLp_apply]
+    simp only [f]
     rw [← Finset.sum_div]
     exact div_self (hspos μ hμ).ne'
   obtain ⟨μ, hμ, hfix⟩ := MintyBrowder.brouwer_convex hΔc hΔconv hΔne f hfc hfmap
   obtain ⟨k, hk, hmem⟩ := hkkm (fun i => μ i) hμ.1 hμ.2
   have hμk : μ k = d k μ / s μ := by
     have := congrArg (fun z : (EuclideanSpace ℝ ι) => z k) hfix
-    simp only [f, PiLp.toLp_apply] at this
+    simp only [f] at this
     exact this.symm
   have hdk : 0 < d k μ := by
     rw [hμk] at hk
@@ -167,7 +167,7 @@ theorem kkm_of_mono (F : X → StrongDual ℝ X) (hmono : ∀ x y, 0 ≤ (F x - 
     intro k j
     have := hmono (y k) (y j)
     have e : a k j + a j k = (F (y k) - F (y j)) (y k - y j) := by
-      simp only [a, ContinuousLinearMap.sub_apply, map_sub]
+      simp only [a, sub_apply, map_sub]
       ring
     rw [e]; exact this
   have hS' : 0 ≤ ∑ k, lam k * (F (y k) - b) (y k - x) := by
@@ -308,7 +308,7 @@ theorem minty_iff (F : X → StrongDual ℝ X) (hhemi : Hemicontinuous F)
     have h2 := hw (-w)
     rw [map_neg] at h2
     have : (F x - b) w = 0 := by linarith
-    rw [ContinuousLinearMap.sub_apply] at this
+    rw [sub_apply] at this
     linarith
 
 /-- **Minty–Browder** i refleksive Banach-rom: monoton, hemikontinuerlig og
@@ -323,7 +323,7 @@ theorem surjective (hrefl : Function.Surjective (NormedSpace.inclusionInDoubleDu
     intro x hx
     have h1 := hRc x hx.ge
     have h2 : b x ≤ ‖b‖ * ‖x‖ := (le_abs_self _).trans (b.le_opNorm x)
-    rw [ContinuousLinearMap.sub_apply]
+    rw [sub_apply]
     rw [hx] at h1 h2
     nlinarith
   set K : Set (WeakDual ℝ (StrongDual ℝ X)) :=
@@ -350,7 +350,7 @@ theorem surjective (hrefl : Function.Surjective (NormedSpace.inclusionInDoubleDu
       have h1 := hmono y v
       have h2 := hvperp (y - v) (V.sub_mem hyV hvV)
       have e : (F y - b) (y - v) = (F y - F v) (y - v) + (F v - b) (y - v) := by
-        simp only [ContinuousLinearMap.sub_apply]; ring
+        simp only [sub_apply]; ring
       rw [map_sub] at e
       linarith
   obtain ⟨Φ, -, hΦ⟩ := hKc.inter_iInter_nonempty C hCc hfip
@@ -402,7 +402,7 @@ theorem hilbert_surjective (F : H → H)
     (fun x w z => by simpa only [hG] using hhemi x w z)
     (fun x y => by
       have : (G x - G y) (x - y) = ⟪F x - F y, x - y⟫ := by
-        simp only [ContinuousLinearMap.sub_apply, hG, inner_sub_left]
+        simp only [sub_apply, hG, inner_sub_left]
       rw [this]; exact hmono x y)
     (fun M => by
       obtain ⟨R, hR, h⟩ := hcoer M

@@ -85,7 +85,7 @@ theorem det_updateRow_single_eq {κ : Type} [Fintype κ] [DecidableEq κ] (N : M
   have h12 : (M.submatrix e e).toBlocks₁₂ = 0 := by
     ext ⟨i, hi⟩ ⟨j, hj⟩
     subst hi
-    simp [toBlocks₁₂, M, e, Pi.single_apply, hj]
+    simp [toBlocks₁₂, M, e, hj]
   have h11 : ((M.submatrix e e).toBlocks₁₁).det = 1 := by
     rw [det_eq_elem_of_subsingleton _ ⟨k, rfl⟩]
     simp [toBlocks₁₁, M, e]
@@ -102,8 +102,8 @@ theorem det_add_single_pos {κ : Type} [Fintype κ] [DecidableEq κ] (N : Matrix
     · subst hi
       by_cases hj : j = i
       · subst hj; simp
-      · simp [diagonal_apply, Pi.single_apply, hj, Ne.symm hj]
-    · simp [updateRow_ne hi, diagonal_apply, Pi.single_apply, hi]
+      · simp [hj, Ne.symm hj]
+    · simp [diagonal_apply, hi]
   rw [hrow, det_updateRow_add, det_updateRow_smul, updateRow_eq_self, det_updateRow_single_eq]
   have h1 := hN.det_pos
   have h2 := hN _ (Subtype.val : {j // ¬ j = k} → κ) Subtype.val_injective
@@ -123,7 +123,7 @@ theorem IsP.add_single {κ : Type} [Fintype κ] [DecidableEq κ] {M : Matrix κ 
   · have heq : (M + diagonal (Pi.single a t)).submatrix f f = M.submatrix f f := by
       ext i j
       have : f i ≠ a := fun h => ha ⟨i, h⟩
-      simp [diagonal_apply, Pi.single_apply, this]
+      simp [diagonal_apply, this]
     rw [heq]; exact hM μ f hf
 
 /-- Ikke-negativ diagonal bevarer P-egenskapen. -/
@@ -142,7 +142,7 @@ theorem IsP.add_diag {κ : Type} [Fintype κ] [DecidableEq κ] {N : Matrix κ κ
       funext i
       by_cases hi : i = a
       · subst hi; simp [ha]
-      · simp [hi, Pi.single_apply]
+      · simp [hi]
     rw [heq]
     exact ih.add_single a (hd a)
 
@@ -303,7 +303,7 @@ theorem taylor {F : (ι → ℝ) → (ι → ℝ)} {A : Matrix ι ι ℝ} {Ω : 
 /-- Måler hvor mye A bevarer fortegn: Σ max(0, vᵢ(Av)ᵢ). -/
 def gfun (A : Matrix ι ι ℝ) (v : ι → ℝ) : ℝ := ∑ i, max 0 (v i * (A *ᵥ v) i)
 
-theorem gfun_smul (A : Matrix ι ι ℝ) {t : ℝ} (ht : 0 ≤ t) (v : ι → ℝ) :
+theorem gfun_smul (A : Matrix ι ι ℝ) {t : ℝ} (_ht : 0 ≤ t) (v : ι → ℝ) :
     gfun A (t • v) = t ^ 2 * gfun A v := by
   unfold gfun
   rw [Finset.mul_sum]
@@ -722,12 +722,12 @@ theorem hasDeriv (b₁ b₂ : ℝ) (u s : Fin 2 → ℝ) :
   · have := h0.sub (((h1.const_mul 3).add (h1.pow 3)).add_const b₁)
     refine this.congr_fderiv ?_
     ext v
-    simp [jac, Matrix.mulVec, dotProduct, Fin.sum_univ_two]
+    simp [jac, dotProduct, Fin.sum_univ_two]
     ring
   · have := h1.sub (h0.const_sub b₂)
     refine this.congr_fderiv ?_
     ext v
-    simp [jac, Matrix.mulVec, dotProduct, Fin.sum_univ_two]
+    simp [jac, dotProduct, Fin.sum_univ_two]
     ring
 
 /-- Tilbakekoblingssløyfen har høyst én likevekt, for alle b₁, b₂. -/

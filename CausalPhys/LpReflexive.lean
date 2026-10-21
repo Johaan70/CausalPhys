@@ -79,11 +79,11 @@ noncomputable def TL : L α q →L[ℝ] StrongDual ℝ (L α p) :=
     { toFun := T hpq
       map_add' := fun g h => by
         ext x
-        simp only [T_apply, ContinuousLinearMap.add_apply, lp.coeFn_add, Pi.add_apply, mul_add]
+        simp only [T_apply, add_apply, lp.coeFn_add, Pi.add_apply, mul_add]
         exact (pair_summable hpq x g).tsum_add (pair_summable hpq x h)
       map_smul' := fun c g => by
         ext x
-        simp only [T_apply, ContinuousLinearMap.smul_apply, lp.coeFn_smul, Pi.smul_apply,
+        simp only [T_apply, smul_apply, lp.coeFn_smul, Pi.smul_apply,
           smul_eq_mul, RingHom.id_apply]
         rw [← tsum_mul_left]
         congr 1; funext i; ring }
@@ -163,7 +163,7 @@ theorem repr (hpq : p.toReal.HolderConjugate q.toReal) (hp : p ≠ ⊤)
   rw [← hs.tsum_eq]
   congr 1
   funext i
-  simp only [Function.comp_apply, hφs]
+  simp only [hφs]
 
 /-! ## 3. Refleksivitet -/
 
@@ -186,7 +186,7 @@ theorem reflexive (hpq : p.toReal.HolderConjugate q.toReal) (hp : p ≠ ⊤) (hq
 
 /-- Spesialtilfellet ℓ²: p = q = 2. -/
 theorem reflexive_two : Function.Surjective (NormedSpace.inclusionInDoubleDual ℝ (L α 2)) := by
-  haveI : Fact ((1 : ℝ≥0∞) ≤ 2) := ⟨by norm_num⟩
+  have : Fact ((1 : ℝ≥0∞) ≤ 2) := ⟨by norm_num⟩
   exact reflexive (p := 2) (q := 2) (by simpa using Real.HolderConjugate.two_two) (by simp) (by simp)
 
 end LpReflexive
@@ -206,9 +206,9 @@ theorem finrank_strongDual (Y : Type*) [NormedAddCommGroup Y] [NormedSpace ℝ Y
 /-- **Endeligdimensjonale normerte rom er refleksive.** -/
 theorem reflexive : Function.Surjective (NormedSpace.inclusionInDoubleDual ℝ X) := by
   obtain ⟨h1, e1⟩ := finrank_strongDual X
-  haveI := h1
+  have := h1
   obtain ⟨h2, e2⟩ := finrank_strongDual (StrongDual ℝ X)
-  haveI := h2
+  have := h2
   have hinj : Function.Injective (NormedSpace.inclusionInDoubleDual ℝ X) :=
     (NormedSpace.inclusionInDoubleDualLi ℝ (E := X)).injective
   exact (LinearMap.injective_iff_surjective_of_finrank_eq_finrank (e2.trans e1).symm

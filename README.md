@@ -75,6 +75,18 @@ Proving that cyclic blocks have solutions led to a sequence of results, several 
 - No `sorry`. `#print axioms` on the main theorems shows only `propext`, `Classical.choice` and `Quot.sound`.
 - **How it was made:** the code was developed together with Claude (Anthropic), an AI assistant, under the direction of the repository owner. It compiles, but it has not yet been reviewed by anyone else. Feedback is very welcome.
 
+## Checks
+
+Every push runs `.github/workflows/ci.yml`: a full build and then `scripts/ci.sh`, which fails on
+
+1. any build error;
+2. any `sorry`;
+3. any warning in `CausalPhys/` (the vendored `PearlDoCalculus/` copy is exempt);
+4. any declaration of the project that depends on an axiom other than `propext`, `Classical.choice` and `Quot.sound` (`scripts/AxiomCheck.lean`, which also catches `sorry` and `native_decide`);
+5. any change in the errors the language gives for wrong models (`CausalPhys/Lang/Tests/Rejects.lean`, which is not part of the library because Lean keeps the failed declarations).
+
+Run the same checks locally with `lake build 2>&1 | tee build.log && scripts/ci.sh build.log`.
+
 ## Building
 
 Requires Lean `v4.36.0-rc1` and Mathlib at commit `807d383`, both pinned in `lean-toolchain` and `lakefile.toml`.

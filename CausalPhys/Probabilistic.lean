@@ -73,7 +73,7 @@ theorem no_parents_of_exo (M : SCM V β) (rank : V → ℕ) (hr : M.Recursive ra
   cases hm
 
 /-- Fyll inn foreldreverdier til en hel tilstand (standardverdi ellers). -/
-def fill (G : DAG V) (v : V) (pa : ∀ u : {u // u ∈ G.parents v}, β) : V → β :=
+def fill (G : DAG V) (v : V) (pa : ∀ _u : {u // u ∈ G.parents v}, β) : V → β :=
   fun w => if h : w ∈ G.parents v then pa ⟨w, h⟩ else default
 
 /-- Sannsynlighetsmodellen: eksogene variabler trekkes uavhengig fra `P v`,

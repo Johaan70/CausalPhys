@@ -174,7 +174,7 @@ theorem lp_le_k : ∀ k e, lp S σ inv k e ≤ k
 
 theorem lp_mono : ∀ k e, lp S σ inv k e ≤ lp S σ inv (k + 1) e
   | 0, _ => Nat.zero_le _
-  | k + 1, e => maxOf_mono fun c _ => Nat.succ_le_succ (lp_mono k c)
+  | k + 1, _ => maxOf_mono fun c _ => Nat.succ_le_succ (lp_mono k c)
 
 theorem lp_edge (k : ℕ) {c e : E} (h : Edge S σ inv c e) : lp S σ inv k c + 1 ≤ lp S σ inv (k + 1) e :=
   le_maxOf (List.mem_map.2 ⟨c, List.mem_filter.2 ⟨S.eq_complete c, by simpa using h⟩, rfl⟩)

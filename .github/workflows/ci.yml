@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install elan
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Restore build cache
+        uses: actions/cache@v4
+        with:
+          path: .lake
+          key: lake-${{ runner.os }}-${{ hashFiles('lean-toolchain', 'lakefile.toml') }}-${{ github.sha }}
+          restore-keys: |
+            lake-${{ runner.os }}-${{ hashFiles('lean-toolchain', 'lakefile.toml') }}-
+
+      - name: Fetch Mathlib build cache
+        run: |
+          lake update --keep-toolchain || true
+          lake exe cache get || echo "no Mathlib cache for this commit; building from source"
+
+      - name: Build
+        run: lake build 2>&1 | tee build.log; test ${PIPESTATUS[0]} -eq 0
+
+      - name: Checks (sorry, warnings, axioms, negative tests)
+        run: scripts/ci.sh build.log
