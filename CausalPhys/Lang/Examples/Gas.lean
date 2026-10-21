@@ -1,62 +1,38 @@
 /-
-  Physics: the ideal gas law pV = nRT, written once.
+  Physics: the ideal gas law pV = nRT, written once, with two lab setups.
 
-  Two lab setups:
-    * locked piston (V, n, T held fixed)  → Lean computes: the law determines p;
-    * weighted piston (p, n, T held fixed) → Lean computes: the law determines V.
-
-  The general theorems of the core then give, with no extra work:
-    * both setups allow exactly the same states (`same_data`),
-    * every intervention has exactly one outcome,
-  and a short calculation gives the physics:
-    * heating with a locked piston raises the pressure, the volume stays;
-    * heating with a weighted piston raises the volume, the pressure stays;
-    * so the same do(T := 2) from the same starting point gives different volumes.
+  Lean computes that the law determines p with a locked piston and V with a
+  weighted piston. The general theorems give that data cannot tell the setups
+  apart and that every intervention has exactly one outcome; reading off the
+  solution gives the physics: heating raises p in one setup and V in the other.
 -/
-import CausalPhys.Lang.Core
+import CausalPhys.Lang.Syntax
 import CausalPhys.Physics
 
-namespace CausalPhys.Lang.Gas
+open CausalPhys CausalPhys.Lang
 
-inductive V | p | vol | n | T
-deriving DecidableEq, Repr
+namespace CausalPhys.Examples
 
-instance : Inhabited V := ⟨.p⟩
+causal_model Gas where
+  variables p vol n T
+  domain 0 < p ∧ 0 < vol
+  law gas : p * vol = n * R * T
+    solve p := n * R * T / vol
+    solve vol := n * R * T / p
+  setup locked fixes vol n T      -- locked piston, heat bath, closed vessel
+  setup weighted fixes p n T      -- weighted piston, heat bath, closed vessel
 
-noncomputable section
+#causal_order Gas.locked
+#causal_order Gas.weighted
 
-/-- The model: one law, solvable for p or for V. -/
-def model : Model Unit V ℝ where
-  eqList := [()]
-  varList := [.p, .vol, .n, .T]
-  law _ s := s .p * s .vol = s .n * R * s .T
-  dom s := 0 < s .p ∧ 0 < s .vol
-  solvers _ :=
-    [(.p, mech [.n, .T, .vol] fun s => s .n * R * s .T / s .vol),
-     (.vol, mech [.n, .T, .p] fun s => s .n * R * s .T / s .p)]
-  sound := by
-    intro _ v m h s hD
-    simp only [List.mem_cons, Prod.mk.injEq, List.not_mem_nil, or_false] at h
-    rcases h with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
-    · show _ ↔ s .p = s .n * R * s .T / s .vol
-      rw [eq_div_iff hD.2.ne']
-    · show _ ↔ s .vol = s .n * R * s .T / s .p
-      rw [eq_div_iff hD.1.ne', mul_comm (s .vol)]
-
-/-- Locked piston in a heat bath, closed vessel. -/
-def locked : Setup model := { exo := [.vol, .n, .T] }
-
-/-- Weighted piston in a heat bath, closed vessel. -/
-def weighted : Setup model := { exo := [.p, .n, .T] }
-
-end
+namespace Gas
 
 /-! ## Computed by Lean -/
 
-theorem locked_determines : locked.determines () = .p := by decide
-theorem weighted_determines : weighted.determines () = .vol := by decide
-theorem locked_acyclic : locked.Acyclic := by decide
-theorem weighted_acyclic : weighted.Acyclic := by decide
+theorem locked_determines : locked.determines .gas = .p := by struct_decide
+theorem weighted_determines : weighted.determines .gas = .vol := by struct_decide
+theorem locked_acyclic : locked.Acyclic := by struct_decide
+theorem weighted_acyclic : weighted.Acyclic := by struct_decide
 
 /-! ## From the general theorems -/
 
@@ -77,29 +53,15 @@ theorem weighted_do (x : V) (c : ℝ) (u : V → ℝ) : ∃! s, (weighted.scm.do
 /-- Heating with a locked piston: the volume stays, the pressure follows. -/
 theorem locked_heat (c : ℝ) (u s : V → ℝ) (h : (locked.scm.doI .T c).Solves u s) :
     s .vol = u .vol ∧ s .p = u .n * R * c / u .vol := by
-  rw [locked.do_exo_iff (by decide)] at h
-  have hv := locked.exo_eq h (v := .vol) (by decide)
-  have hn := locked.exo_eq h (v := .n) (by decide)
-  have hT := locked.exo_eq h (v := .T) (by decide)
-  have hp := locked.mech_eq h ()
-  rw [locked_determines] at hp
-  simp only [Function.update_apply, reduceCtorEq, ↓reduceIte] at hv hn hT
-  simp [Model.mechOf, Model.find, model, mech] at hp
-  rw [hp, hv, hn, hT]
+  read_solution h
+  rw [h_p, h_vol, h_n, h_T]
   exact ⟨rfl, rfl⟩
 
 /-- Heating with a weighted piston: the pressure stays, the volume follows. -/
 theorem weighted_heat (c : ℝ) (u s : V → ℝ) (h : (weighted.scm.doI .T c).Solves u s) :
     s .p = u .p ∧ s .vol = u .n * R * c / u .p := by
-  rw [weighted.do_exo_iff (by decide)] at h
-  have hp := weighted.exo_eq h (v := .p) (by decide)
-  have hn := weighted.exo_eq h (v := .n) (by decide)
-  have hT := weighted.exo_eq h (v := .T) (by decide)
-  have hv := weighted.mech_eq h ()
-  rw [weighted_determines] at hv
-  simp only [Function.update_apply, reduceCtorEq, ↓reduceIte] at hp hn hT
-  simp [Model.mechOf, Model.find, model, mech] at hv
-  rw [hv, hp, hn, hT]
+  read_solution h
+  rw [h_vol, h_p, h_n, h_T]
   exact ⟨rfl, rfl⟩
 
 /-- Same starting point, same intervention do(T := 2), different answers:
@@ -113,4 +75,6 @@ theorem different_answers (s s' : V → ℝ)
   rw [(weighted_heat 2 _ s' hs').2]
   field_simp
 
-end CausalPhys.Lang.Gas
+end Gas
+
+end CausalPhys.Examples

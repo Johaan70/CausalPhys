@@ -11,15 +11,34 @@ Given an equation system and a choice of exogenous variables, the library
 
 Worked examples include the ideal gas law under different lab setups, chemical equilibrium and Le Chatelier, metal–ligand complexation, electrical circuits, supply–demand markets with taxes and the Lucas critique, the cobweb model, and counterfactuals.
 
-## The language core
+## The language
 
-`CausalPhys/Lang/Core.lean` is a small core that the rest of the language is meant to grow from. A model is written once, as domain content: the variables, the laws, the domain where the laws make sense, and the ways each law can be solved for a variable. A lab setup is only the list of variables the lab holds fixed. Everything else is derived by machinery that never mentions a field of science:
+A model is written the way it is written on a blackboard (`CausalPhys/Lang/Examples/Gas.lean`):
 
-- the structure seen by the matching algorithm is read off the solvers, so the two cannot disagree;
-- `struct_decide` computes which law determines which variable, the blocks and acyclicity (checked by the kernel, also for models with symbolic parameters);
-- general theorems hold for every model: solutions of the causal model are the solutions of the laws (`solves_iff`), different setups cannot be told apart by data (`obs_equiv`), do(x := c) is equation surgery (`do_iff`), and an acyclic setup gives exactly one outcome for every intervention (`do_existsUnique`). For a cyclic block, uniqueness is the domain-specific part and is plugged in through `unique_of_laws`.
+```lean
+causal_model Gas where
+  variables p vol n T
+  domain 0 < p ∧ 0 < vol
+  law gas : p * vol = n * R * T
+    solve p := n * R * T / vol
+    solve vol := n * R * T / p
+  setup locked fixes vol n T      -- locked piston, heat bath, closed vessel
+  setup weighted fixes p n T      -- weighted piston, heat bath, closed vessel
 
-The examples in `CausalPhys/Lang/Examples` are special cases, each a model plus two setups that give opposite answers to the same question:
+#causal_order Gas.locked
+-- gas determines p, reading [n, T, vol]
+-- acyclic: every intervention has exactly one outcome
+```
+
+What the user writes is only domain content: variables, laws, the domain where they make sense, how each law can be solved, and which variables a lab holds fixed. Everything else is field-independent machinery:
+
+- `causal_model` (`Lang/Syntax.lean`) collects what each formula reads from the formula itself, and proves with `law_solve` that each formula solves its law on the domain (a proof can be given after `by` when the algebra needs more, such as a positive parameter).
+- `Lang/Core.lean` computes the Simon order of each setup (`struct_decide`, checked by the kernel, also for models with symbolic parameters) and proves general theorems for every model: solutions of the causal model are the solutions of the laws (`solves_iff`), setups cannot be told apart by data (`obs_equiv`), do(x := c) is equation surgery (`do_iff`), and an acyclic setup gives exactly one outcome for every intervention (`do_existsUnique`). For a cyclic block, uniqueness is the domain-specific part and is plugged in through `unique_of_laws`.
+- `Lang/Tactic.lean` has `read_solution h`, which turns a solution, before or after an intervention, into one equation per variable, and `#causal_order`.
+
+Mistakes are caught with plain messages: a formula that does not solve its law, an unknown variable, a setup that fixes too many variables, or a false claim about the causal order.
+
+The examples are special cases, each a model plus two setups that give opposite answers to the same question:
 
 | Example | Field | Setups | Same intervention, different answers |
 |---|---|---|---|
@@ -46,7 +65,7 @@ Proving that cyclic blocks have solutions led to a sequence of results, several 
 
 ## Status
 
-- 34 modules in `CausalPhys/`, about 9,800 lines.
+- 36 modules in `CausalPhys/`, about 10,000 lines.
 - No `sorry`. `#print axioms` on the main theorems shows only `propext`, `Classical.choice` and `Quot.sound`.
 - **How it was made:** the code was developed together with Claude (Anthropic), an AI assistant, under the direction of the repository owner. It compiles, but it has not yet been reviewed by anyone else. Feedback is very welcome.
 
@@ -69,6 +88,7 @@ The build prints warnings that Mathlib modules are "designed for use with the mo
 
 ## Known limitations
 
+- The surface language uses `variables`, `domain`, `law`, `solve`, `setup` and `fixes` as keywords in files that import it, and values are real numbers.
 - The duality (Lᵖ)* ≅ L^q is proved for sequence spaces ℓᵖ but not for general measures (only the isometric embedding Lᵖ → (L^q)* that reflexivity needs).
 - Uniqueness for infinite models holds among square-summable solutions only.
 - Mechanisms have finitely many parents, so aggregates over infinitely many variables are not expressible.

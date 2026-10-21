@@ -1,32 +1,24 @@
 /-
-  Economics: one market, written once.
+  Economics: one market, in a closed economy or a small open economy.
 
       demand    Q_d = a − b·P + c·y                (y: income)
       supply    Q_s = d + e·(P − t) + f·w          (t: tax per unit, w: weather)
       clearing  Q_d = Q_s + Imp                    (Imp: imports)
 
-  Two lab setups, i.e. two economies:
-
-    * closed economy (imports fixed, normally 0) → Lean computes: price and both
-      quantities form ONE cyclic block, the market equilibrium. Uniqueness is
-      the economics (b + e ≠ 0), plugged into the core's `unique_of_laws`.
-    * small open economy (the price is the world price) → Lean computes: the
-      model is acyclic; demand gives Q_d, supply gives Q_s, and the clearing
-      condition now DETERMINES the imports.
-
-  The same tax increase do(t := t + Δ) then gets two different answers:
-    * closed: the price rises by e/(b+e)·Δ (consumers carry part of the tax);
-    * open: the price does not move, and imports rise by e·Δ (producers carry
-      all of it, domestic production is replaced by imports).
+  Lean computes that the closed economy is one cyclic block (the market
+  equilibrium), while in the small open economy (world price fixed) the model
+  is acyclic and the clearing condition determines the imports. The same tax
+  increase then gets two answers: in the closed economy the price rises by
+  e/(b+e)·Δ; in the open economy the price stays and imports rise by e·Δ.
 -/
-import CausalPhys.Lang.Core
-import Mathlib.Tactic.LinearCombination
-import Mathlib.Tactic.FieldSimp
+import CausalPhys.Lang.Syntax
 
-namespace CausalPhys.Lang.Market
+open CausalPhys CausalPhys.Lang
+
+namespace CausalPhys.Examples
 
 /-- Slopes and intercepts of demand and supply. -/
-structure Params where
+structure Market.Params where
   a : ℝ
   b : ℝ
   c : ℝ
@@ -36,62 +28,27 @@ structure Params where
   hb : 0 < b
   he : 0 < e
 
-inductive V | P | Qd | Qs | Imp | t | y | w
-deriving DecidableEq, Repr
+causal_model Market (m : Market.Params) where
+  variables P Qd Qs Imp t y w
+  law demand : Qd = m.a - m.b * P + m.c * y
+    solve Qd := m.a - m.b * P + m.c * y
+    solve P := (m.a + m.c * y - Qd) / m.b by have := m.hb.ne'; law_solve
+  law supply : Qs = m.d + m.e * (P - t) + m.f * w
+    solve Qs := m.d + m.e * (P - t) + m.f * w
+    solve P := (Qs - m.d - m.f * w) / m.e + t by have := m.he.ne'; law_solve
+  law clearing : Qd = Qs + Imp
+    solve Qd := Qs + Imp
+    solve Qs := Qd - Imp
+    solve Imp := Qd - Qs
+  setup closed fixes Imp t y w    -- closed economy: imports fixed (normally 0)
+  setup open_ fixes P t y w       -- small open economy: the world price is given
 
-instance : Inhabited V := ⟨.P⟩
-
-inductive Law | demand | supply | clearing
-deriving DecidableEq, Repr
+namespace Market
 
 variable (m : Params)
 
-noncomputable section
-
-def model : Model Law V ℝ where
-  eqList := [.demand, .supply, .clearing]
-  varList := [.P, .Qd, .Qs, .Imp, .t, .y, .w]
-  law
-    | .demand, s => s .Qd = m.a - m.b * s .P + m.c * s .y
-    | .supply, s => s .Qs = m.d + m.e * (s .P - s .t) + m.f * s .w
-    | .clearing, s => s .Qd = s .Qs + s .Imp
-  solvers
-    | .demand => [(.Qd, mech [.P, .y] fun s => m.a - m.b * s .P + m.c * s .y),
-                  (.P, mech [.Qd, .y] fun s => (m.a + m.c * s .y - s .Qd) / m.b)]
-    | .supply => [(.Qs, mech [.P, .t, .w] fun s => m.d + m.e * (s .P - s .t) + m.f * s .w),
-                  (.P, mech [.Qs, .t, .w] fun s => (s .Qs - m.d - m.f * s .w) / m.e + s .t)]
-    | .clearing => [(.Qd, mech [.Qs, .Imp] fun s => s .Qs + s .Imp),
-                    (.Qs, mech [.Qd, .Imp] fun s => s .Qd - s .Imp),
-                    (.Imp, mech [.Qd, .Qs] fun s => s .Qd - s .Qs)]
-  sound := by
-    have hb := m.hb.ne'
-    have he := m.he.ne'
-    intro e v mm h s _
-    cases e <;> simp only [List.mem_cons, Prod.mk.injEq, List.not_mem_nil, or_false] at h
-    · rcases h with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
-      · exact Iff.rfl
-      · show s .Qd = m.a - m.b * s .P + m.c * s .y ↔ s .P = (m.a + m.c * s .y - s .Qd) / m.b
-        rw [eq_div_iff hb]
-        constructor <;> intro h <;> linear_combination h
-    · rcases h with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
-      · exact Iff.rfl
-      · show s .Qs = m.d + m.e * (s .P - s .t) + m.f * s .w ↔
-          s .P = (s .Qs - m.d - m.f * s .w) / m.e + s .t
-        constructor <;> intro h <;> rw [h] <;> field_simp <;> ring
-    · rcases h with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
-      · exact Iff.rfl
-      · show s .Qd = s .Qs + s .Imp ↔ s .Qs = s .Qd - s .Imp
-        constructor <;> intro h <;> linarith
-      · show s .Qd = s .Qs + s .Imp ↔ s .Imp = s .Qd - s .Qs
-        constructor <;> intro h <;> linarith
-
-/-- Closed economy: imports are fixed (normally zero). -/
-def closed : Setup (model m) := { exo := [.Imp, .t, .y, .w] }
-
-/-- Small open economy: the price is the world price. -/
-def open_ : Setup (model m) := { exo := [.P, .t, .y, .w] }
-
-end
+#causal_order closed m
+#causal_order open_ m
 
 /-! ## Computed by Lean -/
 
@@ -157,35 +114,27 @@ theorem closed_tax {u s s' : V → ℝ} (Δ : ℝ) (hs : (closed m).scm.Solves u
 theorem open_solution {u s : V → ℝ} (hs : (open_ m).scm.Solves u s) :
     s .P = u .P ∧ s .Qd = m.a - m.b * u .P + m.c * u .y ∧
     s .Qs = m.d + m.e * (u .P - u .t) + m.f * u .w ∧ s .Imp = s .Qd - s .Qs := by
-  have hP := (open_ m).exo_eq hs (v := .P) (by simp [open_])
-  have ht := (open_ m).exo_eq hs (v := .t) (by simp [open_])
-  have hy := (open_ m).exo_eq hs (v := .y) (by simp [open_])
-  have hw := (open_ m).exo_eq hs (v := .w) (by simp [open_])
-  have hD := (open_ m).mech_eq hs .demand
-  have hS := (open_ m).mech_eq hs .supply
-  have hC := (open_ m).mech_eq hs .clearing
-  obtain ⟨o1, o2, o3⟩ := open_order m
-  rw [o1] at hD; rw [o2] at hS; rw [o3] at hC
-  simp [Model.mechOf, Model.find, model, mech] at hD hS hC
-  refine ⟨hP, ?_, ?_, hC⟩
-  · rw [hD, hP, hy]
-  · rw [hS, hP, ht, hw]
+  read_solution hs
+  refine ⟨hs_P, ?_, ?_, hs_Imp⟩
+  · rw [hs_Qd, hs_P, hs_y]
+  · rw [hs_Qs, hs_P, hs_t, hs_w]
 
 /-- Tax incidence in the small open economy: the price does not move, and
     imports rise by e·Δ. -/
 theorem open_tax {u s s' : V → ℝ} (Δ : ℝ) (hs : (open_ m).scm.Solves u s)
     (hs' : ((open_ m).scm.doI .t (u .t + Δ)).Solves u s') :
     s' .P = s .P ∧ s' .Imp - s .Imp = m.e * Δ := by
-  rw [(open_ m).do_exo_iff (by simp [open_])] at hs'
-  obtain ⟨p1, d1, q1, i1⟩ := open_solution hs
-  obtain ⟨p2, d2, q2, i2⟩ := open_solution hs'
-  simp only [Function.update_apply, reduceCtorEq, ↓reduceIte] at p2 d2 q2
-  refine ⟨by rw [p1, p2], ?_⟩
-  rw [i1, i2, d1, d2, q1, q2]
+  read_solution hs
+  read_solution hs'
+  refine ⟨by rw [hs_P, hs'_P], ?_⟩
+  rw [hs_Imp, hs'_Imp, hs_Qd, hs'_Qd, hs_Qs, hs'_Qs, hs_P, hs'_P, hs_y, hs'_y, hs_t, hs'_t,
+    hs_w, hs'_w]
   ring
 
 /-- Every intervention in the open economy has exactly one outcome. -/
 theorem open_do (x : V) (c : ℝ) (u : V → ℝ) : ∃! s, ((open_ m).scm.doI x c).Solves u s :=
   (open_ m).do_existsUnique (open_acyclic m) x c u
 
-end CausalPhys.Lang.Market
+end Market
+
+end CausalPhys.Examples

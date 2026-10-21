@@ -28,6 +28,8 @@ import CausalPhys.InfiniteSCM
 import CausalPhys.Reflexivity
 import CausalPhys.LpMeasure
 import CausalPhys.Lang.Core
+import CausalPhys.Lang.Tactic
+import CausalPhys.Lang.Syntax
 import CausalPhys.Lang.Examples.Gas
 import CausalPhys.Lang.Examples.Circuit
 import CausalPhys.Lang.Examples.Complexation

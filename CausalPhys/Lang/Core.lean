@@ -198,6 +198,33 @@ def solversOf (exo : List V) : Solvers (M.struct exo) M.equation M.dom where
 
 end Model
 
+/-- One way to solve a law: the variable it determines, the formula, and the
+    proof that the formula solves the law on the domain. Keeping the proof next
+    to the formula is what lets a surface syntax check each formula separately. -/
+structure Solver (V : Type) (α : Type u) (law : (V → α) → Prop) (dom : (V → α) → Prop) where
+  target : V
+  mech   : Mech V α
+  sound  : ∀ s, dom s → (law s ↔ s target = mech.f s)
+
+/-- Build a model from laws and solvers that carry their own proofs. -/
+def Model.ofSolvers {E V : Type} {α : Type u} (eqList : List E) (varList : List V)
+    (eq_complete : ∀ e, e ∈ eqList) (var_complete : ∀ v, v ∈ varList)
+    (law : E → (V → α) → Prop) (dom : (V → α) → Prop)
+    (solvers : (e : E) → List (Solver V α (law e) dom)) : Model E V α where
+  eqList := eqList
+  varList := varList
+  eq_complete := eq_complete
+  var_complete := var_complete
+  law := law
+  dom := dom
+  solvers e := (solvers e).map fun x => (x.target, x.mech)
+  sound := by
+    intro e v m h s hD
+    obtain ⟨x, hx, hxe⟩ := List.mem_map.1 h
+    simp only [Prod.mk.injEq] at hxe
+    obtain ⟨rfl, rfl⟩ := hxe
+    exact x.sound s hD
+
 open Lean Meta Elab Tactic in
 /-- Closes a decidable goal by evaluation in the kernel only. Unlike `decide`, it
     accepts goals that mention symbolic parameters (rate constants, elasticities …):
@@ -207,6 +234,12 @@ elab "kernel_decide" : tactic => do
   let g ← getMainGoal
   let t ← instantiateMVars (← g.getType)
   let inst ← synthInstance (mkApp (mkConst ``Decidable) t)
+  let b ← g.withContext do
+    match Kernel.whnf (← getEnv) (← getLCtx) (mkApp2 (mkConst ``Decidable.decide) t inst) with
+    | .ok r => pure r
+    | .error _ => throwError "kernel_decide: the kernel could not evaluate the statement"
+  if b.isConstOf ``Bool.false then
+    throwError "kernel_decide: the statement is false (the kernel evaluates it to `false`)"
   let rflTrue := mkApp2 (mkConst ``Eq.refl [1]) (mkConst ``Bool) (mkConst ``Bool.true)
   g.assign (mkApp3 (mkConst ``of_decide_eq_true) t inst rflTrue)
   replaceMainGoal []
@@ -214,12 +247,17 @@ elab "kernel_decide" : tactic => do
 /-- Decides a structural fact about a model (matching, blocks, acyclicity). -/
 macro "struct_decide" : tactic => `(tactic| first | decide | kernel_decide)
 
+/-- Checks that a lab setup gives a valid causal reading. -/
+macro "setup_check" : tactic => `(tactic| first | decide | kernel_decide |
+  fail "this setup has no valid causal reading: the laws cannot be matched one-to-one \
+    with the variables that are not fixed (fix fewer or other variables)")
+
 /-- A lab setup: which variables the lab holds fixed. `valid` says that the
     computed matching is a perfect matching; it is checked by evaluation. -/
 structure Setup {E V : Type} {α : Type u} [DecidableEq E] [DecidableEq V] [Inhabited V]
     (M : Model E V α) where
   exo   : List V
-  valid : Valid (M.struct exo) (M.order exo) := by struct_decide
+  valid : Valid (M.struct exo) (M.order exo) := by setup_check
 
 namespace Setup
 
@@ -378,6 +416,48 @@ theorem blocks_independent (hu : DM.Uniform (M.struct S.exo) M.eqVars)
     DM.Reach (fun e v => v ∈ M.eqVars e) S.cert.σ x e ↔
       DM.Reach (fun e v => v ∈ M.eqVars e) c.σ x e :=
   DM.blocks_independent hu S.valid hc x e
+
+/-! ### Reading a solution off, variable by variable -/
+
+/-- What the causal model says variable `v` equals: its exogenous value, or the
+    formula of the law that determines it. -/
+def rhs (u s : V → α) (v : V) : α :=
+  match S.cert.inv v with
+  | none => u v
+  | some e => (M.mechOf e v).f s
+
+theorem scm_mech (v : V) : S.scm.mech v = (S.cert.inv v).map fun e => M.mechOf e v := by
+  simp only [scm, Reading.toSCM, reading, toReading, Model.solversOf, cert, Option.map_map]
+  rfl
+
+theorem value_eq {u s : V → α} (h : S.scm.Solves u s) (v : V) : s v = S.rhs u s v := by
+  have hv := h v
+  rw [S.scm_mech v] at hv
+  unfold rhs
+  cases hi : S.cert.inv v with
+  | none => rw [hi] at hv; exact hv
+  | some e => rw [hi] at hv; exact hv
+
+theorem do_value_eq {x : V} {c : α} {u s : V → α} (h : (S.scm.doI x c).Solves u s) (v : V) :
+    s v = if v = x then c else S.rhs u s v := by
+  by_cases hvx : v = x
+  · subst hvx
+    simp only [ite_true]
+    exact SCM.doI_self _ v c u s h
+  · simp only [hvx, ite_false]
+    have hv := h v
+    rw [SCM.doI_mech_ne _ c hvx, S.scm_mech v] at hv
+    unfold rhs
+    cases hi : S.cert.inv v with
+    | none => rw [hi] at hv; exact hv
+    | some e => rw [hi] at hv; exact hv
+
+theorem rhs_none {u s : V → α} {v : V} (h : S.cert.inv v = none) : S.rhs u s v = u v := by
+  simp [rhs, h]
+
+theorem rhs_some {u s : V → α} {v : V} {e : E} (h : S.cert.inv v = some e) :
+    S.rhs u s v = (M.mechOf e v).f s := by
+  simp [rhs, h]
 
 end Setup
 

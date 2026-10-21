@@ -1,83 +1,54 @@
 /-
-  Chemistry: stepwise complexation (e.g. Ag⁺ + NH₃), written once.
+  Chemistry: stepwise complexation (e.g. Ag⁺ + NH₃), with a closed flask or a
+  ligand buffer.
 
       M + L  ⇌ ML      [ML]  = K₁·[M]·[L]
       ML + L ⇌ ML₂     [ML₂] = K₂·[ML]·[L]
       metal balance    m₀ = [M] + [ML] + [ML₂]
       ligand balance   l₀ = [L] + [ML] + 2·[ML₂]
 
-  m₀ and l₀ (the amounts added) are variables, so "add more metal" is an
-  intervention. Two lab setups:
-
-    * closed flask (m₀, l₀ fixed) → Lean computes: all four laws form ONE cyclic
-      block. Uniqueness is the chemistry: a monotonicity argument (proved in
-      `CausalPhys.Complexation`), plugged into the core's `unique_of_laws`.
-      Le Chatelier is then a statement about do(m₀ := more).
-    * buffered ligand ([L] fixed) → Lean computes: the ligand balance now
-      DETERMINES l₀ (how much ligand the buffer had to deliver), and the
-      block shrinks to the three remaining laws.
+  Lean computes that the closed flask is one cyclic block of four laws, while
+  with a ligand buffer the ligand balance determines l₀ (how much ligand the
+  buffer delivered) and the block shrinks to three. Uniqueness in the cyclic
+  block is the chemistry (a monotonicity argument from `CausalPhys.Complexation`);
+  Le Chatelier is an intervention do(m₀ := more).
 -/
-import CausalPhys.Lang.Core
+import CausalPhys.Lang.Syntax
 import CausalPhys.Complexation
 
-namespace CausalPhys.Lang.Complexation
+open CausalPhys CausalPhys.Lang
+
+namespace CausalPhys.Examples
 
 /-- The two equilibrium constants (fixed at a given temperature). -/
-structure Consts where
+structure Complexation.Consts where
   K1 : ℝ
   K2 : ℝ
   hK1 : 0 < K1
   hK2 : 0 < K2
 
-inductive V | M | L | ML | ML2 | m0 | l0
-deriving DecidableEq, Repr
+causal_model Complexation (c : Complexation.Consts) where
+  variables M L ML ML2 m0 l0
+  domain 0 < M ∧ 0 < L
+  law k1 : ML = c.K1 * M * L
+    solve ML := c.K1 * M * L
+  law k2 : ML2 = c.K2 * ML * L
+    solve ML2 := c.K2 * ML * L
+  law metal : m0 = M + ML + ML2
+    solve M := m0 - ML - ML2
+    solve m0 := M + ML + ML2
+  law ligand : l0 = L + ML + 2 * ML2
+    solve L := l0 - ML - 2 * ML2
+    solve l0 := L + ML + 2 * ML2
+  setup closed fixes m0 l0        -- closed flask: the amounts added are fixed
+  setup buffered fixes m0 L       -- ligand buffer: free ligand held fixed
 
-instance : Inhabited V := ⟨.M⟩
-
-inductive Law | k1 | k2 | metal | ligand
-deriving DecidableEq, Repr
+namespace Complexation
 
 variable (c : Consts)
 
-noncomputable section
-
-def model : Model Law V ℝ where
-  eqList := [.k1, .k2, .metal, .ligand]
-  varList := [.M, .L, .ML, .ML2, .m0, .l0]
-  law
-    | .k1, s => s .ML = c.K1 * s .M * s .L
-    | .k2, s => s .ML2 = c.K2 * s .ML * s .L
-    | .metal, s => s .m0 = s .M + s .ML + s .ML2
-    | .ligand, s => s .l0 = s .L + s .ML + 2 * s .ML2
-  dom s := 0 < s .M ∧ 0 < s .L
-  solvers
-    | .k1 => [(.ML, mech [.M, .L] fun s => c.K1 * s .M * s .L)]
-    | .k2 => [(.ML2, mech [.ML, .L] fun s => c.K2 * s .ML * s .L)]
-    | .metal => [(.M, mech [.m0, .ML, .ML2] fun s => s .m0 - s .ML - s .ML2),
-                 (.m0, mech [.M, .ML, .ML2] fun s => s .M + s .ML + s .ML2)]
-    | .ligand => [(.L, mech [.l0, .ML, .ML2] fun s => s .l0 - s .ML - 2 * s .ML2),
-                  (.l0, mech [.L, .ML, .ML2] fun s => s .L + s .ML + 2 * s .ML2)]
-  sound := by
-    intro e v m h s _
-    cases e <;> simp only [List.mem_cons, Prod.mk.injEq, List.not_mem_nil, or_false] at h
-    · obtain ⟨rfl, rfl⟩ := h; exact Iff.rfl
-    · obtain ⟨rfl, rfl⟩ := h; exact Iff.rfl
-    · rcases h with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
-      · show s .m0 = s .M + s .ML + s .ML2 ↔ s .M = s .m0 - s .ML - s .ML2
-        constructor <;> intro h <;> linarith
-      · exact Iff.rfl
-    · rcases h with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
-      · show s .l0 = s .L + s .ML + 2 * s .ML2 ↔ s .L = s .l0 - s .ML - 2 * s .ML2
-        constructor <;> intro h <;> linarith
-      · exact Iff.rfl
-
-/-- Closed flask: the amounts added are fixed. -/
-def closed : Setup (model c) := { exo := [.m0, .l0] }
-
-/-- Ligand buffer: the free ligand concentration is held fixed. -/
-def buffered : Setup (model c) := { exo := [.m0, .L] }
-
-end
+#causal_order closed c
+#causal_order buffered c
 
 /-! ## Computed by Lean -/
 
@@ -175,4 +146,6 @@ theorem buffered_solution {u s : V → ℝ} (hD : (model c).dom s)
   rw [key.1, ← hL, ← hm]
   rfl
 
-end CausalPhys.Lang.Complexation
+end Complexation
+
+end CausalPhys.Examples
