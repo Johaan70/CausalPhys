@@ -79,6 +79,20 @@ def ctorsOf (V : Expr) : MetaM (List Name) := do
   let info ← getConstInfoInduct n
   pure info.ctors
 
+/-- Simp lemmas that unfold a model or setup expression: every constant in it
+    whose type is a `Model …` or a `Setup …` (the user's model and setups, and
+    `Model.replace` / `Setup.intervene` after an intervention). -/
+def unfoldLemmas (es : Array Expr) : MetaM (Array (TSyntax `Lean.Parser.Tactic.simpLemma)) := do
+  let mut names : Array Name := #[]
+  for e in es do
+    for n in e.getUsedConstants do
+      if names.contains n then continue
+      let ci ← getConstInfo n
+      let ok ← forallTelescopeReducing ci.type fun _ b =>
+        pure (b.isAppOf ``Model || b.isAppOf ``Setup)
+      if ok then names := names.push n
+  names.mapM fun n => `(Lean.Parser.Tactic.simpLemma| $(mkCIdent n):ident)
+
 /-! ## Reading off a solution -/
 
 /-- `read_solution h` adds `h_x : s x = …` for every variable `x`. -/
@@ -97,9 +111,7 @@ elab "read_solution " h:ident : tactic => withMainContext do
     | _ => throwError "read_solution: unsupported model {model}"
   let SType ← inferType S
   let M := SType.getAppArgs.back!
-  let some modelName := M.getAppFn.constName?
-    | throwError "read_solution: the model must be a named definition"
-  let modelId := mkCIdent modelName
+  let extra ← unfoldLemmas #[M, S]
   let u := ty.getAppArgs[3]!
   let s := ty.getAppArgs[4]!
   let hTerm := mkFVar hdecl.fvarId
@@ -126,8 +138,8 @@ elab "read_solution " h:ident : tactic => withMainContext do
       evalTactic (← `(tactic| rw [$ra:ident] at $nm:ident))
       evalTactic (← `(tactic| clear $ra:ident))
       evalTactic (← `(tactic|
-        try simp only [Model.mechOf, Model.find, Model.ofSolvers, CausalPhys.Lang.mech,
-          $modelId:ident, List.map_cons, List.map_nil, List.find?_cons, List.find?_nil,
+        try simp only [Model.mechOf, Model.find, Model.ofSolvers, CausalPhys.Lang.mech, CausalPhys.SCM.Mech.const,
+          $extra,*, List.map_cons, List.map_nil, List.find?_cons, List.find?_nil,
           Option.map_some, Option.getD_some, Function.update_apply,
           reduceCtorEq, decide_true, decide_false, ↓reduceIte] at $nm:ident))
 
@@ -138,6 +150,7 @@ partial def shortName (e : Expr) : String :=
   match e.listLit? with
   | some (_, xs) => "[" ++ ", ".intercalate (xs.map shortName) ++ "]"
   | none =>
+    if e.isAppOfArity ``Subtype.mk 4 then shortName e.getAppArgs[2]! else
     match e.getAppFn.constName? with
     | some n => n.getString!
     | none => toString e
@@ -148,12 +161,12 @@ elab "#causal_order " t:term : command => runTermElabM fun _ => do
   Term.synthesizeSyntheticMVarsNoPostponing
   let S ← instantiateMVars S
   let SType ← whnfR (← inferType S)
-  let #[E, V, _, _, _, _, M] := SType.getAppArgs
+  let #[_, _, _, _, _, _, M] := SType.getAppArgs
     | throwError "#causal_order: expected a setup"
-  let _ := V
+  let eqs ← kernelNorm (← mkAppM ``Model.eqList #[M])
+  let some (_, laws) := eqs.listLit? | throwError "#causal_order: could not list the laws"
   let mut lines : Array MessageData := #[]
-  for ctor in ← ctorsOf E do
-    let e := mkConst ctor
+  for e in laws do
     let v ← kernelNorm (← mkAppM ``Setup.determines #[S, e])
     let deps ← kernelNorm (← mkAppM ``Model.deps #[M, e, v])
     lines := lines.push m!"{shortName e} determines {shortName v}, reading {shortName deps}"
@@ -161,13 +174,12 @@ elab "#causal_order " t:term : command => runTermElabM fun _ => do
   if acyclic.isAppOf ``Bool.true then
     lines := lines.push m!"acyclic: every intervention has exactly one outcome of the causal model"
   else
-    let mut seen : Array Expr := #[]
-    for ctor in ← ctorsOf E do
-      let e := mkConst ctor
-      if seen.any (·.isConstOf ctor) then continue
+    let mut seen : Array String := #[]
+    for e in laws do
+      if seen.contains (shortName e) then continue
       let b ← kernelNorm (← mkAppM ``Setup.block #[S, e])
       let elems := (b.listLit?.map (·.2)).getD []
-      seen := seen ++ elems.toArray
+      seen := seen ++ (elems.map shortName).toArray
       if elems.length > 1 then
         lines := lines.push m!"cyclic block: {shortName b}"
   logInfo (MessageData.joinSep lines.toList "\n")
@@ -177,7 +189,7 @@ elab "#causal_order " t:term : command => runTermElabM fun _ => do
 /-- Unfolding lemmas for the linear criterion. -/
 macro "linear_unfold" : tactic => `(tactic|
   simp only [Setup.formula, Setup.const, Setup.coef, Setup.base, Setup.linMatrix,
-    Model.mechOf, Model.find, Model.ofSolvers, CausalPhys.Lang.mech,
+    Model.mechOf, Model.find, Model.ofSolvers, CausalPhys.Lang.mech, CausalPhys.SCM.Mech.const,
     List.map_cons, List.map_nil, List.find?_cons, List.find?_nil,
     Option.map_some, Option.getD_some, Function.update_apply, List.mem_cons, List.not_mem_nil,
     reduceCtorEq, decide_true, decide_false, ↓reduceIte, or_false, or_true, false_or, true_or,
@@ -202,10 +214,7 @@ elab "linear_block" : tactic => withMainContext do
     pure (args[7]!, u)
   let SType ← inferType S
   let M := SType.getAppArgs.back!
-  let some modelName := M.getAppFn.constName?
-    | throwError "linear_block: the model must be a named definition"
-  let some setupName := S.getAppFn.constName?
-    | throwError "linear_block: the setup must be a named definition"
+  let extra ← unfoldLemmas #[M, S]
   let eqs ← kernelNorm (← mkAppM ``Model.eqList #[M])
   let some (_, laws) := eqs.listLit? | throwError "linear_block: could not list the laws"
   let mut vars : Array Expr := #[]
@@ -215,8 +224,6 @@ elab "linear_block" : tactic => withMainContext do
   let varsStx ← vars.mapM fun e => Term.exprToSyntax e
   let SStx ← Term.exprToSyntax S
   let uStx ← Term.exprToSyntax u
-  let modelId := mkCIdent modelName
-  let setupId := mkCIdent setupName
   evalTactic (← `(tactic|
     refine Setup.linear_existsUnique (S := $SStx) (laws := ![$lawsStx,*]) (vars := ![$varsStx,*])
       (by kernel_decide) ?aff $uStx ?det))
@@ -228,7 +235,7 @@ elab "linear_block" : tactic => withMainContext do
     all_goals
       intro s
       try linear_unfold
-      simp only [$modelId:ident, $setupId:ident]
+      simp only [$extra,*]
       try linear_unfold
       first
       | ring1
@@ -241,7 +248,7 @@ elab "linear_block" : tactic => withMainContext do
     | simp only [Matrix.det_fin_one, Matrix.det_fin_two, Matrix.det_fin_three]
     | simp [Matrix.det_succ_row_zero, Fin.sum_univ_succ, Fin.succAbove, Matrix.one_apply]
     try linear_unfold
-    simp only [$modelId:ident, $setupId:ident]
+    simp only [$extra,*]
     try linear_unfold
     try ring_nf
     try (first
@@ -312,21 +319,19 @@ elab "#causal_check " t:term : command => runTermElabM fun _ => do
 
 /-! ## The domain: consistency and outcomes inside it -/
 
-/-- The name of the model in a goal `Model.dom M x` / `Model.Sat M x`. -/
-def modelNameIn (e : Expr) : MetaM Name := do
+/-- Unfolding lemmas for the model in a goal `Model.dom M x` / `Model.Sat M x`. -/
+def modelLemmasIn (e : Expr) : MetaM (Array (TSyntax `Lean.Parser.Tactic.simpLemma)) := do
   let some m := e.find? fun x => x.isAppOf ``Model.dom || x.isAppOf ``Model.Sat
     | throwError "expected a goal about `Model.dom` or `Model.Sat`"
-  let M := m.getAppArgs[3]!
-  let some n := M.getAppFn.constName? | throwError "the model must be a named definition"
-  pure n
+  unfoldLemmas #[m.getAppArgs[3]!]
 
 /-- Proves `M.dom w ∧ M.Sat w` for a concrete state `w` (the witness of a
     model): unfold, then the usual arithmetic closers. -/
 elab "witness_check" : tactic => withMainContext do
-  let modelId := mkCIdent (← modelNameIn (← instantiateMVars (← getMainTarget)))
+  let extra ← modelLemmasIn (← instantiateMVars (← getMainTarget))
   evalTactic (← `(tactic| (
     refine ⟨?_, ?_⟩
-    · try simp only [$modelId:ident, CausalPhys.Lang.Model.ofSolvers]
+    · try simp only [$extra,*, CausalPhys.Lang.Model.ofSolvers]
       all_goals try (repeat' constructor)
       all_goals first
         | positivity
@@ -335,7 +340,7 @@ elab "witness_check" : tactic => withMainContext do
         | fail "witness: could not show that the witness lies in the domain"
     · unfold CausalPhys.Lang.Model.Sat
       intro e
-      cases e <;> (try simp only [$modelId:ident, CausalPhys.Lang.Model.ofSolvers]) <;>
+      cases e <;> (try simp only [$extra,*, CausalPhys.Lang.Model.ofSolvers]) <;>
         first
         | rfl
         | (norm_num; done)
@@ -350,7 +355,7 @@ elab "witness_check" : tactic => withMainContext do
     hypotheses about the exogenous values in the context). -/
 elab "in_domain" : tactic => withMainContext do
   let goal ← instantiateMVars (← getMainTarget)
-  let modelId := mkCIdent (← modelNameIn goal)
+  let extra ← modelLemmasIn goal
   let sId := mkIdent `s
   let hsId := mkIdent `hs
   evalTactic (← `(tactic| intro $sId:ident $hsId:ident))
@@ -362,7 +367,7 @@ elab "in_domain" : tactic => withMainContext do
   let lemmas : Array (TSyntax `Lean.Parser.Tactic.simpLemma) ←
     names.mapM fun n => `(Lean.Parser.Tactic.simpLemma| $n:ident)
   evalTactic (← `(tactic| (
-    try simp only [$modelId:ident, CausalPhys.Lang.Model.ofSolvers]
+    try simp only [$extra,*, CausalPhys.Lang.Model.ofSolvers]
     try simp only [$lemmas,*]
     all_goals try (repeat' constructor)
     all_goals first

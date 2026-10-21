@@ -34,6 +34,14 @@ Negative tests (`Tests/Rejects.lean`) pin the errors the language must give for 
 | Keynesian cross (`Tests/Economics`) | short run; policy target | one linear block {Y, C} (needs 1 − c₁ ≠ 0); acyclic, income identity determines G | multiplier 1/(1 − c₁); the G needed for a target income | `shortRun_existsUnique`, `multiplier`, `target_G` |
 | Quantity theory, MV = PY (`Tests/Economics`) | flexible prices; fixed prices | acyclic; the law determines P, or Y | doubling M doubles P, or doubles Y | `classical_money`, `fixedPrice_money` |
 
+## Interventions inside cyclic blocks
+
+| Model | Intervention | Expected | Theorems |
+|---|---|---|---|
+| Market, closed economy | price held fixed, switching off market clearing (price ceiling) | demand and supply still hold; acyclic; excess demand (b + e)·(P* − P̄) | `ceiling_existsUnique`, `ceiling_excess_demand` |
+| Market, closed economy | price held fixed, switching off demand (Pearl's do(P), since demand determines P in the computed reading) | buyers absorb supply plus imports; no excess demand | `demand_reading_is_do`, `do_reading_no_excess` |
+| Complexation, closed flask | free ligand held fixed, switching off the ligand balance (Pearl's do(L)) | the remaining block {k1, k2, metal} is linear; free metal m₀/(1 + K₁L + K₁K₂L²), as with a buffer | `fixL_is_do`, `fixL_existsUnique`, `fixL_metal` |
+
 ## What the language must reject (`Tests/Rejects.lean`)
 
 - a formula that does not solve its law;
@@ -44,7 +52,8 @@ Negative tests (`Tests/Rejects.lean`) pin the errors the language must give for 
 - a singular linear block must be reported as singular, not as unique;
 - a nonlinear block must not be treated as linear;
 - parameters must be explicit and must not share a name with a variable;
-- a model without a witness, and a model whose domain contradicts its laws.
+- a model without a witness, and a model whose domain contradicts its laws;
+- an intervention on a variable the lab already holds fixed (a law is left with nothing to determine).
 
 ## What the tests do and do not show
 

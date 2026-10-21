@@ -184,6 +184,54 @@ theorem buffered_existsUnique (u : V → ℝ) (hL : 0 < u .L) :
   linear_block
   have := c.hK1; have := c.hK2; positivity
 
+/-! ## Holding the free ligand fixed in the closed flask
+
+  In the closed flask the ligand balance determines [L]. Pearl's do(L := c)
+  switches it off and the lab holds [L] at c: Lean finds the remaining block
+  {k1, k2, metal}, now linear, and `linear_block` gives exactly one outcome with
+  the same determinant as the buffer. The free metal is the buffer's closed form:
+  holding [L] fixed by intervention and by a buffer are the same experiment. -/
+
+section FixedLigand
+
+variable (c : Consts)
+
+/--
+info: k1 determines ML, reading [M, L]
+k2 determines ML2, reading [ML, L]
+metal determines M, reading [m0, ML, ML2]
+cyclic block: [k1, k2, metal]
+-/
+#guard_msgs in
+#causal_order (closed c).intervene .ligand .L
+
+/-- Switching off the ligand balance is Pearl's do(L := x) in the closed flask. -/
+theorem fixL_is_do (x : ℝ) (u s : V → ℝ) (hD : (model c).dom s) :
+    ((closed c).intervene .ligand .L).scm.Solves (Function.update u .L x) s ↔
+      ((closed c).scm.doI .L x).Solves u s :=
+  (closed c).intervene_iff_doI (by struct_decide) x u s hD
+
+theorem fixL_existsUnique (u : V → ℝ) (hL : 0 < u .L) :
+    ∃! s, ((closed c).intervene .ligand .L).scm.Solves u s := by
+  linear_block
+  have := c.hK1; have := c.hK2; positivity
+
+variable {c}
+
+/-- The free metal after do(L := u .L): the buffer's closed form. -/
+theorem fixL_metal {u s : V → ℝ} (hL : 0 < u .L)
+    (hs : ((closed c).intervene .ligand .L).scm.Solves u s) :
+    s .M = u .m0 / (1 + c.K1 * u .L + c.K1 * c.K2 * u .L ^ 2) := by
+  read_solution hs
+  have hden : 1 + c.K1 * u .L + c.K1 * c.K2 * u .L ^ 2 ≠ 0 := by
+    have := c.hK1; have := c.hK2; positivity
+  rw [eq_div_iff hden]
+  rw [hs_m0] at hs_M
+  rw [hs_L] at hs_ML hs_ML2
+  linear_combination hs_M - hs_ML2 - (1 + c.K2 * u .L) * hs_ML
+
+end FixedLigand
+
 end Complexation
 
 end CausalPhys.Examples

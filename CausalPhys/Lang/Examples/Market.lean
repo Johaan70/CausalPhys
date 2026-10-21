@@ -164,6 +164,73 @@ theorem open_tax {u s s' : V → ℝ} (Δ : ℝ) (hs : (open_ m).scm.Solves u s)
 theorem open_do (x : V) (c : ℝ) (u : V → ℝ) : ∃! s, ((open_ m).scm.doI x c).Solves u s :=
   (open_ m).do_existsUnique (open_acyclic m) x c u
 
+/-! ## A price ceiling: an intervention inside the equilibrium block
+
+  In the closed economy price and quantities are one block. Holding the price
+  fixed can mean two different things, and the language makes the user say
+  which law is switched off (the price itself becomes fixed by the lab):
+
+  * Pearl's do(P := c) switches off the law that determines P in the computed
+    reading, here demand. Buyers then simply absorb what is supplied.
+  * A price ceiling switches off market clearing: buyers still follow demand,
+    sellers still follow supply, and the gap is excess demand. -/
+
+section Ceiling
+
+variable (m : Params)
+
+/--
+info: demand determines Qd, reading [P, y]
+supply determines Qs, reading [P, t, w]
+acyclic: every intervention has exactly one outcome of the causal model
+-/
+#guard_msgs in
+#causal_order (closed m).intervene .clearing .P
+/--
+info: supply determines Qs, reading [P, t, w]
+clearing determines Qd, reading [Qs, Imp]
+acyclic: every intervention has exactly one outcome of the causal model
+-/
+#guard_msgs in
+#causal_order (closed m).intervene .demand .P
+
+/-- Switching off demand is Pearl's do(P := c) in this setup. -/
+theorem demand_reading_is_do (c : ℝ) (u s : V → ℝ) :
+    ((closed m).intervene .demand .P).scm.Solves (Function.update u .P c) s ↔
+      ((closed m).scm.doI .P c).Solves u s :=
+  (closed m).intervene_iff_doI (by struct_decide) c u s trivial
+
+/-- The price ceiling has exactly one outcome. -/
+theorem ceiling_existsUnique (u : V → ℝ) :
+    ∃! s, ((closed m).intervene .clearing .P).scm.Solves u s :=
+  Setup.existsUnique _ (by struct_decide) u
+
+variable {m}
+
+/-- Under a price ceiling at `u .P`, excess demand is (b + e)·(P* − u .P), where
+    P* is the equilibrium price: positive when the ceiling binds. -/
+theorem ceiling_excess_demand {u s : V → ℝ}
+    (hs : ((closed m).intervene .clearing .P).scm.Solves u s) :
+    s .Qd - s .Qs - u .Imp =
+      (m.b + m.e) * ((m.a + m.c * u .y - m.d + m.e * u .t - m.f * u .w - u .Imp) / (m.b + m.e)
+        - u .P) := by
+  read_solution hs
+  have hbe : m.b + m.e ≠ 0 := (add_pos m.hb m.he).ne'
+  rw [hs_Qd, hs_Qs, hs_P, hs_y, hs_t, hs_w]
+  field_simp
+  ring
+
+/-- Under Pearl's do(P := c) instead, buyers take exactly what is supplied plus
+    imports: there is no excess demand, and the demand curve no longer holds. -/
+theorem do_reading_no_excess {u s : V → ℝ}
+    (hs : ((closed m).intervene .demand .P).scm.Solves u s) :
+    s .Qd - s .Qs - u .Imp = 0 := by
+  read_solution hs
+  rw [hs_Qd, hs_Imp]
+  ring
+
+end Ceiling
+
 end Market
 
 end CausalPhys.Examples

@@ -143,6 +143,29 @@ causal_model NoWitness where
     solve x := a
   setup s fixes a
 
+/-! An intervention on a variable the lab already holds fixed leaves a law
+    with nothing to determine: the intervened setup is rejected. -/
+causal_model Supply where
+  variables P Q t
+  law supply : Q = 2 * P - t
+    solve Q := 2 * P - t
+    solve P := (Q + t) / 2
+  law demand : Q = 10 - P
+    solve Q := 10 - P
+    solve P := 10 - Q
+  witness P := 4, Q := 6, t := 2
+  setup market fixes t
+
+/--
+error: could not synthesize default value for parameter 'h' using tactics
+---
+error: this setup has no valid causal reading: the laws cannot be matched one-to-one with the variables that are not fixed (fix fewer or other variables)
+⊢ Order.Valid ((Supply.model.remove Supply.Law.supply).struct (Supply.V.t :: Supply.market.exo))
+    ((Supply.model.remove Supply.Law.supply).order (Supply.V.t :: Supply.market.exo))
+-/
+#guard_msgs in
+noncomputable def badIntervention := Supply.market.intervene .supply .t
+
 /-! Parameters must be explicit, and must not share a name with a variable. -/
 /--
 error: causal_model: parameters must be explicit binders `(name : Type)`

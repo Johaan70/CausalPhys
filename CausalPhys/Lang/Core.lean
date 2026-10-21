@@ -236,6 +236,27 @@ def Model.ofSolvers {E V : Type} {α : Type u} (eqList : List E) (varList : List
     obtain ⟨rfl, rfl⟩ := hxe
     exact x.sound s hD
 
+/-- The model with law `e` switched off. Which law an intervention switches off
+    is part of what the intervention is (a price ceiling suspends market
+    clearing, not demand or supply). The laws are now those different from `e`. -/
+def Model.remove {E V : Type} {α : Type u} [DecidableEq E] (M : Model E V α) (e : E) :
+    Model {e' : E // e' ≠ e} V α where
+  eqList := M.eqList.filterMap fun e' => if h : e' = e then none else some ⟨e', h⟩
+  varList := M.varList
+  eq_complete := by
+    rintro ⟨e', he'⟩
+    rw [List.mem_filterMap]
+    exact ⟨e', M.eq_complete e', by simp [he']⟩
+  var_complete := M.var_complete
+  law e' := M.law e'.1
+  dom := M.dom
+  solvers e' := M.solvers e'.1
+  sound e' := M.sound e'.1
+
+theorem Model.sat_remove {E V : Type} {α : Type u} [DecidableEq E] (M : Model E V α) (e : E)
+    (s : V → α) : (M.remove e).Sat s ↔ ∀ e', e' ≠ e → M.law e' s :=
+  ⟨fun h e' he' => h ⟨e', he'⟩, fun h e' => h e'.1 e'.2⟩
+
 open Lean Meta Elab Tactic in
 /-- Closes a decidable goal by evaluation in the kernel only. Unlike `decide`, it
     accepts goals that mention symbolic parameters (rate constants, elasticities …):
@@ -504,6 +525,52 @@ theorem rhs_none {u s : V → α} {v : V} (h : S.cert.inv v = none) : S.rhs u s 
 theorem rhs_some {u s : V → α} {v : V} {e : E} (h : S.cert.inv v = some e) :
     S.rhs u s v = (M.mechOf e v).f s := by
   simp [rhs, h]
+
+/-! ### Interventions inside a block -/
+
+/-- The setup after an intervention that switches off law `e` and holds `x`
+    fixed: the lab now fixes `x` as well. Lean recomputes the causal order
+    (`setup_check` fails if the result is overdetermined). The value given to
+    `x` is part of the exogenous values. -/
+def intervene (e : E) (x : V)
+    (h : Valid ((M.remove e).struct (x :: S.exo)) ((M.remove e).order (x :: S.exo)) := by
+      setup_check) :
+    Setup (M.remove e) := ⟨x :: S.exo, h⟩
+
+/-- When `e` is the law that determines `x` in this setup, the intervention is
+    exactly Pearl's do(x := c): inside the domain the two have the same
+    solutions. For any other law it is a different intervention, one that
+    switches off another mechanism. -/
+theorem intervene_iff_doI {e : E} {x : V} {h} (hx : S.determines e = x) (c : α)
+    (u s : V → α) (hD : M.dom s) :
+    (S.intervene e x h).scm.Solves (Function.update u x c) s ↔ (S.scm.doI x c).Solves u s := by
+  have hD' : (M.remove e).dom s := hD
+  rw [(S.intervene e x h).solves_iff _ s hD', S.do_iff x c u s hD, Model.sat_remove]
+  have hxexo : x ∉ S.exo := by
+    intro hxe
+    have h1 : S.cert.inv x = some e := (S.valid.inv_iff x e).2 hx
+    have h2 : S.cert.inv x = none := (S.valid.inv_none x).2 hxe
+    rw [h1] at h2; cases h2
+  have hdet : ∀ e', S.determines e' ≠ x ↔ e' ≠ e := by
+    intro e'
+    constructor
+    · intro h1 h2; exact h1 (h2 ▸ hx)
+    · intro h1 h2
+      exact h1 (DM.valid_injective S.valid (h2.trans hx.symm))
+  show (_ ∧ ∀ v, v ∈ x :: S.exo → _) ↔ _
+  constructor
+  · rintro ⟨hl, hex⟩
+    refine ⟨?_, fun e' he' => hl e' ((hdet e').1 he'), fun v hvx hv => ?_⟩
+    · simpa using hex x (List.mem_cons_self ..)
+    · have := hex v (List.mem_cons_of_mem _ hv)
+      rwa [Function.update_of_ne hvx] at this
+  · rintro ⟨hxc, hl, hex⟩
+    refine ⟨fun e' he' => hl e' ((hdet e').2 he'), fun v hv => ?_⟩
+    rcases List.mem_cons.1 hv with rfl | hv'
+    · simpa using hxc
+    · have hvx : v ≠ x := by rintro rfl; exact hxexo hv'
+      rw [Function.update_of_ne hvx]
+      exact hex v hvx hv'
 
 end Setup
 
