@@ -240,6 +240,8 @@ elab "kernel_decide" : tactic => do
     | .error _ => throwError "kernel_decide: the kernel could not evaluate the statement"
   if b.isConstOf ``Bool.false then
     throwError "kernel_decide: the statement is false (the kernel evaluates it to `false`)"
+  unless b.isConstOf ``Bool.true do
+    throwError "kernel_decide: the kernel could not evaluate the statement to `true`"
   let rflTrue := mkApp2 (mkConst ``Eq.refl [1]) (mkConst ``Bool) (mkConst ``Bool.true)
   g.assign (mkApp3 (mkConst ``of_decide_eq_true) t inst rflTrue)
   replaceMainGoal []
@@ -434,6 +436,17 @@ theorem value_eq {u s : V → α} (h : S.scm.Solves u s) (v : V) : s v = S.rhs u
   have hv := h v
   rw [S.scm_mech v] at hv
   unfold rhs
+  cases hi : S.cert.inv v with
+  | none => rw [hi] at hv; exact hv
+  | some e => rw [hi] at hv; exact hv
+
+/-- Conversely, a state that takes the value the model assigns to every variable
+    is a solution. -/
+theorem solves_of_values {u s : V → α} (h : ∀ v, s v = S.rhs u s v) : S.scm.Solves u s := by
+  intro v
+  have hv := h v
+  rw [S.scm_mech v]
+  unfold rhs at hv
   cases hi : S.cert.inv v with
   | none => rw [hi] at hv; exact hv
   | some e => rw [hi] at hv; exact hv

@@ -35,6 +35,9 @@ What the user writes is only domain content: variables, laws, the domain where t
 - `causal_model` (`Lang/Syntax.lean`) collects what each formula reads from the formula itself, and proves with `law_solve` that each formula solves its law on the domain (a proof can be given after `by` when the algebra needs more, such as a positive parameter).
 - `Lang/Core.lean` computes the Simon order of each setup (`struct_decide`, checked by the kernel, also for models with symbolic parameters) and proves general theorems for every model: solutions of the causal model are the solutions of the laws (`solves_iff`), setups cannot be told apart by data (`obs_equiv`), do(x := c) is equation surgery (`do_iff`), and an acyclic setup gives exactly one outcome for every intervention (`do_existsUnique`). For a cyclic block, uniqueness is the domain-specific part and is plugged in through `unique_of_laws`.
 - `Lang/Tactic.lean` has `read_solution h`, which turns a solution, before or after an intervention, into one equation per variable, and `#causal_order`.
+- Cyclic blocks are handled by a toolbox. `Lang/Linear.lean` proves once for every model that affine formulas with det(I − C) ≠ 0 give exactly one outcome (`linear_existsUnique`). The tactic `linear_block` applies it: it enumerates the computed matching, checks that every formula is affine, computes the determinant, and tries to show it is nonzero; if it cannot, the determinant condition is left as the domain-specific goal. `#causal_check S` reports which case a setup is in: acyclic, cyclic and linear (with the condition still to show), linear but singular, or nonlinear (then a domain argument such as monotonicity, Gale–Nikaido or Minty–Browder goes in through `unique_of_laws`).
+
+For the closed market, `linear_block` leaves 1 + e/b ≠ 0, which is the economics; for the ligand buffer it leaves 1 + K₁L + K₁K₂L² ≠ 0, the familiar denominator of complexation chemistry; for the current divider it finishes on its own.
 
 Mistakes are caught with plain messages: a formula that does not solve its law, an unknown variable, a setup that fixes too many variables, or a false claim about the causal order.
 
@@ -46,6 +49,7 @@ The examples are special cases, each a model plus two setups that give opposite 
 | `Circuit` | physics | voltage vs current source | a larger resistor runs cooler, or hotter |
 | `Complexation` | chemistry | closed flask vs ligand buffer | one cyclic block of four laws, or the ligand balance determines the ligand delivered; Le Chatelier as do(m₀) |
 | `Market` | economics | closed vs small open economy | a tax raises the price by e/(b+e)·Δ, or leaves it and raises imports by e·Δ |
+| `Divider` | physics | current vs voltage source | a linear cyclic block (solved by `linear_block`), or acyclic; the current divider rule |
 
 ## Functional analysis along the way
 
@@ -65,7 +69,7 @@ Proving that cyclic blocks have solutions led to a sequence of results, several 
 
 ## Status
 
-- 36 modules in `CausalPhys/`, about 10,000 lines.
+- 38 modules in `CausalPhys/`, about 10,500 lines.
 - No `sorry`. `#print axioms` on the main theorems shows only `propext`, `Classical.choice` and `Quot.sound`.
 - **How it was made:** the code was developed together with Claude (Anthropic), an AI assistant, under the direction of the repository owner. It compiles, but it has not yet been reviewed by anyone else. Feedback is very welcome.
 

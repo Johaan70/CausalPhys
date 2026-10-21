@@ -49,6 +49,8 @@ variable (m : Params)
 
 #causal_order closed m
 #causal_order open_ m
+#causal_check closed m
+#causal_check open_ m
 
 /-! ## Computed by Lean -/
 
@@ -75,20 +77,16 @@ theorem price_of_laws {s : V → ℝ} (h : (model m).Sat s) :
   rw [eq_div_iff hbe]
   linear_combination hD - hC - hS
 
-/-- The cyclic block has exactly one solution. -/
+/-- The closed economy has exactly one equilibrium for every choice of the
+    exogenous values. `linear_block` does the linear algebra; what is left,
+    1 + e/b ≠ 0, is the economics (demand falls and supply rises with price). -/
+theorem closed_existsUnique (u : V → ℝ) : ∃! s, (closed m).scm.Solves u s := by
+  linear_block
+  have := m.hb; have := m.he; positivity
+
 theorem closed_unique {u s s' : V → ℝ} (hs : (closed m).scm.Solves u s)
-    (hs' : (closed m).scm.Solves u s') : s = s' := by
-  refine (closed m).unique_of_laws ?_ trivial trivial hs hs'
-  intro s s' _ _ h h' hex
-  have hI := hex .Imp (by simp [closed])
-  have ht := hex .t (by simp [closed])
-  have hy := hex .y (by simp [closed])
-  have hw := hex .w (by simp [closed])
-  have hP : s .P = s' .P := by rw [price_of_laws h, price_of_laws h', hI, ht, hy, hw]
-  have hQd : s .Qd = s' .Qd := by rw [h .demand, h' .demand, hP, hy]
-  have hQs : s .Qs = s' .Qs := by rw [h .supply, h' .supply, hP, ht, hw]
-  funext v
-  cases v <;> assumption
+    (hs' : (closed m).scm.Solves u s') : s = s' :=
+  (closed_existsUnique u).unique hs hs'
 
 /-- Price in the closed economy, read off a solution. -/
 theorem closed_price {u s : V → ℝ} (hs : (closed m).scm.Solves u s) :

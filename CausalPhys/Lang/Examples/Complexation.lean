@@ -49,6 +49,8 @@ variable (c : Consts)
 
 #causal_order closed c
 #causal_order buffered c
+#causal_check closed c
+#causal_check buffered c
 
 /-! ## Computed by Lean -/
 
@@ -145,6 +147,14 @@ theorem buffered_solution {u s : V → ℝ} (hD : (model c).dom s)
   refine ⟨?_, hsat .ligand⟩
   rw [key.1, ← hL, ← hm]
   rfl
+
+/-- With a ligand buffer the block is linear in its own variables, and
+    `linear_block` finds the determinant 1 + K₁L + K₁K₂L², the same denominator
+    as in the closed form: positive for a positive free ligand concentration. -/
+theorem buffered_existsUnique (u : V → ℝ) (hL : 0 < u .L) :
+    ∃! s, (buffered c).scm.Solves u s := by
+  linear_block
+  have := c.hK1; have := c.hK2; positivity
 
 end Complexation
 

@@ -14,6 +14,7 @@
                        reads, the blocks, and whether the setup is acyclic.
 -/
 import CausalPhys.Lang.Core
+import CausalPhys.Lang.Linear
 import Mathlib.Tactic.FieldSimp
 import Mathlib.Tactic.LinearCombination
 import Mathlib.Tactic.Linarith
@@ -170,5 +171,140 @@ elab "#causal_order " t:term : command => runTermElabM fun _ => do
       if elems.length > 1 then
         lines := lines.push m!"cyclic block: {shortName b}"
   logInfo (MessageData.joinSep lines.toList "\n")
+
+/-! ## The linear criterion, automatically -/
+
+/-- Unfolding lemmas for the linear criterion. -/
+macro "linear_unfold" : tactic => `(tactic|
+  simp only [Setup.formula, Setup.const, Setup.coef, Setup.base, Setup.linMatrix,
+    Model.mechOf, Model.find, Model.ofSolvers, CausalPhys.Lang.mech,
+    List.map_cons, List.map_nil, List.find?_cons, List.find?_nil,
+    Option.map_some, Option.getD_some, Function.update_apply, List.mem_cons, List.not_mem_nil,
+    reduceCtorEq, decide_true, decide_false, ↓reduceIte, or_false, or_true, false_or, true_or,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two, Matrix.cons_val_three,
+    Matrix.head_cons, Matrix.tail_cons, Matrix.cons_val_succ, Fin.isValue, Fin.sum_univ_succ, Fin.sum_univ_zero,
+    Matrix.of_apply, Matrix.sub_apply, Matrix.one_apply_eq, Matrix.one_apply_ne,
+    ne_eq, Fin.reduceEq, not_false_eq_true, Fin.succ_zero_eq_one, Fin.succ_one_eq_two])
+
+/-- `linear_block` proves `∃! s, S.scm.Solves u s` with the linear criterion:
+    it enumerates the computed matching, proves that every formula is affine,
+    and computes det(I − C). If it cannot show det(I − C) ≠ 0 by itself, that
+    goal is left, simplified, for the user (it is the domain-specific part). -/
+elab "linear_block" : tactic => withMainContext do
+  let goal ← instantiateMVars (← getMainTarget)
+  let (``ExistsUnique, #[_, p]) := goal.getAppFnArgs
+    | throwError "linear_block: expected a goal `∃! s, S.scm.Solves u s`"
+  let (S, u) ← lambdaTelescope p fun _ body => do
+    let (``CausalPhys.SCM.Solves, #[_, _, model, u, _]) := body.getAppFnArgs
+      | throwError "linear_block: expected a goal `∃! s, S.scm.Solves u s`"
+    let (``CausalPhys.Lang.Setup.scm, args) := model.getAppFnArgs
+      | throwError "linear_block: expected a goal `∃! s, S.scm.Solves u s`"
+    pure (args[7]!, u)
+  let SType ← inferType S
+  let M := SType.getAppArgs.back!
+  let some modelName := M.getAppFn.constName?
+    | throwError "linear_block: the model must be a named definition"
+  let some setupName := S.getAppFn.constName?
+    | throwError "linear_block: the setup must be a named definition"
+  let eqs ← kernelNorm (← mkAppM ``Model.eqList #[M])
+  let some (_, laws) := eqs.listLit? | throwError "linear_block: could not list the laws"
+  let mut vars : Array Expr := #[]
+  for e in laws do
+    vars := vars.push (← kernelNorm (← mkAppM ``Order.Cert.σ #[← mkAppM ``Setup.cert #[S], e]))
+  let lawsStx ← laws.toArray.mapM fun e => Term.exprToSyntax e
+  let varsStx ← vars.mapM fun e => Term.exprToSyntax e
+  let SStx ← Term.exprToSyntax S
+  let uStx ← Term.exprToSyntax u
+  let modelId := mkCIdent modelName
+  let setupId := mkCIdent setupName
+  evalTactic (← `(tactic|
+    refine Setup.linear_existsUnique (S := $SStx) (laws := ![$lawsStx,*]) (vars := ![$varsStx,*])
+      (by kernel_decide) ?aff $uStx ?det))
+  -- affinity: unfold every formula and compare with `ring`
+  evalTactic (← `(tactic| case aff =>
+    unfold Setup.IsAffine
+    simp only [Fin.forall_fin_succ, IsEmpty.forall_iff, and_true]
+    repeat' apply And.intro
+    all_goals
+      intro s
+      try linear_unfold
+      simp only [$modelId:ident, $setupId:ident]
+      try linear_unfold
+      first
+      | ring1
+      | fail "linear_block: a formula of this setup is not affine in its endogenous \
+          variables; the linear criterion does not apply (try a monotonicity or fixed \
+          point argument via `unique_of_laws`)"))
+  -- the determinant: compute it, then try the usual ways to see it is nonzero
+  evalTactic (← `(tactic| (
+    first
+    | simp only [Matrix.det_fin_one, Matrix.det_fin_two, Matrix.det_fin_three]
+    | simp [Matrix.det_succ_row_zero, Fin.sum_univ_succ, Fin.succAbove, Matrix.one_apply]
+    try linear_unfold
+    simp only [$modelId:ident, $setupId:ident]
+    try linear_unfold
+    try ring_nf
+    try (first
+      | positivity
+      | (field_simp; positivity)
+      | norm_num))))
+
+/-! ## Which criterion applies? -/
+
+/-- `#causal_check S` says how the question "exactly one outcome?" is settled
+    for a setup: by structure (acyclic), by the linear criterion (and what is
+    left to show), or that a domain-specific argument is needed. -/
+elab "#causal_check " t:term : command => runTermElabM fun _ => do
+  let S ← Term.elabTerm t none
+  Term.synthesizeSyntheticMVarsNoPostponing
+  let S ← instantiateMVars S
+  let acyclic ← kernelNorm (← mkDecide (← mkAppM ``Setup.Acyclic #[S]))
+  if acyclic.isAppOf ``Bool.true then
+    logInfo m!"acyclic: every intervention has exactly one outcome (Setup.do_existsUnique)"
+    return
+  let SType ← inferType S
+  let V := SType.getAppArgs[1]!
+  let realTy := SType.getAppArgs[2]!
+  let uTy ← mkArrow V realTy
+  let goalTy ← withLocalDeclD `u uTy fun u => do
+    let body ← withLocalDeclD `s uTy fun s => do
+      let scm ← mkAppM ``Setup.scm #[S]
+      let sol ← mkAppM ``CausalPhys.SCM.Solves #[scm, u, s]
+      mkLambdaFVars #[s] sol
+    mkForallFVars #[u] (← mkAppM ``ExistsUnique #[body])
+  let saved ← saveState
+  let result ← try
+      Core.resetMessageLog
+      let g ← mkFreshExprMVar goalTy
+      let gs ← Term.withoutErrToSorry <| Tactic.run g.mvarId! <| Tactic.withoutRecover (do
+        evalTactic (← `(tactic| intro u))
+        evalTactic (← `(tactic| linear_block)))
+      if (← MonadLog.hasErrors) then
+        throwError "failed"
+      let pf ← instantiateMVars g
+      if pf.hasSorry then throwError "failed"
+      let singular ← gs.anyM fun g => do
+        return (← instantiateMVars (← g.getType)).isConstOf ``False
+      let rest ← gs.mapM fun g => g.withContext do
+        return toMessageData (← ppExpr (← instantiateMVars (← g.getType)))
+      pure (some (if singular then [m!"__singular__"] else rest))
+    catch _ => pure none
+  saved.restore
+  match result with
+  | some [m] =>
+    if (← m.toString) == "__singular__" then
+      logInfo m!"cyclic, linear, singular: det(I − C) = 0, so the linear criterion \
+        fails (for an affine block this means no outcome or infinitely many)"
+    else
+      logInfo m!"cyclic, linear: exactly one outcome provided that\n  {m}\n\
+        (finish `linear_block` with a proof of this)"
+  | some [] => logInfo m!"cyclic, linear: exactly one outcome for every choice of the \
+      exogenous values (proved by linear_block)"
+  | some rest => logInfo m!"cyclic, linear: exactly one outcome provided that\n  \
+      {MessageData.joinSep rest "\n  "}\n\
+      (finish `linear_block` with a proof of this)"
+  | none => logInfo m!"cyclic, nonlinear: the linear criterion does not apply; uniqueness \
+      needs a domain-specific argument (monotonicity, Gale–Nikaido, Minty–Browder), \
+      plugged in with Setup.unique_of_laws"
 
 end CausalPhys.Lang
