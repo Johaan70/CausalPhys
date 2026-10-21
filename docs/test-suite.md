@@ -42,7 +42,13 @@ Negative tests (`Tests/Rejects.lean`) pin the errors the language must give for 
 - a setup that fixes so much that the laws cannot be matched to the remaining variables;
 - a false claim about the causal order;
 - a singular linear block must be reported as singular, not as unique;
-- a nonlinear block must not be treated as linear.
+- a nonlinear block must not be treated as linear;
+- parameters must be explicit and must not share a name with a variable;
+- a model without a witness, and a model whose domain contradicts its laws.
+
+## What the tests do and do not show
+
+For acyclic setups, most answer theorems read the outcome off the solved formulas with `read_solution`; they check the formulas the user wrote and the causal order, not that the formulas were derived from the laws (that is what `law_solve` checks, on the domain). For cyclic setups the answers are derived from the laws through `solves_iff`. `Gas.locked_laws`, `Battery.circuit_laws`, `Divider.currentSource_laws` and `Market.closed_laws` state uniqueness for the laws themselves inside the domain. Every model carries a checked witness (`consistent`).
 
 ## How the expected answers were chosen
 
