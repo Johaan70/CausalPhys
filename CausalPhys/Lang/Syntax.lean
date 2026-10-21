@@ -9,6 +9,7 @@
         law gas : p * vol = n * R * T
           solve p := n * R * T / vol
           solve vol := n * R * T / p
+        witness p := 1, vol := 1, n := 1, T := 1 / R
         setup locked fixes vol n T
         setup weighted fixes p n T
 
@@ -18,6 +19,9 @@
       reads is collected from the formula itself, and that each formula solves
       its law on the domain is proved by `law_solve` (or by the tactic given
       after `by`),
+    * `consistent : ∃ s, model.dom s ∧ model.Sat s`, proved from the `witness`
+      (a concrete state; variables not listed are 0). Every model must have one,
+      so a domain that contradicts the laws is rejected,
     * one `Setup model` per `setup` line.
 
   Parameters (equilibrium constants, elasticities …) are binders after the
@@ -37,11 +41,14 @@ open Lean Elab Command
 syntax solveClause := "solve " ident " := " term (" by " tacticSeq)?
 syntax lawClause := "law " ident " : " term (ppLine solveClause)*
 syntax setupClause := "setup " ident " fixes " ident+
+syntax witnessItem := ident " := " term
+syntax witnessClause := "witness " sepBy1(witnessItem, ", ") (" by " tacticSeq)?
 
 syntax (name := causalModel) "causal_model " ident (ppSpace bracketedBinder)* " where"
   ppLine "variables " ident+
   (ppLine "domain " term)?
   (ppLine lawClause)+
+  (ppLine witnessClause)?
   (ppLine setupClause)* : command
 
 /-- Replace every identifier naming a variable by `s V.x`. -/
@@ -79,6 +86,7 @@ macro_rules
         variables $vs:ident*
         $[domain $dom?]?
         $laws:lawClause*
+        $[$wc?:witnessClause]?
         $setups:setupClause*) => do
     let binders : Array Syntax := bs.map (·.raw)
     for b in binders do
@@ -149,6 +157,36 @@ macro_rules
           (fun e $s => match e with $lawAlts:matchAlt*)
           (fun $s => $domBody)
           (fun e => match e with $solverAlts:matchAlt*)))
+    -- the witness: a state in the domain that satisfies every law
+    let some wc := wc? | Macro.throwErrorAt name "causal_model: give a `witness`, a state \
+      that lies in the domain and satisfies every law, e.g. `witness x := 1, y := 2`; \
+      variables not listed are 0. This shows that the domain and the laws are consistent."
+    let (items, wtac?) ← match wc with
+      | `(witnessClause| witness $its:witnessItem,* by $t:tacticSeq) => pure (its.getElems, some t)
+      | `(witnessClause| witness $its:witnessItem,*) => pure (its.getElems, none)
+      | _ => Macro.throwUnsupported
+    let mut wvals : Array (Name × Term) := #[]
+    for it in items do
+      let `(witnessItem| $x:ident := $e:term) := it | Macro.throwUnsupported
+      let xn := x.getId.eraseMacroScopes
+      unless vars.contains xn do
+        Macro.throwErrorAt x s!"{xn} is not a variable of the model"
+      wvals := wvals.push (xn, e)
+    let mut walts : Array (TSyntax ``Lean.Parser.Term.matchAlt) := #[]
+    for v in vars do
+      let val : Term ← match wvals.find? (·.1 == v) with
+        | some (_, e) => pure e
+        | none => `((0 : ℝ))
+      walts := walts.push (← `(Lean.Parser.Term.matchAltExpr| | $(vIdent v):ident => $val))
+    let wproof ← withRef wc <| match wtac? with
+      | some t => `(by $t)
+      | none => `(by witness_check)
+    let consT := mkIdent `consistent
+    cmds := cmds.push (← `(
+      /-- The domain and the laws are consistent: the witness satisfies both. -/
+      theorem $consT $bs:bracketedBinder* :
+          ∃ s, ($modelApp).dom s ∧ ($modelApp).Sat s :=
+        ⟨fun v => (match v with $walts:matchAlt*), $wproof⟩))
     for st in setups do
       let `(setupClause| setup $sn:ident fixes $xs:ident*) := st | Macro.throwUnsupported
       for x in xs do

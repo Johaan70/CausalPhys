@@ -310,4 +310,73 @@ elab "#causal_check " t:term : command => runTermElabM fun _ => do
       only on exogenous ones); uniqueness needs another argument (monotonicity, \
       Gale–Nikaido, Minty–Browder), plugged in with Setup.unique_of_laws"
 
+/-! ## The domain: consistency and outcomes inside it -/
+
+/-- The name of the model in a goal `Model.dom M x` / `Model.Sat M x`. -/
+def modelNameIn (e : Expr) : MetaM Name := do
+  let some m := e.find? fun x => x.isAppOf ``Model.dom || x.isAppOf ``Model.Sat
+    | throwError "expected a goal about `Model.dom` or `Model.Sat`"
+  let M := m.getAppArgs[3]!
+  let some n := M.getAppFn.constName? | throwError "the model must be a named definition"
+  pure n
+
+/-- Proves `M.dom w ∧ M.Sat w` for a concrete state `w` (the witness of a
+    model): unfold, then the usual arithmetic closers. -/
+elab "witness_check" : tactic => withMainContext do
+  let modelId := mkCIdent (← modelNameIn (← instantiateMVars (← getMainTarget)))
+  evalTactic (← `(tactic| (
+    refine ⟨?_, ?_⟩
+    · try simp only [$modelId:ident, CausalPhys.Lang.Model.ofSolvers]
+      all_goals try (repeat' constructor)
+      all_goals first
+        | positivity
+        | (norm_num; done)
+        | linarith
+        | fail "witness: could not show that the witness lies in the domain"
+    · unfold CausalPhys.Lang.Model.Sat
+      intro e
+      cases e <;> (try simp only [$modelId:ident, CausalPhys.Lang.Model.ofSolvers]) <;>
+        first
+        | rfl
+        | (norm_num; done)
+        | ring1
+        | (field_simp; done)
+        | (field_simp; ring1)
+        | linarith
+        | fail "witness: could not show that the witness satisfies this law")))
+
+/-- Proves `∀ s, S.scm.Solves u s → M.dom s` for acyclic setups: read the
+    solution off, substitute, and show each condition with `positivity` (using
+    hypotheses about the exogenous values in the context). -/
+elab "in_domain" : tactic => withMainContext do
+  let goal ← instantiateMVars (← getMainTarget)
+  let modelId := mkCIdent (← modelNameIn goal)
+  let sId := mkIdent `s
+  let hsId := mkIdent `hs
+  evalTactic (← `(tactic| intro $sId:ident $hsId:ident))
+  evalTactic (← `(tactic| read_solution $hsId:ident))
+  let names ← withMainContext do
+    let lctx ← getLCtx
+    pure <| lctx.foldl (init := #[]) fun acc d =>
+      if d.userName.toString.startsWith "hs_" then acc.push (mkIdent d.userName) else acc
+  let lemmas : Array (TSyntax `Lean.Parser.Tactic.simpLemma) ←
+    names.mapM fun n => `(Lean.Parser.Tactic.simpLemma| $n:ident)
+  evalTactic (← `(tactic| (
+    try simp only [$modelId:ident, CausalPhys.Lang.Model.ofSolvers]
+    try simp only [$lemmas,*]
+    all_goals try (repeat' constructor)
+    all_goals first
+      | positivity
+      | fail "in_domain: could not show that the outcome lies in the domain")))
+
+/-- Proves `∃! s, M.dom s ∧ M.Sat s ∧ (exogenous values)`: exactly one solution
+    of the laws themselves inside the domain. Uses the structure (acyclic) or
+    the linear criterion for the causal model, then `in_domain`. -/
+macro "laws_unique" : tactic => `(tactic| (
+  refine CausalPhys.Lang.Setup.laws_existsUnique _ ?_ ?_
+  · first
+    | exact CausalPhys.Lang.Setup.existsUnique _ (by struct_decide) _
+    | linear_block
+  · in_domain))
+
 end CausalPhys.Lang

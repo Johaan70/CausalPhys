@@ -27,6 +27,7 @@ causal_model Divider where
   law ohm2 : U = R2 * I2
     solve U := R2 * I2
     solve I2 := U / R2
+  witness I := 2, I1 := 1, I2 := 1, U := 1, R1 := 1, R2 := 1
   setup currentSource fixes I R1 R2
   setup voltageSource fixes U R1 R2
 
@@ -76,12 +77,7 @@ theorem currentSource_existsUnique (u : V → ℝ) (h1 : 0 < u .R1) (h2 : 0 < u 
     domain, so the laws have exactly one solution there. -/
 theorem currentSource_laws (u : V → ℝ) (h1 : 0 < u .R1) (h2 : 0 < u .R2) :
     ∃! s, model.dom s ∧ model.Sat s ∧ ∀ v, v ∈ currentSource.exo → s v = u v := by
-  apply currentSource.laws_existsUnique (currentSource_existsUnique u h1 h2)
-  intro s hs
-  show 0 < s .R1 ∧ 0 < s .R2
-  rw [currentSource.exo_eq hs (v := .R1) (by simp [currentSource]),
-    currentSource.exo_eq hs (v := .R2) (by simp [currentSource])]
-  exact ⟨h1, h2⟩
+  laws_unique
 
 /-- The current divider rule: I₁ = R₂/(R₁ + R₂)·I. -/
 theorem divider_rule {u s : V → ℝ} (h1 : 0 < u .R1) (h2 : 0 < u .R2)

@@ -34,6 +34,7 @@ causal_model Keynes (k : Keynes.Params) where
     solve G := Y - C - I
   law consumption : C = k.c0 + k.c1 * (Y - Tax)
     solve C := k.c0 + k.c1 * (Y - Tax)
+  witness C := k.c0, G := -k.c0
   setup shortRun fixes I G Tax
   setup target fixes Y I Tax
 
@@ -127,6 +128,7 @@ causal_model Quantity where
   law fisher : M * Vel = P * Y
     solve P := M * Vel / Y
     solve Y := M * Vel / P
+  witness M := 1, Vel := 1, P := 1, Y := 1
   setup classical fixes M Vel Y
   setup fixedPrice fixes M Vel P
 

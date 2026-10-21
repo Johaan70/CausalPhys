@@ -40,6 +40,8 @@ causal_model Complexation (c : Complexation.Consts) where
   law ligand : l0 = L + ML + 2 * ML2
     solve L := l0 - ML - 2 * ML2
     solve l0 := L + ML + 2 * ML2
+  witness M := 1, L := 1, ML := c.K1, ML2 := c.K2 * c.K1, m0 := 1 + c.K1 + c.K2 * c.K1,
+    l0 := 1 + c.K1 + 2 * (c.K2 * c.K1)
   setup closed fixes m0 l0        -- closed flask: the amounts added are fixed
   setup buffered fixes m0 L       -- ligand buffer: free ligand held fixed
 

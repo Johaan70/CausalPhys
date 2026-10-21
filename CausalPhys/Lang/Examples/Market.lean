@@ -40,6 +40,7 @@ causal_model Market (m : Market.Params) where
     solve Qd := Qs + Imp
     solve Qs := Qd - Imp
     solve Imp := Qd - Qs
+  witness Qd := m.a, Qs := m.d, Imp := m.a - m.d
   setup closed fixes Imp t y w    -- closed economy: imports fixed (normally 0)
   setup open_ fixes P t y w       -- small open economy: the world price is given
 

@@ -18,6 +18,8 @@ e✝ : Law
 s✝ : V → ℝ
 hD✝ : 0 < s✝ V.R
 ⊢ s✝ V.U = s✝ V.R * s✝ V.I ↔ s✝ V.I = s✝ V.R / s✝ V.U
+---
+warning: declaration uses `sorry`
 -/
 #guard_msgs in
 causal_model WrongFormula where
@@ -25,6 +27,7 @@ causal_model WrongFormula where
   domain 0 < R
   law ohm : U = R * I
     solve I := R / U
+  witness R := 1
   setup s fixes U R
 
 /-! A solver for a variable the model does not have. -/
@@ -36,6 +39,7 @@ causal_model UnknownVariable where
   variables U R I
   law ohm : U = R * I
     solve P := R * I
+  witness U := 0
   setup s fixes R I
 
 /-! A formula for x that mentions x itself. -/
@@ -47,6 +51,7 @@ causal_model SelfReference where
   variables x y
   law l : x = 2 * y
     solve x := x / 2 + y
+  witness x := 0
   setup s fixes y
 
 /-! A setup that fixes too much: the law has nothing left to determine. -/
@@ -61,6 +66,7 @@ causal_model OverFixed where
   variables U R I
   law ohm : U = R * I
     solve U := R * I
+  witness U := 0
   setup s fixes U R I
 
 /-! A false claim about the causal order. -/
@@ -68,6 +74,7 @@ causal_model Ohm where
   variables U R I
   law ohm : U = R * I
     solve U := R * I
+  witness U := 0
   setup voltage fixes R I
 
 /--
@@ -84,6 +91,7 @@ causal_model Singular where
     solve x := y + a
   law l2 : y = x - a
     solve y := x - a
+  witness x := 0
   setup s fixes a
 
 /--
@@ -99,6 +107,7 @@ causal_model Nonlinear where
     solve x := y * y + a
   law l2 : y = x - a
     solve y := x - a
+  witness x := 0
   setup s fixes a
 
 /--
@@ -106,6 +115,33 @@ info: cyclic: the linear criterion does not apply (it needs every formula of the
 -/
 #guard_msgs in
 #causal_check Nonlinear.s
+
+/-! A domain that contradicts the law: no witness can exist, so the model is
+    rejected (in phase 2 such a domain made the formula check empty). -/
+/--
+error: witness: could not show that the witness satisfies this law
+case refine_2.l
+⊢ 0 = 1
+-/
+#guard_msgs in
+causal_model Contradictory where
+  variables x a
+  domain x = 0
+  law l : x = 1
+    solve x := 2
+  witness x := 0
+  setup s fixes a
+
+/-! A model without a witness. -/
+/--
+error: causal_model: give a `witness`, a state that lies in the domain and satisfies every law, e.g. `witness x := 1, y := 2`; variables not listed are 0. This shows that the domain and the laws are consistent.
+-/
+#guard_msgs in
+causal_model NoWitness where
+  variables x a
+  law l : x = a
+    solve x := a
+  setup s fixes a
 
 /-! Parameters must be explicit, and must not share a name with a variable. -/
 /--
@@ -116,6 +152,7 @@ causal_model ImplicitParam {k : ℝ} where
   variables x y
   law l : x = k * y
     solve x := k * y
+  witness x := 0
   setup s fixes y
 
 /--
@@ -126,6 +163,7 @@ causal_model ClashingParam (x : ℝ) where
   variables x y
   law l : y = 2 * x
     solve y := 2 * x
+  witness y := 0
   setup s fixes x
 
 end CausalPhys.Tests.Rejects

@@ -25,6 +25,7 @@ causal_model Circuit where
     solve U := Rr * I
   law newton : T = Ta + k * P
     solve T := Ta + k * P
+  witness U := 1, Rr := 1, I := 1, P := 1
   setup voltageSource fixes U Rr Ta k
   setup currentSource fixes I Rr Ta k
 

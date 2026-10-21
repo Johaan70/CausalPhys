@@ -34,6 +34,7 @@ causal_model WeakAcid where
   law charge : H + Na = A
     solve Na := A - H
     solve H := A - Na
+  witness H := 1, A := 1, HA := 1, C := 2, Ka := 1
   setup titration fixes C Na Ka
   setup buffer fixes C H Ka
 
@@ -113,6 +114,7 @@ causal_model BeerLambert where
   law conc : c * vol = n
     solve c := n / vol
     solve n := c * vol
+  witness vol := 1
   setup prepared fixes eps l n vol
   setup flowCell fixes eps l c vol
 
@@ -169,6 +171,7 @@ causal_model Arrhenius where
     solve k := Pre * Real.exp (-(Ea / (R * T)))
   law rateLaw : rate = k * X
     solve rate := k * X
+  witness T := 1
   setup lab fixes Pre Ea T X
 
 /--

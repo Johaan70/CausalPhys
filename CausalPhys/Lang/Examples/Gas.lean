@@ -19,6 +19,7 @@ causal_model Gas where
   law gas : p * vol = n * R * T
     solve p := n * R * T / vol
     solve vol := n * R * T / p
+  witness p := 1, vol := 1, n := 1, T := 1 / R by have := R_pos.ne'; witness_check
   setup locked fixes vol n T      -- locked piston, heat bath, closed vessel
   setup weighted fixes p n T      -- weighted piston, heat bath, closed vessel
 
@@ -57,6 +58,13 @@ theorem locked_do (x : V) (c : ℝ) (u : V → ℝ) : ∃! s, (locked.scm.doI x 
 
 theorem weighted_do (x : V) (c : ℝ) (u : V → ℝ) : ∃! s, (weighted.scm.doI x c).Solves u s :=
   weighted.do_existsUnique weighted_acyclic x c u
+
+/-- For the gas law itself: with positive amount, temperature and volume, the
+    law has exactly one solution in the domain (the pressure nRT/V). -/
+theorem locked_laws (u : V → ℝ) (hn : 0 < u .n) (hT : 0 < u .T) (hv : 0 < u .vol) :
+    ∃! s, model.dom s ∧ model.Sat s ∧ ∀ v, v ∈ locked.exo → s v = u v := by
+  have := R_pos
+  laws_unique
 
 /-! ## The physics -/
 

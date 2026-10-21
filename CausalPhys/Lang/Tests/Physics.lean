@@ -25,6 +25,7 @@ causal_model ThermalWall where
   law wall2 : Tm - T2 = R2 * Q
     solve Q := (Tm - T2) / R2
     solve Tm := T2 + R2 * Q
+  witness R1 := 1, R2 := 1
   setup baths fixes T1 T2 R1 R2
 
 /--
@@ -84,6 +85,7 @@ causal_model Battery where
     solve I := eps / (R + r)
   law load : U = R * I
     solve U := R * I
+  witness I := 1, U := 1, eps := 2, r := 1, R := 1
   setup circuit fixes eps r R
 
 /--
@@ -107,6 +109,11 @@ theorem terminal_voltage (x : ℝ) (u s : V → ℝ) (h : (circuit.scm.doI .R x)
     s .U = x * (u .eps / (x + u .r)) := by
   read_solution h
   rw [h_U, h_I, h_R, h_eps, h_r]
+
+/-- Kirchhoff's loop law and Ohm's law have exactly one solution in the domain. -/
+theorem circuit_laws (u : V → ℝ) (hr : 0 < u .r) (hR : 0 < u .R) :
+    ∃! s, model.dom s ∧ model.Sat s ∧ ∀ v, v ∈ circuit.exo → s v = u v := by
+  laws_unique
 
 /-- A larger load resistance gives a higher terminal voltage. -/
 theorem larger_load_higher_voltage (u s₁ s₂ : V → ℝ) {x₁ x₂ : ℝ}

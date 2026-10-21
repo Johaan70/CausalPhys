@@ -409,6 +409,11 @@ theorem do_existsUnique (hA : S.Acyclic) (x : V) (c : α) (u : V → α) :
   obtain ⟨s, hs⟩ := hr.exists u
   exact ⟨s, hs, fun t ht => hr.unique ht hs⟩
 
+/-- 7b. Exactly one outcome, for the setup itself. -/
+theorem existsUnique (hA : S.Acyclic) (u : V → α) : ∃! s, S.scm.Solves u s := by
+  obtain ⟨s, hs⟩ := S.exists_solution hA u
+  exact ⟨s, hs, fun t ht => S.unique hA ht hs⟩
+
 /-! ### Cyclic setups -/
 
 /-- 8. If the laws, with the exogenous values fixed, have at most one solution
