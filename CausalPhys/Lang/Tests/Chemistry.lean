@@ -47,7 +47,7 @@ cyclic block: [acid, mass, charge]
 #guard_msgs in
 #causal_order WeakAcid.titration
 /--
-info: cyclic: the linear criterion does not apply (some formula is not affine in the variables of its own block); uniqueness needs another argument (monotonicity, Gale–Nikaido, Minty–Browder), plugged in with Setup.unique_of_laws
+info: cyclic: neither criterion applies (some formula is not affine in its own block, and not affine in each variable separately); uniqueness needs a domain-specific argument (monotonicity, Gale–Nikaido, Minty–Browder), plugged in with Setup.unique_of_laws
 -/
 #guard_msgs in
 #causal_check WeakAcid.titration

@@ -50,9 +50,7 @@ cyclic block: [income, consumption]
 #guard_msgs in
 #causal_order shortRun k
 /--
-info: cyclic, linear in each block: exactly one outcome of the causal model provided that
-  ¬1 - k.c1 = 0
-(finish `block_linear` with a proof of this)
+info: cyclic, linear in each block: exactly one outcome of the causal model for every choice of the exogenous values (proved by block_linear)
 -/
 #guard_msgs in
 #causal_check shortRun k
@@ -77,9 +75,6 @@ variable {k}
 
 theorem shortRun_existsUnique (u : V → ℝ) : ∃! s, (shortRun k).scm.Solves u s := by
   linear_block
-  have := k.h1
-  intro h
-  linarith
 
 /-- Equilibrium income. -/
 theorem income_eq {u s : V → ℝ} (hs : (shortRun k).scm.Solves u s) :

@@ -65,9 +65,7 @@ acyclic: every intervention has exactly one outcome of the causal model
 #guard_msgs in
 #causal_order open_ m
 /--
-info: cyclic, linear in each block: exactly one outcome of the causal model provided that
-  ¬1 + m.b⁻¹ * m.e = 0
-(finish `block_linear` with a proof of this)
+info: cyclic, linear in each block: exactly one outcome of the causal model for every choice of the exogenous values (proved by block_linear)
 -/
 #guard_msgs in
 #causal_check closed m
@@ -107,7 +105,6 @@ theorem price_of_laws {s : V → ℝ} (h : (model m).Sat s) :
     1 + e/b ≠ 0, is the economics (demand falls and supply rises with price). -/
 theorem closed_existsUnique (u : V → ℝ) : ∃! s, (closed m).scm.Solves u s := by
   linear_block
-  have := m.hb; have := m.he; positivity
 
 /-- The market laws themselves (demand, supply, clearing) have exactly one
     solution with the given exogenous values; the domain is everything here. -/

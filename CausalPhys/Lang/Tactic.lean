@@ -16,6 +16,7 @@
 import CausalPhys.Lang.Core
 import CausalPhys.Lang.Linear
 import CausalPhys.Lang.Blockwise
+import CausalPhys.Lang.Secant
 import Mathlib.Tactic.FieldSimp
 import Mathlib.Tactic.LinearCombination
 import Mathlib.Tactic.Linarith
@@ -93,6 +94,29 @@ def unfoldLemmas (es : Array Expr) : MetaM (Array (TSyntax `Lean.Parser.Tactic.s
         pure (b.isAppOf ``Model || b.isAppOf ``Setup)
       if ok then names := names.push n
   names.mapM fun n => `(Lean.Parser.Tactic.simpLemma| $(mkCIdent n):ident)
+
+/-- Make the facts stored in parameter structures available: for every local
+    variable whose type is a structure (such as rate constants `c : Consts` with
+    `c.hK1 : 0 < c.K1`), add each of its propositional fields as a hypothesis. -/
+def addParamFacts : TacticM Unit := withMainContext do
+  let env ← getEnv
+  let mut facts : Array (Expr × Expr) := #[]
+  for ldecl in ← getLCtx do
+    if ldecl.isImplementationDetail then continue
+    let ty ← whnfR ldecl.type
+    let some n := ty.getAppFn.constName? | continue
+    unless isStructure env n do continue
+    for f in getStructureFields env n do
+      try
+        let e ← mkAppM (n ++ f) #[ldecl.toExpr]
+        let t ← inferType e
+        if ← isProp t then facts := facts.push (e, t)
+      catch _ => pure ()
+  let mut g ← getMainGoal
+  for (e, t) in facts do
+    let (_, g') ← (← g.assert `param_fact t e).intro1
+    g := g'
+  replaceMainGoal [g]
 
 /-! ## Reading off a solution -/
 
@@ -204,6 +228,7 @@ macro "linear_unfold" : tactic => `(tactic|
     and computes det(I − C). If it cannot show det(I − C) ≠ 0 by itself, that
     goal is left, simplified, for the user (it is the domain-specific part). -/
 elab "linear_block" : tactic => withMainContext do
+  addParamFacts
   let goal ← instantiateMVars (← getMainTarget)
   let (``ExistsUnique, #[_, p]) := goal.getAppFnArgs
     | throwError "linear_block: expected a goal `∃! s, S.scm.Solves u s`"
@@ -246,7 +271,7 @@ elab "linear_block" : tactic => withMainContext do
   -- the determinant: compute it, then try the usual ways to see it is nonzero
   evalTactic (← `(tactic| (
     first
-    | simp only [Matrix.det_fin_one, Matrix.det_fin_two, Matrix.det_fin_three]
+    | simp only [Matrix.det_fin_one, Matrix.det_fin_two, Matrix.det_fin_three, CausalPhys.Lang.det_fin_four]
     | simp [Matrix.det_succ_row_zero, Fin.sum_univ_succ, Fin.succAbove, Matrix.one_apply]
     try linear_unfold
     simp only [$extra,*]
@@ -280,6 +305,7 @@ macro_rules
     on lower blocks), and computes det(I − C) for every block. Determinant
     conditions it cannot discharge are left as goals, one per block. -/
 elab "block_linear" : tactic => withMainContext do
+  addParamFacts
   let goal ← instantiateMVars (← getMainTarget)
   let (``ExistsUnique, #[_, p]) := goal.getAppFnArgs
     | throwError "block_linear: expected a goal `∃! s, S.scm.Solves u s`"
@@ -377,7 +403,7 @@ elab "block_linear" : tactic => withMainContext do
     evalTactic (← `(tactic| (
       try simp only [Fin.isValue, Fin.mk_zero, Fin.zero_eta, Fin.mk_one]
       try (first
-        | simp only [Matrix.det_fin_one, Matrix.det_fin_two, Matrix.det_fin_three]
+        | simp only [Matrix.det_fin_one, Matrix.det_fin_two, Matrix.det_fin_three, CausalPhys.Lang.det_fin_four]
         | simp [Matrix.det_succ_row_zero, Fin.sum_univ_succ, Fin.succAbove, Matrix.one_apply])
       try simp only [Matrix.submatrix_apply]
       try simp (config := { decide := true }) only [Matrix.cons_val, Setup.bmat, ↓reduceIte,
@@ -399,6 +425,132 @@ elab "block_linear" : tactic => withMainContext do
         | (field_simp; positivity))
       try simp only [not_true_eq_false, ne_eq, not_false_eq_true])))
     rest := rest ++ (← getGoals)
+  setGoals rest
+
+
+/-! ## Nonlinear blocks: the secant P-matrix criterion -/
+
+/-- All strictly increasing index tuples of length `r` from `0 … n-1`. -/
+partial def incTuples (n r : Nat) (start : Nat := 0) : List (List Nat) :=
+  if r == 0 then [[]]
+  else (List.range (n - start)).flatMap fun d =>
+    let i := start + d
+    (incTuples n (r - 1) (i + 1)).map (i :: ·)
+
+/-- Unfolding for the secant criterion. -/
+syntax "secant_unfold" (Lean.Parser.Tactic.location)? : tactic
+macro_rules
+  | `(tactic| secant_unfold $[$loc]?) => `(tactic|
+  simp (config := { decide := true }) only [Setup.formula, Setup.slope, Setup.zmix,
+    Setup.secMat, Model.mechOf, Model.find, Model.ofSolvers, CausalPhys.Lang.mech,
+    CausalPhys.SCM.Mech.const, List.map_cons, List.map_nil, List.find?_cons, List.find?_nil,
+    Option.map_some, Option.getD_some, Function.update_apply, List.mem_cons, List.not_mem_nil,
+    List.ofFn_succ, List.ofFn_zero, List.take_succ_cons, List.take_zero, List.take_nil,
+    reduceCtorEq, decide_true, decide_false, ↓reduceIte, or_false, or_true, false_or, true_or,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two, Matrix.cons_val_three,
+    Matrix.head_cons, Matrix.tail_cons, Matrix.cons_val_succ, Matrix.cons_val, Fin.isValue,
+    Matrix.submatrix_apply, Matrix.sub_apply, Matrix.of_apply, Matrix.one_apply_eq,
+    Matrix.one_apply_ne, ne_eq, Fin.reduceEq, not_false_eq_true, Fin.succ_zero_eq_one,
+    Fin.succ_one_eq_two] $[$loc]?)
+
+/-- `secant_unique` proves
+      `∀ u x y, S.scm.Solves u x → S.scm.Solves u y → M.dom x → M.dom y → x = y`
+    for setups whose formulas are multi-affine (affine in each endogenous
+    variable separately): it checks multi-affinity with `ring1`, and shows that
+    every principal minor of the secant matrix is positive on the domain with
+    `positivity`. Minors it cannot show are left as goals. -/
+elab "secant_unique" : tactic =>
+  -- the minors are many small computations; give them room
+  withTheReader Core.Context (fun ctx => { ctx with maxHeartbeats := ctx.maxHeartbeats * 20 }) <|
+  withMainContext do
+  addParamFacts
+  let goal ← instantiateMVars (← getMainTarget)
+  let S ← forallTelescopeReducing goal.consumeMData fun xs _ => do
+    for x in xs do
+      if let some h := (← inferType x).find? fun e => e.isAppOf ``Setup.scm then
+        return h.getAppArgs[7]!
+    throwError "secant_unique: expected a goal about `S.scm.Solves`"
+  let SType ← inferType S
+  let M := SType.getAppArgs.back!
+  let extra ← unfoldLemmas #[M, S]
+  let eqs ← kernelNorm (← mkAppM ``Model.eqList #[M])
+  let some (_, laws) := eqs.listLit? | throwError "secant_unique: could not list the laws"
+  let laws := laws.toArray
+  let n := laws.size
+  let mut vars : Array Expr := #[]
+  for e in laws do
+    vars := vars.push (← kernelNorm (← mkAppM ``Order.Cert.σ #[← mkAppM ``Setup.cert #[S], e]))
+  let lawsStx ← laws.mapM fun e => Term.exprToSyntax e
+  let varsStx ← vars.mapM fun e => Term.exprToSyntax e
+  let SStx ← Term.exprToSyntax S
+  let nT := Syntax.mkNumLit (toString n)
+  let u := mkIdent `u; let x := mkIdent `x; let y := mkIdent `y
+  let hx := mkIdent `hx; let hy := mkIdent `hy; let hDx := mkIdent `hDx; let hDy := mkIdent `hDy
+  evalTactic (← `(tactic|
+    refine fun $u $x $y $hx $hy $hDx $hDy => Setup.secant_unique (S := $SStx)
+      (laws := ![$lawsStx,*]) (vars := ![$varsStx,*]) (by kernel_decide) ?ma ?P $hx $hy $hDx $hDy))
+  -- multi-affinity, formula by formula and coordinate by coordinate
+  evalTactic (← `(tactic| case ma =>
+    unfold Setup.MultiAffine
+    simp only [Fin.forall_fin_succ, IsEmpty.forall_iff, and_true]
+    repeat' apply And.intro
+    all_goals
+      intro z t
+      try secant_unfold
+      try simp only [$extra,*]
+      try secant_unfold
+      first
+      | ring1
+      | fail "secant_unique: a formula is not affine in each variable separately"))
+  -- the secant matrix is a P-matrix on the domain
+  let hexo := mkIdent `hexo
+  evalTactic (← `(tactic|
+    intro $x $y $hDx $hDy $hexo))
+  evalTactic (← `(tactic| apply isP_of_minors))
+  let r := mkIdent `r; let idx := mkIdent `idx; let hm := mkIdent `hm
+  evalTactic (← `(tactic| intro $r $idx $hm))
+  evalTactic (← `(tactic|
+    have hr : $r ≤ $nT := by
+      simpa using Fintype.card_le_of_injective $idx ($hm).injective))
+  evalTactic (← `(tactic| interval_cases $r:ident))
+  let rGoals ← getGoals
+  let mut rest : List MVarId := []
+  for (g, rr) in rGoals.zip (List.range (n + 1)) do
+    setGoals [g]
+    let tuples := incTuples n rr
+    let tupStx : Array Term ← tuples.toArray.mapM fun t => do
+      let elems : Array Term := t.toArray.map fun i => ⟨(Syntax.mkNumLit (toString i)).raw⟩
+      `((![$elems,*] : Fin $(Syntax.mkNumLit (toString rr)) → Fin $nT))
+    let rrT := Syntax.mkNumLit (toString rr)
+    let hmemI := mkIdent `hmem
+    let hidxI := mkIdent `hidx
+    evalTactic (← `(tactic|
+      have $hmemI:ident := (by kernel_decide : ∀ i : Fin $rrT → Fin $nT,
+        (∀ a b, a < b → i a < i b) → i ∈ [$tupStx,*]) $idx (fun a b h => $hm h)))
+    evalTactic (← `(tactic|
+      try simp only [List.mem_cons, List.not_mem_nil, or_false] at $hmemI:ident))
+    evalTactic (← `(tactic| try repeat' (rcases $hmemI:ident with $hidxI:ident | $hmemI:ident)))
+    evalTactic (← `(tactic| all_goals (first | subst $hidxI:ident | subst $hmemI:ident | skip)))
+    let cases ← getGoals
+    for c in cases do
+      setGoals [c]
+      evalTactic (← `(tactic| (
+        try simp only [Matrix.det_fin_zero, Matrix.det_fin_one, Matrix.det_fin_two,
+          Matrix.det_fin_three, CausalPhys.Lang.det_fin_four, zero_lt_one]
+        try (simp [Matrix.det_succ_row_zero, Fin.sum_univ_succ, Fin.succAbove, Matrix.one_apply])
+        try secant_unfold
+        try simp only [$extra,*]
+        try secant_unfold
+        try simp only [$extra,*, CausalPhys.Lang.Model.ofSolvers, List.mem_cons, List.not_mem_nil,
+          or_false, forall_eq_or_imp, forall_eq, IsEmpty.forall_iff, implies_true,
+          and_true] at $hexo:ident $hDx:ident $hDy:ident
+        try casesm* _ ∧ _
+        try simp only [$hexo:ident]
+        try ring_nf
+        try (first
+          | positivity
+          | (rw [← sub_pos]; ring_nf; positivity)))))
+      rest := rest ++ (← getGoals)
   setGoals rest
 
 /-! ## Which criterion applies? -/
@@ -458,9 +610,41 @@ elab "#causal_check " t:term : command => runTermElabM fun _ => do
       model provided that\n  \
       {MessageData.joinSep rest "\n  "}\n\
       (finish `block_linear` with a proof of this)"
-  | none => logInfo m!"cyclic: the linear criterion does not apply (some formula is not \
-      affine in the variables of its own block); uniqueness needs another argument \
-      (monotonicity, Gale–Nikaido, Minty–Browder), plugged in with Setup.unique_of_laws"
+  | none =>
+    -- second criterion: multi-affine formulas and a secant P-matrix (uniqueness only)
+    let M := SType.getAppArgs.back!
+    let uniqTy ← withLocalDeclD `u uTy fun u => withLocalDeclD `x uTy fun x =>
+      withLocalDeclD `y uTy fun y => do
+        let scm ← mkAppM ``Setup.scm #[S]
+        let hx ← mkAppM ``CausalPhys.SCM.Solves #[scm, u, x]
+        let hy ← mkAppM ``CausalPhys.SCM.Solves #[scm, u, y]
+        let dx ← mkAppM ``Model.dom #[M, x]
+        let dy ← mkAppM ``Model.dom #[M, y]
+        let body ← mkArrow hx (← mkArrow hy (← mkArrow dx (← mkArrow dy (← mkEq x y))))
+        mkForallFVars #[u, x, y] body
+    let saved ← saveState
+    let res2 ← try
+        Core.resetMessageLog
+        let g ← mkFreshExprMVar uniqTy
+        let gs ← Term.withoutErrToSorry <| Tactic.run g.mvarId! <| Tactic.withoutRecover (do
+          evalTactic (← `(tactic| secant_unique)))
+        if (← MonadLog.hasErrors) then throwError "failed"
+        if (← instantiateMVars g).hasSorry then throwError "failed"
+        let rest ← gs.mapM fun g => g.withContext do
+          return toMessageData (← ppExpr (← instantiateMVars (← g.getType)))
+        pure (some rest)
+      catch _ => pure none
+    saved.restore
+    match res2 with
+    | some [] => logInfo m!"cyclic, not linear in its own block, but multi-affine: at most \
+        one outcome in the domain (secant P-matrix criterion, proved by secant_unique)"
+    | some rest => logInfo m!"cyclic, not linear in its own block, but multi-affine: at most \
+        one outcome in the domain provided that these principal minors are positive:\n  \
+        {MessageData.joinSep rest "\n  "}\n(finish `secant_unique` with proofs of these)"
+    | none => logInfo m!"cyclic: neither criterion applies (some formula is not affine in \
+        its own block, and not affine in each variable separately); uniqueness needs a \
+        domain-specific argument (monotonicity, Gale–Nikaido, Minty–Browder), plugged in \
+        with Setup.unique_of_laws"
 
 /-! ## The domain: consistency and outcomes inside it -/
 
@@ -473,6 +657,7 @@ def modelLemmasIn (e : Expr) : MetaM (Array (TSyntax `Lean.Parser.Tactic.simpLem
 /-- Proves `M.dom w ∧ M.Sat w` for a concrete state `w` (the witness of a
     model): unfold, then the usual arithmetic closers. -/
 elab "witness_check" : tactic => withMainContext do
+  addParamFacts
   let extra ← modelLemmasIn (← instantiateMVars (← getMainTarget))
   evalTactic (← `(tactic| (
     refine ⟨?_, ?_⟩
@@ -499,6 +684,7 @@ elab "witness_check" : tactic => withMainContext do
     solution off, substitute, and show each condition with `positivity` (using
     hypotheses about the exogenous values in the context). -/
 elab "in_domain" : tactic => withMainContext do
+  addParamFacts
   let goal ← instantiateMVars (← getMainTarget)
   let extra ← modelLemmasIn goal
   let sId := mkIdent `s

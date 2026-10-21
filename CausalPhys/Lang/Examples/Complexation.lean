@@ -29,7 +29,7 @@ structure Complexation.Consts where
 
 causal_model Complexation (c : Complexation.Consts) where
   variables M L ML ML2 m0 l0
-  domain 0 < M ∧ 0 < L
+  domain 0 < M ∧ 0 < L ∧ 0 < ML ∧ 0 < ML2
   law k1 : ML = c.K1 * M * L
     solve ML := c.K1 * M * L
   law k2 : ML2 = c.K2 * ML * L
@@ -68,7 +68,7 @@ cyclic block: [k1, k2, metal]
 #guard_msgs in
 #causal_order buffered c
 /--
-info: cyclic: the linear criterion does not apply (some formula is not affine in the variables of its own block); uniqueness needs another argument (monotonicity, Gale–Nikaido, Minty–Browder), plugged in with Setup.unique_of_laws
+info: cyclic, not linear in its own block, but multi-affine: at most one outcome in the domain (secant P-matrix criterion, proved by secant_unique)
 -/
 #guard_msgs in
 #causal_check closed c
@@ -100,7 +100,7 @@ theorem m0_pos {s : V → ℝ} (hD : (model c).dom s) (h : (model c).Sat s) : 0 
   have h1 : s .ML = c.K1 * s .M * s .L := h .k1
   have h2 : s .ML2 = c.K2 * s .ML * s .L := h .k2
   have h3 : s .m0 = s .M + s .ML + s .ML2 := h .metal
-  have := c.hK1; have := c.hK2; have := hD.1; have := hD.2
+  have := c.hK1; have := c.hK2; have := hD.1; have := hD.2.1
   have : 0 < s .ML := by rw [h1]; positivity
   have : 0 < s .ML2 := by rw [h2]; positivity
   linarith
@@ -109,7 +109,7 @@ theorem l0_pos {s : V → ℝ} (hD : (model c).dom s) (h : (model c).Sat s) : 0 
   have h1 : s .ML = c.K1 * s .M * s .L := h .k1
   have h2 : s .ML2 = c.K2 * s .ML * s .L := h .k2
   have h4 : s .l0 = s .L + s .ML + 2 * s .ML2 := h .ligand
-  have := c.hK1; have := c.hK2; have := hD.1; have := hD.2
+  have := c.hK1; have := c.hK2; have := hD.1; have := hD.2.1
   have : 0 < s .ML := by rw [h1]; positivity
   have : 0 < s .ML2 := by rw [h2]; positivity
   linarith
@@ -120,12 +120,25 @@ def sysOf (s : V → ℝ) (hD : (model c).dom s) (h : (model c).Sat s) : Complex
 
 theorem isEq {s : V → ℝ} (hD : (model c).dom s) (h : (model c).Sat s) :
     (sysOf s hD h).IsEq (s .M) (s .L) (s .ML) (s .ML2) :=
-  ⟨hD.1, hD.2, h .k1, h .k2, h .metal, h .ligand⟩
+  ⟨hD.1, hD.2.1, h .k1, h .k2, h .metal, h .ligand⟩
 
 /-! ## Closed flask: uniqueness and Le Chatelier -/
 
-/-- The cyclic block has exactly one solution on the physical domain. -/
+/-- The cyclic block has at most one solution with positive concentrations,
+    proved automatically: the formulas are multi-affine and every principal
+    minor of the secant matrix is positive (`secant_unique`). -/
+theorem closed_atMostOne : ∀ u x y : V → ℝ, (closed c).scm.Solves u x →
+    (closed c).scm.Solves u y → (model c).dom x → (model c).dom y → x = y := by
+  secant_unique
+
 theorem closed_unique {u s t : V → ℝ} (hDs : (model c).dom s) (hDt : (model c).dom t)
+    (hs : (closed c).scm.Solves u s) (ht : (closed c).scm.Solves u t) : s = t :=
+  closed_atMostOne u s t hs ht hDs hDt
+
+/-- The same by the chemistry: reduce to one equation in the free ligand and use
+    that it is strictly increasing (`CausalPhys.Complexation`); this argument
+    also gives existence. -/
+theorem closed_unique_by_monotonicity {u s t : V → ℝ} (hDs : (model c).dom s) (hDt : (model c).dom t)
     (hs : (closed c).scm.Solves u s) (ht : (closed c).scm.Solves u t) : s = t := by
   refine (closed c).unique_of_laws ?_ hDs hDt hs ht
   intro s t hDs hDt hss hst hex
@@ -133,7 +146,7 @@ theorem closed_unique {u s t : V → ℝ} (hDs : (model c).dom s) (hDt : (model 
   have hl := hex .l0 (by simp [closed])
   have h1 := isEq hDs hss
   have h2 : (sysOf s hDs hss).IsEq (t .M) (t .L) (t .ML) (t .ML2) :=
-    ⟨hDt.1, hDt.2, hst .k1, hst .k2, hm.trans (hst .metal), hl.trans (hst .ligand)⟩
+    ⟨hDt.1, hDt.2.1, hst .k1, hst .k2, hm.trans (hst .metal), hl.trans (hst .ligand)⟩
   have := (sysOf s hDs hss).eq_exists_unique.unique
     (y₁ := (s .M, s .L, s .ML, s .ML2)) (y₂ := (t .M, t .L, t .ML, t .ML2)) h1 h2
   simp only [Prod.mk.injEq] at this
@@ -170,7 +183,7 @@ theorem buffered_solution {u s : V → ℝ} (hD : (model c).dom s)
   obtain ⟨hsat, hex⟩ := ((buffered c).solves_iff u s hD).1 hs
   have hL := hex .L (by simp [buffered])
   have hm := hex .m0 (by simp [buffered])
-  have key := ((sysOf s hD hsat).buffered_eq (s .L) hD.2 (s .M) (s .ML) (s .ML2)).1
+  have key := ((sysOf s hD hsat).buffered_eq (s .L) hD.2.1 (s .M) (s .ML) (s .ML2)).1
     ⟨hD.1, hsat .k1, hsat .k2, hsat .metal⟩
   refine ⟨?_, hsat .ligand⟩
   rw [key.1, ← hL, ← hm]
@@ -182,7 +195,6 @@ theorem buffered_solution {u s : V → ℝ} (hD : (model c).dom s)
 theorem buffered_existsUnique (u : V → ℝ) (hL : 0 < u .L) :
     ∃! s, (buffered c).scm.Solves u s := by
   linear_block
-  have := c.hK1; have := c.hK2; positivity
 
 /-! ## Holding the free ligand fixed in the closed flask
 
@@ -214,7 +226,6 @@ theorem fixL_is_do (x : ℝ) (u s : V → ℝ) (hD : (model c).dom s) :
 theorem fixL_existsUnique (u : V → ℝ) (hL : 0 < u .L) :
     ∃! s, ((closed c).intervene .ligand .L).scm.Solves u s := by
   linear_block
-  have := c.hK1; have := c.hK2; positivity
 
 variable {c}
 

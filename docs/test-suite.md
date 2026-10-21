@@ -21,7 +21,7 @@ Negative tests (`Tests/Rejects.lean`) pin the errors the language must give for 
 
 | Model | Setups | Expected structure | Expected answer | Theorems |
 |---|---|---|---|---|
-| Stepwise complexation (`Examples/Complexation`) | closed flask; ligand buffer | one nonlinear block of four laws; with a buffer a linear block of three, and the ligand balance determines l₀ | exactly one equilibrium; Le Chatelier: more metal, less free ligand; buffer determinant 1 + K₁L + K₁K₂L² | `closed_unique`, `le_chatelier`, `buffered_existsUnique` |
+| Stepwise complexation (`Examples/Complexation`) | closed flask; ligand buffer | one nonlinear block of four laws, multi-affine, uniqueness proved automatically by the secant P-matrix criterion; with a buffer a linear block of three, and the ligand balance determines l₀ | exactly one equilibrium; Le Chatelier: more metal, less free ligand; buffer determinant 1 + K₁L + K₁K₂L² | `closed_atMostOne` (automatic), `closed_unique_by_monotonicity`, `le_chatelier`, `buffered_existsUnique` |
 | Weak acid (`Tests/Chemistry`) | titration (base added); buffer (pH fixed) | one nonlinear block; a linear block {acid, mass}, and the charge balance determines Na⁺ | Henderson–Hasselbalch: [A⁻] = C·Ka/([H⁺]+Ka) | `buffer_existsUnique`, `dissociated` |
 | Beer–Lambert after dilution (`Tests/Chemistry`) | prepared sample; flow cell | acyclic: n,V → c → A; or c,V → n | doubling V halves A; in the flow cell A stays and n doubles | `prepared_dilute`, `flowCell_dilute` |
 | Arrhenius (`Tests/Chemistry`) | A, Eₐ, T, [X] fixed | acyclic | a higher temperature gives a higher rate | `hotter_faster` |
