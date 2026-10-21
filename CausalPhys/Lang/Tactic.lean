@@ -15,6 +15,7 @@
 -/
 import CausalPhys.Lang.Core
 import CausalPhys.Lang.Linear
+import CausalPhys.Lang.Blockwise
 import Mathlib.Tactic.FieldSimp
 import Mathlib.Tactic.LinearCombination
 import Mathlib.Tactic.Linarith
@@ -256,6 +257,150 @@ elab "linear_block" : tactic => withMainContext do
       | (field_simp; positivity)
       | norm_num))))
 
+/-! ## The linear criterion, block by block -/
+
+/-- Unfolding lemmas for the blockwise criterion. -/
+syntax "block_unfold" (Lean.Parser.Tactic.location)? : tactic
+macro_rules
+  | `(tactic| block_unfold $[$loc]?) => `(tactic|
+  simp only [Setup.formula, Setup.bconst, Setup.bcoef, Setup.bbase, Setup.bmat, Setup.bvec,
+    Model.mechOf, Model.find, Model.ofSolvers, CausalPhys.Lang.mech, CausalPhys.SCM.Mech.const,
+    List.map_cons, List.map_nil, List.find?_cons, List.find?_nil,
+    Option.map_some, Option.getD_some, Function.update_apply, List.mem_cons, List.not_mem_nil,
+    reduceCtorEq, decide_true, decide_false, ↓reduceIte, or_false, or_true, false_or, true_or,
+    and_true, true_and, and_false, false_and,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two, Matrix.cons_val_three,
+    Matrix.head_cons, Matrix.tail_cons, Matrix.cons_val_succ, Matrix.cons_val, Fin.isValue,
+    Fin.sum_univ_succ, Fin.sum_univ_zero, ne_eq, Fin.reduceEq, not_false_eq_true, Fin.succ_zero_eq_one,
+    Fin.succ_one_eq_two] $[$loc]?)
+
+/-- `block_linear` proves `∃! s, S.scm.Solves u s` with the blockwise linear
+    criterion: Lean computes the blocks in causal order, proves that every
+    formula is affine in the variables of its own block (coefficients may depend
+    on lower blocks), and computes det(I − C) for every block. Determinant
+    conditions it cannot discharge are left as goals, one per block. -/
+elab "block_linear" : tactic => withMainContext do
+  let goal ← instantiateMVars (← getMainTarget)
+  let (``ExistsUnique, #[_, p]) := goal.getAppFnArgs
+    | throwError "block_linear: expected a goal `∃! s, S.scm.Solves u s`"
+  let (S, u) ← lambdaTelescope p fun _ body => do
+    let (``CausalPhys.SCM.Solves, #[_, _, model, u, _]) := body.getAppFnArgs
+      | throwError "block_linear: expected a goal `∃! s, S.scm.Solves u s`"
+    let (``CausalPhys.Lang.Setup.scm, args) := model.getAppFnArgs
+      | throwError "block_linear: expected a goal `∃! s, S.scm.Solves u s`"
+    pure (args[7]!, u)
+  let SType ← inferType S
+  let M := SType.getAppArgs.back!
+  let extra ← unfoldLemmas #[M, S]
+  let eqs ← kernelNorm (← mkAppM ``Model.eqList #[M])
+  let some (_, laws) := eqs.listLit? | throwError "block_linear: could not list the laws"
+  let laws := laws.toArray
+  let mut vars : Array Expr := #[]
+  for e in laws do
+    vars := vars.push (← kernelNorm (← mkAppM ``Order.Cert.σ #[← mkAppM ``Setup.cert #[S], e]))
+  -- the rank of a law: how many laws lie strictly upstream of it (equal inside a block)
+  let exo ← mkAppM ``Setup.exo #[S]
+  let st ← mkAppM ``Model.struct #[M, exo]
+  let mut ranks : Array Nat := #[]
+  for e in laws do
+    let r ← kernelNorm (← mkAppOptM ``Order.rankOf #[none, none, none, none, none, st, e])
+    let some k := r.rawNatLit? <|> (do let n ← r.nat?; pure n)
+      | throwError "block_linear: could not compute the rank of {e}"
+    ranks := ranks.push k
+  let levels := (ranks.toList.eraseDups.toArray.qsort (· < ·))
+  let m := levels.size
+  let blkIdx : Array Nat := ranks.map fun r => levels.idxOf r
+  let lawsStx ← laws.mapM fun e => Term.exprToSyntax e
+  let varsStx ← vars.mapM fun e => Term.exprToSyntax e
+  let mT := Syntax.mkNumLit (toString m)
+  let blkStx : Array Term ← blkIdx.mapM fun k => `(($(Syntax.mkNumLit (toString k)) : Fin $mT))
+  let mut bvStx : Array Term := #[]
+  for b in [0:m] do
+    let mut vs : Array Term := #[]
+    for i in [0:laws.size] do
+      if blkIdx[i]! == b then vs := vs.push varsStx[i]!
+    bvStx := bvStx.push (← `([$vs,*]))
+  let SStx ← Term.exprToSyntax S
+  let uStx ← Term.exprToSyntax u
+  evalTactic (← `(tactic|
+    refine Setup.block_existsUnique (S := $SStx) (laws := ![$lawsStx,*]) (vars := ![$varsStx,*])
+      (blk := ![$blkStx,*]) (bv := ![$bvStx,*]) (by kernel_decide) ?aff $uStx ?det))
+  evalTactic (← `(tactic| case aff =>
+    unfold Setup.BlockAffine
+    simp only [Fin.forall_fin_succ, IsEmpty.forall_iff, and_true]
+    repeat' apply And.intro
+    all_goals
+      intro s
+      try block_unfold
+      simp only [$extra,*]
+      try block_unfold
+      first
+      | ring1
+      | fail "block_linear: a formula is not affine in the variables of its own block; \
+          the blockwise linear criterion does not apply (try a monotonicity or fixed \
+          point argument via `unique_of_laws`)"))
+  let hsI := mkIdent `hs
+  let hlowI := mkIdent `hlow
+  let sI := mkIdent `s
+  let bI := mkIdent `b
+  let nT := Syntax.mkNumLit (toString laws.size)
+  evalTactic (← `(tactic| (intro $bI:ident; fin_cases $bI:ident)))
+  let detGoals ← getGoals
+  let mut rest : List MVarId := []
+  for (g, b) in detGoals.zip (List.range m) do
+    setGoals [g]
+    evalTactic (← `(tactic| intro $sI:ident $hsI:ident $hlowI:ident))
+    evalTactic (← `(tactic|
+      try simp only [$extra,*, List.mem_cons, List.not_mem_nil, or_false, forall_eq_or_imp,
+        forall_eq, IsEmpty.forall_iff, implies_true, and_true] at $hsI:ident))
+    -- laws of lower blocks of size one: their equations can be substituted
+    let mut lowIds : Array Ident := #[]
+    for k in [0:laws.size] do
+      let bk := blkIdx[k]!
+      if bk < b && (blkIdx.filter (· == bk)).size == 1 then
+        let hk := mkIdent (Name.mkSimple s!"hlow_{k}")
+        let kT := Syntax.mkNumLit (toString k)
+        evalTactic (← `(tactic|
+          have $hk:ident := $hlowI:ident ($kT : Fin $nT) (by decide)))
+        evalTactic (← `(tactic| try block_unfold at $hk:ident))
+        evalTactic (← `(tactic| try simp only [$extra,*] at $hk:ident))
+        evalTactic (← `(tactic| try block_unfold at $hk:ident))
+        lowIds := lowIds.push hk
+    let lowLemmas : Array (TSyntax `Lean.Parser.Tactic.simpLemma) ←
+      lowIds.mapM fun h => `(Lean.Parser.Tactic.simpLemma| $h:ident)
+    -- reduce to the determinant of block b alone
+    let mut idxs : Array Term := #[]
+    for k in [0:laws.size] do
+      if blkIdx[k]! == b then idxs := idxs.push (← `(($(Syntax.mkNumLit (toString k)) : Fin $nT)))
+    evalTactic (← `(tactic|
+      rw [Setup.det_bmat (idx := ![$idxs,*]) (by kernel_decide) (by kernel_decide) $sI:ident]))
+    evalTactic (← `(tactic| (
+      try simp only [Fin.isValue, Fin.mk_zero, Fin.zero_eta, Fin.mk_one]
+      try (first
+        | simp only [Matrix.det_fin_one, Matrix.det_fin_two, Matrix.det_fin_three]
+        | simp [Matrix.det_succ_row_zero, Fin.sum_univ_succ, Fin.succAbove, Matrix.one_apply])
+      try simp only [Matrix.submatrix_apply]
+      try simp (config := { decide := true }) only [Matrix.cons_val, Setup.bmat, ↓reduceIte,
+        ite_true, ite_false, and_self, and_true, true_and, and_false, false_and]
+      try block_unfold
+      try simp only [$extra,*]
+      try block_unfold)))
+    if !lowLemmas.isEmpty then
+      evalTactic (← `(tactic| try simp only [$lowLemmas,*]))
+    evalTactic (← `(tactic| (
+      try simp only [$hsI:ident]
+      try simp (config := { decide := true }) only [Matrix.cons_val, ↓reduceIte, ite_true,
+        ite_false, and_self, and_true, true_and, and_false, false_and, mul_one, one_mul,
+        mul_zero, zero_mul, sub_zero, zero_sub, add_zero, zero_add]
+      try ring_nf
+      try (first
+        | (norm_num; done)
+        | positivity
+        | (field_simp; positivity))
+      try simp only [not_true_eq_false, ne_eq, not_false_eq_true])))
+    rest := rest ++ (← getGoals)
+  setGoals rest
+
 /-! ## Which criterion applies? -/
 
 /-- `#causal_check S` says how the question "exactly one outcome?" is settled
@@ -286,7 +431,7 @@ elab "#causal_check " t:term : command => runTermElabM fun _ => do
       let g ← mkFreshExprMVar goalTy
       let gs ← Term.withoutErrToSorry <| Tactic.run g.mvarId! <| Tactic.withoutRecover (do
         evalTactic (← `(tactic| intro $(mkIdent `u):ident))
-        evalTactic (← `(tactic| linear_block)))
+        evalTactic (← `(tactic| block_linear)))
       if (← MonadLog.hasErrors) then
         throwError "failed"
       let pf ← instantiateMVars g
@@ -301,21 +446,21 @@ elab "#causal_check " t:term : command => runTermElabM fun _ => do
   match result with
   | some [m] =>
     if (← m.toString) == "__singular__" then
-      logInfo m!"cyclic, linear, singular: det(I − C) = 0, so the linear criterion \
-        fails (for an affine block this means no outcome or infinitely many)"
+      logInfo m!"cyclic, linear in each block, singular: det(I − C) = 0 for a block, so \
+        the linear criterion fails (for an affine block this means no outcome or infinitely \
+        many)"
     else
-      logInfo m!"cyclic, linear: exactly one outcome of the causal model provided that\n  {m}\n\
-        (finish `linear_block` with a proof of this)"
-  | some [] => logInfo m!"cyclic, linear: exactly one outcome of the causal model for every \
-      choice of the exogenous values (proved by linear_block)"
-  | some rest => logInfo m!"cyclic, linear: exactly one outcome of the causal model provided \
-      that\n  \
+      logInfo m!"cyclic, linear in each block: exactly one outcome of the causal model \
+        provided that\n  {m}\n(finish `block_linear` with a proof of this)"
+  | some [] => logInfo m!"cyclic, linear in each block: exactly one outcome of the causal \
+      model for every choice of the exogenous values (proved by block_linear)"
+  | some rest => logInfo m!"cyclic, linear in each block: exactly one outcome of the causal \
+      model provided that\n  \
       {MessageData.joinSep rest "\n  "}\n\
-      (finish `linear_block` with a proof of this)"
-  | none => logInfo m!"cyclic: the linear criterion does not apply (it needs every formula \
-      of the setup to be affine in the endogenous variables, with coefficients that depend \
-      only on exogenous ones); uniqueness needs another argument (monotonicity, \
-      Gale–Nikaido, Minty–Browder), plugged in with Setup.unique_of_laws"
+      (finish `block_linear` with a proof of this)"
+  | none => logInfo m!"cyclic: the linear criterion does not apply (some formula is not \
+      affine in the variables of its own block); uniqueness needs another argument \
+      (monotonicity, Gale–Nikaido, Minty–Browder), plugged in with Setup.unique_of_laws"
 
 /-! ## The domain: consistency and outcomes inside it -/
 
@@ -382,6 +527,8 @@ macro "laws_unique" : tactic => `(tactic| (
   · first
     | exact CausalPhys.Lang.Setup.existsUnique _ (by struct_decide) _
     | linear_block
+    | block_linear
   · in_domain))
+
 
 end CausalPhys.Lang

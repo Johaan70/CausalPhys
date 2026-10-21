@@ -47,7 +47,7 @@ cyclic block: [acid, mass, charge]
 #guard_msgs in
 #causal_order WeakAcid.titration
 /--
-info: cyclic: the linear criterion does not apply (it needs every formula of the setup to be affine in the endogenous variables, with coefficients that depend only on exogenous ones); uniqueness needs another argument (monotonicity, Gale–Nikaido, Minty–Browder), plugged in with Setup.unique_of_laws
+info: cyclic: the linear criterion does not apply (some formula is not affine in the variables of its own block); uniqueness needs another argument (monotonicity, Gale–Nikaido, Minty–Browder), plugged in with Setup.unique_of_laws
 -/
 #guard_msgs in
 #causal_check WeakAcid.titration
@@ -60,9 +60,9 @@ cyclic block: [acid, mass]
 #guard_msgs in
 #causal_order WeakAcid.buffer
 /--
-info: cyclic, linear: exactly one outcome of the causal model provided that
-  ¬1 + u WeakAcid.V.Ka * (u WeakAcid.V.H)⁻¹ = 0
-(finish `linear_block` with a proof of this)
+info: cyclic, linear in each block: exactly one outcome of the causal model provided that
+  ¬1 + (u WeakAcid.V.H)⁻¹ * u WeakAcid.V.Ka = 0
+(finish `block_linear` with a proof of this)
 -/
 #guard_msgs in
 #causal_check WeakAcid.buffer

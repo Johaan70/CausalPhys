@@ -36,9 +36,9 @@ cyclic block: [wall1, wall2]
 #guard_msgs in
 #causal_order ThermalWall.baths
 /--
-info: cyclic, linear: exactly one outcome of the causal model provided that
-  ¬1 + u ThermalWall.V.R1 * (u ThermalWall.V.R2)⁻¹ = 0
-(finish `linear_block` with a proof of this)
+info: cyclic, linear in each block: exactly one outcome of the causal model provided that
+  ¬1 + (u ThermalWall.V.R2)⁻¹ * u ThermalWall.V.R1 = 0
+(finish `block_linear` with a proof of this)
 -/
 #guard_msgs in
 #causal_check ThermalWall.baths

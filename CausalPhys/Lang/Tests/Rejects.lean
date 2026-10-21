@@ -95,7 +95,7 @@ causal_model Singular where
   setup s fixes a
 
 /--
-info: cyclic, linear, singular: det(I − C) = 0, so the linear criterion fails (for an affine block this means no outcome or infinitely many)
+info: cyclic, linear in each block, singular: det(I − C) = 0 for a block, so the linear criterion fails (for an affine block this means no outcome or infinitely many)
 -/
 #guard_msgs in
 #causal_check Singular.s
@@ -111,7 +111,7 @@ causal_model Nonlinear where
   setup s fixes a
 
 /--
-info: cyclic: the linear criterion does not apply (it needs every formula of the setup to be affine in the endogenous variables, with coefficients that depend only on exogenous ones); uniqueness needs another argument (monotonicity, Gale–Nikaido, Minty–Browder), plugged in with Setup.unique_of_laws
+info: cyclic: the linear criterion does not apply (some formula is not affine in the variables of its own block); uniqueness needs another argument (monotonicity, Gale–Nikaido, Minty–Browder), plugged in with Setup.unique_of_laws
 -/
 #guard_msgs in
 #causal_check Nonlinear.s

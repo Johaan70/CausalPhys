@@ -34,6 +34,13 @@ Negative tests (`Tests/Rejects.lean`) pin the errors the language must give for 
 | Keynesian cross (`Tests/Economics`) | short run; policy target | one linear block {Y, C} (needs 1 − c₁ ≠ 0); acyclic, income identity determines G | multiplier 1/(1 − c₁); the G needed for a target income | `shortRun_existsUnique`, `multiplier`, `target_G` |
 | Quantity theory, MV = PY (`Tests/Economics`) | flexible prices; fixed prices | acyclic; the law determines P, or Y | doubling M doubles P, or doubles Y | `classical_money`, `fixedPrice_money` |
 
+## Blockwise criterion (`Tests/Blockwise`)
+
+| Model | Setup | Expected | Theorems |
+|---|---|---|---|
+| Current divider with the power in one resistor | current source | linear block {U, I₁, I₂} with a nonlinear law (P₁ = R₁I₁²) downstream; exactly one state | `DividerPower.existsUnique` (proved by `block_linear` alone) |
+| Current divider with a heated resistor | heater and current source | upstream laws T = Tₐ + kP_h and R₁ = R₀(1 + αT) give the divider an endogenous coefficient; exactly one state when the heated resistance is positive | `HeatedDivider.existsUnique` |
+
 ## Interventions inside cyclic blocks
 
 | Model | Intervention | Expected | Theorems |

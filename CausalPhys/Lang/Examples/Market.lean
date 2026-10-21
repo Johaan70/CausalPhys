@@ -65,9 +65,9 @@ acyclic: every intervention has exactly one outcome of the causal model
 #guard_msgs in
 #causal_order open_ m
 /--
-info: cyclic, linear: exactly one outcome of the causal model provided that
+info: cyclic, linear in each block: exactly one outcome of the causal model provided that
   ¬1 + m.b⁻¹ * m.e = 0
-(finish `linear_block` with a proof of this)
+(finish `block_linear` with a proof of this)
 -/
 #guard_msgs in
 #causal_check closed m

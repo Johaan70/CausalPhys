@@ -50,9 +50,9 @@ cyclic block: [income, consumption]
 #guard_msgs in
 #causal_order shortRun k
 /--
-info: cyclic, linear: exactly one outcome of the causal model provided that
+info: cyclic, linear in each block: exactly one outcome of the causal model provided that
   ¬1 - k.c1 = 0
-(finish `linear_block` with a proof of this)
+(finish `block_linear` with a proof of this)
 -/
 #guard_msgs in
 #causal_check shortRun k

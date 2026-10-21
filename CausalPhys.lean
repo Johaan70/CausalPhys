@@ -29,6 +29,7 @@ import CausalPhys.Reflexivity
 import CausalPhys.LpMeasure
 import CausalPhys.Lang.Core
 import CausalPhys.Lang.Linear
+import CausalPhys.Lang.Blockwise
 import CausalPhys.Lang.Tactic
 import CausalPhys.Lang.Syntax
 import CausalPhys.Lang.Examples.Gas
@@ -39,3 +40,4 @@ import CausalPhys.Lang.Examples.Divider
 import CausalPhys.Lang.Tests.Physics
 import CausalPhys.Lang.Tests.Chemistry
 import CausalPhys.Lang.Tests.Economics
+import CausalPhys.Lang.Tests.Blockwise

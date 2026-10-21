@@ -40,9 +40,9 @@ cyclic block: [kcl, ohm1, ohm2]
 #guard_msgs in
 #causal_order Divider.currentSource
 /--
-info: cyclic, linear: exactly one outcome of the causal model provided that
+info: cyclic, linear in each block: exactly one outcome of the causal model provided that
   ¬1 + (u Divider.V.R1)⁻¹ * u Divider.V.R2 = 0
-(finish `linear_block` with a proof of this)
+(finish `block_linear` with a proof of this)
 -/
 #guard_msgs in
 #causal_check Divider.currentSource
