@@ -24,13 +24,13 @@ causal_model Gas where
 
 /--
 info: gas determines p, reading [n, T, vol]
-acyclic: every intervention has exactly one outcome
+acyclic: every intervention has exactly one outcome of the causal model
 -/
 #guard_msgs in
 #causal_order Gas.locked
 /--
 info: gas determines vol, reading [n, T, p]
-acyclic: every intervention has exactly one outcome
+acyclic: every intervention has exactly one outcome of the causal model
 -/
 #guard_msgs in
 #causal_order Gas.weighted

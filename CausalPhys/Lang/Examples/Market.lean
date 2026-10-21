@@ -59,19 +59,19 @@ cyclic block: [demand, supply, clearing]
 info: demand determines Qd, reading [P, y]
 supply determines Qs, reading [P, t, w]
 clearing determines Imp, reading [Qd, Qs]
-acyclic: every intervention has exactly one outcome
+acyclic: every intervention has exactly one outcome of the causal model
 -/
 #guard_msgs in
 #causal_order open_ m
 /--
-info: cyclic, linear: exactly one outcome provided that
+info: cyclic, linear: exactly one outcome of the causal model provided that
   ¬1 + m.b⁻¹ * m.e = 0
 (finish `linear_block` with a proof of this)
 -/
 #guard_msgs in
 #causal_check closed m
 /--
-info: acyclic: every intervention has exactly one outcome (Setup.do_existsUnique)
+info: acyclic: every intervention has exactly one outcome of the causal model (Setup.do_existsUnique; it satisfies the laws when it lies in the domain)
 -/
 #guard_msgs in
 #causal_check open_ m
@@ -107,6 +107,12 @@ theorem price_of_laws {s : V → ℝ} (h : (model m).Sat s) :
 theorem closed_existsUnique (u : V → ℝ) : ∃! s, (closed m).scm.Solves u s := by
   linear_block
   have := m.hb; have := m.he; positivity
+
+/-- The market laws themselves (demand, supply, clearing) have exactly one
+    solution with the given exogenous values; the domain is everything here. -/
+theorem closed_laws (u : V → ℝ) :
+    ∃! s, (model m).dom s ∧ (model m).Sat s ∧ ∀ v, v ∈ (closed m).exo → s v = u v :=
+  (closed m).laws_existsUnique (closed_existsUnique u) fun _ _ => trivial
 
 theorem closed_unique {u s s' : V → ℝ} (hs : (closed m).scm.Solves u s)
     (hs' : (closed m).scm.Solves u s') : s = s' :=

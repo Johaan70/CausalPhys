@@ -49,7 +49,7 @@ cyclic block: [income, consumption]
 #guard_msgs in
 #causal_order shortRun k
 /--
-info: cyclic, linear: exactly one outcome provided that
+info: cyclic, linear: exactly one outcome of the causal model provided that
   ¬1 - k.c1 = 0
 (finish `linear_block` with a proof of this)
 -/
@@ -58,12 +58,12 @@ info: cyclic, linear: exactly one outcome provided that
 /--
 info: income determines G, reading [Y, C, I]
 consumption determines C, reading [Y, Tax]
-acyclic: every intervention has exactly one outcome
+acyclic: every intervention has exactly one outcome of the causal model
 -/
 #guard_msgs in
 #causal_order target k
 /--
-info: acyclic: every intervention has exactly one outcome (Setup.do_existsUnique)
+info: acyclic: every intervention has exactly one outcome of the causal model (Setup.do_existsUnique; it satisfies the laws when it lies in the domain)
 -/
 #guard_msgs in
 #causal_check target k
@@ -132,13 +132,13 @@ causal_model Quantity where
 
 /--
 info: fisher determines P, reading [M, Vel, Y]
-acyclic: every intervention has exactly one outcome
+acyclic: every intervention has exactly one outcome of the causal model
 -/
 #guard_msgs in
 #causal_order Quantity.classical
 /--
 info: fisher determines Y, reading [M, Vel, P]
-acyclic: every intervention has exactly one outcome
+acyclic: every intervention has exactly one outcome of the causal model
 -/
 #guard_msgs in
 #causal_order Quantity.fixedPrice

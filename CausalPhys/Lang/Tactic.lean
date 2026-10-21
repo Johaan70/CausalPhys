@@ -159,7 +159,7 @@ elab "#causal_order " t:term : command => runTermElabM fun _ => do
     lines := lines.push m!"{shortName e} determines {shortName v}, reading {shortName deps}"
   let acyclic ← kernelNorm (← mkDecide (← mkAppM ``Setup.Acyclic #[S]))
   if acyclic.isAppOf ``Bool.true then
-    lines := lines.push m!"acyclic: every intervention has exactly one outcome"
+    lines := lines.push m!"acyclic: every intervention has exactly one outcome of the causal model"
   else
     let mut seen : Array Expr := #[]
     for ctor in ← ctorsOf E do
@@ -260,7 +260,8 @@ elab "#causal_check " t:term : command => runTermElabM fun _ => do
   let S ← instantiateMVars S
   let acyclic ← kernelNorm (← mkDecide (← mkAppM ``Setup.Acyclic #[S]))
   if acyclic.isAppOf ``Bool.true then
-    logInfo m!"acyclic: every intervention has exactly one outcome (Setup.do_existsUnique)"
+    logInfo m!"acyclic: every intervention has exactly one outcome of the causal model \
+      (Setup.do_existsUnique; it satisfies the laws when it lies in the domain)"
     return
   let SType ← inferType S
   let V := SType.getAppArgs[1]!
@@ -277,7 +278,7 @@ elab "#causal_check " t:term : command => runTermElabM fun _ => do
       Core.resetMessageLog
       let g ← mkFreshExprMVar goalTy
       let gs ← Term.withoutErrToSorry <| Tactic.run g.mvarId! <| Tactic.withoutRecover (do
-        evalTactic (← `(tactic| intro u))
+        evalTactic (← `(tactic| intro $(mkIdent `u):ident))
         evalTactic (← `(tactic| linear_block)))
       if (← MonadLog.hasErrors) then
         throwError "failed"
@@ -296,15 +297,17 @@ elab "#causal_check " t:term : command => runTermElabM fun _ => do
       logInfo m!"cyclic, linear, singular: det(I − C) = 0, so the linear criterion \
         fails (for an affine block this means no outcome or infinitely many)"
     else
-      logInfo m!"cyclic, linear: exactly one outcome provided that\n  {m}\n\
+      logInfo m!"cyclic, linear: exactly one outcome of the causal model provided that\n  {m}\n\
         (finish `linear_block` with a proof of this)"
-  | some [] => logInfo m!"cyclic, linear: exactly one outcome for every choice of the \
-      exogenous values (proved by linear_block)"
-  | some rest => logInfo m!"cyclic, linear: exactly one outcome provided that\n  \
+  | some [] => logInfo m!"cyclic, linear: exactly one outcome of the causal model for every \
+      choice of the exogenous values (proved by linear_block)"
+  | some rest => logInfo m!"cyclic, linear: exactly one outcome of the causal model provided \
+      that\n  \
       {MessageData.joinSep rest "\n  "}\n\
       (finish `linear_block` with a proof of this)"
-  | none => logInfo m!"cyclic, nonlinear: the linear criterion does not apply; uniqueness \
-      needs a domain-specific argument (monotonicity, Gale–Nikaido, Minty–Browder), \
-      plugged in with Setup.unique_of_laws"
+  | none => logInfo m!"cyclic: the linear criterion does not apply (it needs every formula \
+      of the setup to be affine in the endogenous variables, with coefficients that depend \
+      only on exogenous ones); uniqueness needs another argument (monotonicity, \
+      Gale–Nikaido, Minty–Browder), plugged in with Setup.unique_of_laws"
 
 end CausalPhys.Lang

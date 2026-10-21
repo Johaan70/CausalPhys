@@ -35,8 +35,8 @@ cyclic block: [wall1, wall2]
 #guard_msgs in
 #causal_order ThermalWall.baths
 /--
-info: cyclic, linear: exactly one outcome provided that
-  ¬1 + u✝ ThermalWall.V.R1 * (u✝ ThermalWall.V.R2)⁻¹ = 0
+info: cyclic, linear: exactly one outcome of the causal model provided that
+  ¬1 + u ThermalWall.V.R1 * (u ThermalWall.V.R2)⁻¹ = 0
 (finish `linear_block` with a proof of this)
 -/
 #guard_msgs in
@@ -89,12 +89,12 @@ causal_model Battery where
 /--
 info: loop determines I, reading [eps, R, r]
 load determines U, reading [R, I]
-acyclic: every intervention has exactly one outcome
+acyclic: every intervention has exactly one outcome of the causal model
 -/
 #guard_msgs in
 #causal_order Battery.circuit
 /--
-info: acyclic: every intervention has exactly one outcome (Setup.do_existsUnique)
+info: acyclic: every intervention has exactly one outcome of the causal model (Setup.do_existsUnique; it satisfies the laws when it lies in the domain)
 -/
 #guard_msgs in
 #causal_check Battery.circuit

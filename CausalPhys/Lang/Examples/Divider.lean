@@ -39,8 +39,8 @@ cyclic block: [kcl, ohm1, ohm2]
 #guard_msgs in
 #causal_order Divider.currentSource
 /--
-info: cyclic, linear: exactly one outcome provided that
-  ¬1 + (u✝ Divider.V.R1)⁻¹ * u✝ Divider.V.R2 = 0
+info: cyclic, linear: exactly one outcome of the causal model provided that
+  ¬1 + (u Divider.V.R1)⁻¹ * u Divider.V.R2 = 0
 (finish `linear_block` with a proof of this)
 -/
 #guard_msgs in
@@ -49,12 +49,12 @@ info: cyclic, linear: exactly one outcome provided that
 info: kcl determines I, reading [I1, I2]
 ohm1 determines I1, reading [U, R1]
 ohm2 determines I2, reading [U, R2]
-acyclic: every intervention has exactly one outcome
+acyclic: every intervention has exactly one outcome of the causal model
 -/
 #guard_msgs in
 #causal_order Divider.voltageSource
 /--
-info: acyclic: every intervention has exactly one outcome (Setup.do_existsUnique)
+info: acyclic: every intervention has exactly one outcome of the causal model (Setup.do_existsUnique; it satisfies the laws when it lies in the domain)
 -/
 #guard_msgs in
 #causal_check Divider.voltageSource
@@ -70,6 +70,18 @@ theorem voltageSource_acyclic : voltageSource.Acyclic := by struct_decide
 theorem currentSource_existsUnique (u : V → ℝ) (h1 : 0 < u .R1) (h2 : 0 < u .R2) :
     ∃! s, currentSource.scm.Solves u s := by
   linear_block
+
+/-- The same statement for the laws themselves (Kirchhoff and Ohm), not only
+    for the solved formulas: with positive resistances the outcome lies in the
+    domain, so the laws have exactly one solution there. -/
+theorem currentSource_laws (u : V → ℝ) (h1 : 0 < u .R1) (h2 : 0 < u .R2) :
+    ∃! s, model.dom s ∧ model.Sat s ∧ ∀ v, v ∈ currentSource.exo → s v = u v := by
+  apply currentSource.laws_existsUnique (currentSource_existsUnique u h1 h2)
+  intro s hs
+  show 0 < s .R1 ∧ 0 < s .R2
+  rw [currentSource.exo_eq hs (v := .R1) (by simp [currentSource]),
+    currentSource.exo_eq hs (v := .R2) (by simp [currentSource])]
+  exact ⟨h1, h2⟩
 
 /-- The current divider rule: I₁ = R₂/(R₁ + R₂)·I. -/
 theorem divider_rule {u s : V → ℝ} (h1 : 0 < u .R1) (h2 : 0 < u .R2)

@@ -102,9 +102,30 @@ causal_model Nonlinear where
   setup s fixes a
 
 /--
-info: cyclic, nonlinear: the linear criterion does not apply; uniqueness needs a domain-specific argument (monotonicity, Gale–Nikaido, Minty–Browder), plugged in with Setup.unique_of_laws
+info: cyclic: the linear criterion does not apply (it needs every formula of the setup to be affine in the endogenous variables, with coefficients that depend only on exogenous ones); uniqueness needs another argument (monotonicity, Gale–Nikaido, Minty–Browder), plugged in with Setup.unique_of_laws
 -/
 #guard_msgs in
 #causal_check Nonlinear.s
+
+/-! Parameters must be explicit, and must not share a name with a variable. -/
+/--
+error: causal_model: parameters must be explicit binders `(name : Type)`
+-/
+#guard_msgs in
+causal_model ImplicitParam {k : ℝ} where
+  variables x y
+  law l : x = k * y
+    solve x := k * y
+  setup s fixes y
+
+/--
+error: causal_model: the parameter x has the same name as a variable
+-/
+#guard_msgs in
+causal_model ClashingParam (x : ℝ) where
+  variables x y
+  law l : y = 2 * x
+    solve y := 2 * x
+  setup s fixes x
 
 end CausalPhys.Tests.Rejects

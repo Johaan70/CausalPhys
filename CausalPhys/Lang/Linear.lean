@@ -6,7 +6,8 @@
   a linear feedback. For those the question "exactly one outcome?" has a
   complete answer: write the solved forms as
 
-        x = C·x + d          (C and d depend only on the exogenous values)
+        x = C·x + d          (C and d may depend only on the exogenous values,
+                              not on endogenous variables of other blocks)
 
   then the setup has exactly one solution when det(I − C) ≠ 0.
 
@@ -16,6 +17,12 @@
   unfolding). Both side conditions, and the determinant, are produced by the
   tactic `linear_block` in `CausalPhys.Lang.Tactic`, so for a concrete model
   what is left is a statement like `b + e ≠ 0`, i.e. the economics.
+
+  The criterion is applied to the whole setup at once, so every formula of the
+  setup must be affine in this sense; a linear block next to a nonlinear one,
+  or whose coefficients come from an upstream block, is not covered yet. The
+  result is about the causal model; `Setup.laws_existsUnique` carries it over
+  to the laws when the outcome lies in the domain.
 -/
 import CausalPhys.Lang.Core
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse

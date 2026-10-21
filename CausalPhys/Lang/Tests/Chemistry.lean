@@ -46,7 +46,7 @@ cyclic block: [acid, mass, charge]
 #guard_msgs in
 #causal_order WeakAcid.titration
 /--
-info: cyclic, nonlinear: the linear criterion does not apply; uniqueness needs a domain-specific argument (monotonicity, Gale–Nikaido, Minty–Browder), plugged in with Setup.unique_of_laws
+info: cyclic: the linear criterion does not apply (it needs every formula of the setup to be affine in the endogenous variables, with coefficients that depend only on exogenous ones); uniqueness needs another argument (monotonicity, Gale–Nikaido, Minty–Browder), plugged in with Setup.unique_of_laws
 -/
 #guard_msgs in
 #causal_check WeakAcid.titration
@@ -59,8 +59,8 @@ cyclic block: [acid, mass]
 #guard_msgs in
 #causal_order WeakAcid.buffer
 /--
-info: cyclic, linear: exactly one outcome provided that
-  ¬1 + u✝ WeakAcid.V.Ka * (u✝ WeakAcid.V.H)⁻¹ = 0
+info: cyclic, linear: exactly one outcome of the causal model provided that
+  ¬1 + u WeakAcid.V.Ka * (u WeakAcid.V.H)⁻¹ = 0
 (finish `linear_block` with a proof of this)
 -/
 #guard_msgs in
@@ -119,14 +119,14 @@ causal_model BeerLambert where
 /--
 info: beer determines Abs, reading [eps, l, c]
 conc determines c, reading [n, vol]
-acyclic: every intervention has exactly one outcome
+acyclic: every intervention has exactly one outcome of the causal model
 -/
 #guard_msgs in
 #causal_order BeerLambert.prepared
 /--
 info: beer determines Abs, reading [eps, l, c]
 conc determines n, reading [c, vol]
-acyclic: every intervention has exactly one outcome
+acyclic: every intervention has exactly one outcome of the causal model
 -/
 #guard_msgs in
 #causal_order BeerLambert.flowCell
@@ -174,7 +174,7 @@ causal_model Arrhenius where
 /--
 info: arrhenius determines k, reading [Pre, Ea, T]
 rateLaw determines rate, reading [k, X]
-acyclic: every intervention has exactly one outcome
+acyclic: every intervention has exactly one outcome of the causal model
 -/
 #guard_msgs in
 #causal_order Arrhenius.lab

@@ -25,7 +25,8 @@
   setup take the same parameters.
 
   Formulas may use any Lean term; a bare identifier that names a variable is
-  read as that variable.
+  read as that variable. This also applies to identifiers bound inside a
+  formula (`fun y => …`), so bound names must differ from the variable names.
 -/
 import CausalPhys.Lang.Tactic
 
@@ -80,8 +81,14 @@ macro_rules
         $laws:lawClause*
         $setups:setupClause*) => do
     let binders : Array Syntax := bs.map (·.raw)
+    for b in binders do
+      unless b.getKind == ``Lean.Parser.Term.explicitBinder do
+        Macro.throwErrorAt b "causal_model: parameters must be explicit binders `(name : Type)`"
     let args := binderArgs binders
     let vars := vs.map (·.getId.eraseMacroScopes)
+    for a in args do
+      if vars.contains a.raw.getId.eraseMacroScopes then
+        Macro.throwErrorAt a s!"causal_model: the parameter {a.raw.getId} has the same name as a variable"
     let s ← `(s)
     -- the law names and their contents
     let mut lawNames : Array Name := #[]

@@ -32,7 +32,7 @@ causal_model Circuit where
 info: joule determines P, reading [U, I]
 ohm determines I, reading [U, Rr]
 newton determines T, reading [Ta, k, P]
-acyclic: every intervention has exactly one outcome
+acyclic: every intervention has exactly one outcome of the causal model
 -/
 #guard_msgs in
 #causal_order Circuit.voltageSource
@@ -40,7 +40,7 @@ acyclic: every intervention has exactly one outcome
 info: joule determines P, reading [U, I]
 ohm determines U, reading [Rr, I]
 newton determines T, reading [Ta, k, P]
-acyclic: every intervention has exactly one outcome
+acyclic: every intervention has exactly one outcome of the causal model
 -/
 #guard_msgs in
 #causal_order Circuit.currentSource

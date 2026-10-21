@@ -14,14 +14,25 @@
       Simon matching and the blocks (`Setup.valid` is checked by `decide`);
     * the causal model, and general theorems that hold for every model:
 
-        `solves_iff`       solutions of the causal model = solutions of the laws
+        `solves_iff`       inside the domain: solutions of the causal model =
+                           solutions of the laws
         `obs_equiv`        two setups allow the same states (data cannot tell them apart)
         `do_iff`           do(x := c) = delete the equation that determines x, add x = c
         `do_exo_iff`       intervening on an exogenous variable = new exogenous value
         `unique`           acyclic setup ⇒ at most one outcome
         `exists_solution`  acyclic setup ⇒ at least one outcome
         `do_existsUnique`  acyclic setup ⇒ every intervention has exactly one outcome
-        `blocks_independent` the blocks do not depend on the matching found
+        `laws_existsUnique` if that outcome lies in the domain, the laws have
+                           exactly one solution in the domain
+        `blocks_independent` for a uniform structure (checked by `decide`), the
+                           blocks do not depend on the matching found
+
+  "Outcome" always means a solution of the causal model, i.e. of the solved
+  formulas. Outside the domain those need not satisfy the laws (Lean's
+  x / 0 = 0, for instance), so statements about the laws themselves go through
+  `solves_iff` or `laws_existsUnique`, which ask for the domain. The language
+  does not check that the domain is consistent with the laws: that is part of
+  the domain content the user writes.
 
   Nothing here mentions physics, chemistry or economics. The examples in
   `CausalPhys/Lang/Examples` are special cases.
@@ -228,8 +239,10 @@ def Model.ofSolvers {E V : Type} {α : Type u} (eqList : List E) (varList : List
 open Lean Meta Elab Tactic in
 /-- Closes a decidable goal by evaluation in the kernel only. Unlike `decide`, it
     accepts goals that mention symbolic parameters (rate constants, elasticities …):
-    structural facts never look at them, so the evaluation goes through. A false
-    goal is rejected by the kernel when the declaration is added. -/
+    structural facts never look at them, so the evaluation goes through. The
+    kernel evaluates the statement first and a false or unevaluable goal is
+    refused at once; the kernel checks the proof again when the declaration is
+    added. -/
 elab "kernel_decide" : tactic => do
   let g ← getMainGoal
   let t ← instantiateMVars (← g.getType)
@@ -409,6 +422,21 @@ theorem unique_of_laws
   obtain ⟨hs1, hs2⟩ := (S.solves_iff u s hDs).1 hs
   obtain ⟨ht1, ht2⟩ := (S.solves_iff u t hDt).1 ht
   exact huniq s t hDs hDt hs1 ht1 fun v hv => (hs2 v hv).trans (ht2 v hv).symm
+
+/-- 8b. A solution of the causal model that lies in the domain satisfies the laws. -/
+theorem sat_of_solves {u s : V → α} (hs : S.scm.Solves u s) (hD : M.dom s) : M.Sat s :=
+  ((S.solves_iff u s hD).1 hs).1
+
+/-- 8c. From the causal model back to the laws: if the causal model has exactly
+    one outcome and that outcome lies in the domain, then the laws, with the
+    exogenous values fixed, have exactly one solution in the domain. -/
+theorem laws_existsUnique {u : V → α} (h : ∃! s, S.scm.Solves u s)
+    (hD : ∀ s, S.scm.Solves u s → M.dom s) :
+    ∃! s, M.dom s ∧ M.Sat s ∧ ∀ v, v ∈ S.exo → s v = u v := by
+  obtain ⟨s, hs, huniq⟩ := h
+  refine ⟨s, ⟨hD s hs, (S.solves_iff u s (hD s hs)).1 hs⟩, ?_⟩
+  rintro t ⟨htD, htS, htE⟩
+  exact huniq t ((S.solves_iff u t htD).2 ⟨htS, htE⟩)
 
 /-- 9. Dulmage–Mendelsohn: if the structure is uniform (each law is solved for
     one of its variables and then reads the others, checked by `decide`), the
