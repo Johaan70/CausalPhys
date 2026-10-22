@@ -1,0 +1,843 @@
+<title>Hva styrer du?</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: et labhefte i fire kapitler; hvert forsøk har tegning til venstre og styring til høyre, og en fast rekkefølge: velg, spå, prøv */
+:root {
+  --paper: #F3F5F1;
+  --surface: #FCFDFB;
+  --grid: rgba(40, 90, 70, 0.07);
+  --ink: #17221D;
+  --muted: #56645D;
+  --line: #CBD6D0;
+  --accent: #1D6B52;
+  --do: #D9480F;
+  --on-do: #FFFFFF;
+  --effect: #1F5FB8;
+  --fixed: #4A5560;
+  --warn: #B42318;
+  --ok: #1D7A3A;
+  --carbon: #2B2F33;
+  --oxygen: #D63A2E;
+  --hydro: #F4F6F8;
+  --energy-p: #2E7D5B;
+  --energy-k: #E8590C;
+  --energy-q: #C2255C;
+  --glow: #FFC93C;
+  --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0F1513; --surface: #161E1B; --grid: rgba(120, 200, 160, 0.06);
+    --ink: #E4ECE7; --muted: #9AABA2; --line: #2A3631; --accent: #5CC79E;
+    --do: #FF8A4C; --on-do: #1A0D05; --effect: #7FB0F5; --fixed: #A9B6BF;
+    --warn: #FF7A6B; --ok: #5FD18A; --carbon: #C9CED3; --oxygen: #FF7A6B; --hydro: #2B3532;
+    --energy-p: #5CC79E; --energy-k: #FF9A4C; --energy-q: #F06595; --glow: #FFD45C;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0F1513; --surface: #161E1B; --grid: rgba(120, 200, 160, 0.06);
+  --ink: #E4ECE7; --muted: #9AABA2; --line: #2A3631; --accent: #5CC79E;
+  --do: #FF8A4C; --on-do: #1A0D05; --effect: #7FB0F5; --fixed: #A9B6BF;
+  --warn: #FF7A6B; --ok: #5FD18A; --carbon: #C9CED3; --oxygen: #FF7A6B; --hydro: #2B3532;
+  --energy-p: #5CC79E; --energy-k: #FF9A4C; --energy-q: #F06595; --glow: #FFD45C;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+  color: var(--ink);
+  font: 400 1.0625rem/1.6 var(--font-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 2.2rem 4rem;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--paper); }
+[hidden] { display: none !important; }
+.wrap { max-width: 1100px; margin: 0 auto; display: grid; gap: 3rem; }
+h1, h2, h3 { font-family: var(--font-display); margin: 0; line-height: 1.1; text-wrap: balance; }
+h1 { font-size: clamp(2.4rem, 7vw, 4.4rem); font-weight: 800; letter-spacing: -0.02em; }
+h1 em { font-style: normal; color: var(--do); }
+h2 { font-size: clamp(1.6rem, 3.6vw, 2.4rem); font-weight: 700; }
+h3 { font-size: 1.15rem; font-weight: 700; }
+p { margin: 0; max-width: 64ch; }
+.eyebrow { font: 600 0.75rem/1 var(--font-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+.lede { font-size: 1.22rem; }
+.note { color: var(--muted); font-size: 0.95rem; }
+code { font-family: var(--font-mono); font-size: 0.9em; }
+
+header.hero { display: grid; gap: 1rem; max-width: 50rem; }
+.steps { list-style: none; margin: 0.4rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.6rem 1.5rem; }
+.steps li { display: flex; gap: 0.5rem; align-items: baseline; }
+.steps b { font: 600 0.85rem/1 var(--font-mono); color: var(--do); }
+.roles { display: flex; flex-wrap: wrap; gap: 0.5rem 1.2rem; font-size: 0.95rem; }
+.roles span { display: inline-flex; align-items: center; gap: 0.45rem; }
+.dot { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
+.dot.do { background: var(--do); }
+.dot.fixed { border: 2px solid var(--fixed); }
+.dot.effect { border: 3px solid var(--effect); }
+
+nav.chapters { display: flex; flex-wrap: wrap; gap: 0.5rem; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; padding-block: 0.6rem; background: var(--paper); }
+nav.chapters a { font: 700 0.95rem/1.2 var(--font-display); text-decoration: none; color: var(--ink); border: 1px solid var(--line); background: var(--surface); padding: 0.5rem 0.9rem; border-radius: 999px; }
+nav.chapters a:hover, nav.chapters a:focus-visible { border-color: var(--accent); color: var(--accent); }
+
+section.chapter { display: grid; gap: 1.5rem; scroll-margin-top: 4rem; }
+.chapter-head { display: grid; gap: 0.5rem; }
+.chapter-head .eyebrow { color: var(--muted); }
+
+.exp { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 1.2rem; display: grid; gap: 1rem; }
+.exp-top { display: grid; gap: 0.35rem; }
+.law { font: 600 1.05rem/1.4 var(--font-mono); color: var(--accent); }
+.bench { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 1.2rem; align-items: start; }
+@media (max-width: 820px) { .bench { grid-template-columns: minmax(0, 1fr); } }
+.fig { display: grid; gap: 0.5rem; min-width: 0; }
+.fig svg { width: 100%; height: auto; display: block; max-width: 100%; }
+.ctrl { display: grid; gap: 0.9rem; min-width: 0; }
+
+.setups { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 0.5rem; }
+.setups button { text-align: left; cursor: pointer; display: grid; gap: 0.15rem; padding: 0.65rem 0.8rem; border-radius: 8px; border: 1px solid var(--line); background: transparent; color: var(--ink); font: 700 0.95rem/1.25 var(--font-display); }
+.setups button small { font: 400 0.82rem/1.35 var(--font-body); color: var(--muted); }
+.setups button[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.setups button[aria-pressed="true"] small { color: var(--paper); opacity: 0.85; }
+
+.slider { display: grid; gap: 0.25rem; }
+.slider-top { display: flex; justify-content: space-between; gap: 0.5rem; align-items: baseline; flex-wrap: wrap; }
+.slider label { font: 700 0.95rem/1.3 var(--font-display); }
+.slider output { font: 600 1rem/1 var(--font-mono); font-variant-numeric: tabular-nums; color: var(--do); }
+input[type="range"] { width: 100%; accent-color: var(--do); }
+
+.flow { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem; font-size: 0.92rem; }
+.pill { border-radius: 999px; padding: 0.22rem 0.6rem; font: 600 0.82rem/1.2 var(--font-mono); white-space: nowrap; }
+.pill.fixed { border: 1.5px solid var(--fixed); color: var(--fixed); }
+.pill.do { background: var(--do); color: var(--on-do); }
+.pill.effect { border: 2px solid var(--effect); color: var(--effect); }
+.flow .arrow { color: var(--muted); font-weight: 700; }
+
+table.readout { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+table.readout th { text-align: left; font-weight: 400; color: var(--muted); padding: 0.3rem 0; border-bottom: 1px solid var(--line); font-size: 0.85rem; }
+table.readout td { padding: 0.38rem 0; border-bottom: 1px solid var(--line); }
+table.readout td.num { text-align: right; font: 600 0.95rem/1.2 var(--font-mono); font-variant-numeric: tabular-nums; }
+table.readout th:last-child { text-align: right; }
+.role { font: 600 0.72rem/1 var(--font-mono); text-transform: uppercase; letter-spacing: 0.05em; }
+.role.fixed { color: var(--fixed); }
+.role.do { color: var(--do); }
+.role.effect { color: var(--effect); }
+
+.predict { border: 1.5px dashed var(--do); border-radius: 10px; padding: 0.9rem; display: grid; gap: 0.6rem; }
+.predict h3 { color: var(--do); font-size: 1rem; }
+.choices { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.choices button { cursor: pointer; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 0.4rem 0.85rem; font: 400 0.95rem/1.2 var(--font-body); }
+.choices button[aria-pressed="true"] { border-color: var(--do); background: var(--do); color: var(--on-do); }
+.feedback { font-size: 0.97rem; display: grid; gap: 0.3rem; }
+.feedback b.right { color: var(--ok); }
+.feedback b.wrong { color: var(--warn); }
+
+.toggle { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.toggle button { cursor: pointer; border: 1px solid var(--line); background: transparent; color: var(--ink); border-radius: 6px; padding: 0.45rem 0.75rem; font: 600 0.9rem/1.2 var(--font-display); }
+.toggle button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent); color: var(--surface); }
+
+.bars { display: grid; gap: 0.35rem; }
+.bar-row { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr) 4.5rem; gap: 0.5rem; align-items: center; font-size: 0.9rem; }
+.bar-track { height: 16px; border-radius: 4px; background: var(--line); overflow: hidden; }
+.bar-fill { height: 100%; }
+.bar-row .num { text-align: right; font: 600 0.88rem/1 var(--font-mono); font-variant-numeric: tabular-nums; }
+
+.chain { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0.4rem; }
+.chain .link { border: 1px solid var(--line); border-radius: 8px; padding: 0.5rem 0.65rem; display: grid; gap: 0.1rem; min-width: 7.5rem; background: var(--paper); }
+.chain .link b { font: 700 0.9rem/1.2 var(--font-display); }
+.chain .link small { font-size: 0.8rem; color: var(--muted); }
+.chain .to { align-self: center; color: var(--muted); font-weight: 700; }
+
+.mol-controls { display: grid; gap: 0.7rem; }
+.molname { font: 800 clamp(1.6rem, 4vw, 2.2rem)/1.1 var(--font-display); }
+.formula { font: 600 1.1rem/1.3 var(--font-mono); }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap: 0.5rem; }
+.fact { border: 1px solid var(--line); border-radius: 8px; padding: 0.5rem 0.65rem; display: grid; gap: 0.1rem; }
+.fact small { color: var(--muted); font-size: 0.8rem; }
+.fact b { font: 700 1.05rem/1.2 var(--font-mono); font-variant-numeric: tabular-nums; }
+.svg-scroll { overflow-x: auto; }
+.svg-scroll svg { min-width: 300px; }
+
+.teacher { display: grid; gap: 0.8rem; border-top: 2px solid var(--line); padding-top: 1.5rem; }
+.teacher ul { margin: 0; padding-left: 1.2rem; display: grid; gap: 0.4rem; max-width: 70ch; }
+
+button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* SVG */
+.s-ink { stroke: var(--ink); fill: none; }
+.s-line { stroke: var(--line); fill: none; }
+.f-ink { fill: var(--ink); }
+.f-muted { fill: var(--muted); }
+.f-surface { fill: var(--surface); }
+.f-line { fill: var(--line); }
+.f-do { fill: var(--do); }
+.f-effect { fill: var(--effect); }
+.f-accent { fill: var(--accent); }
+.f-glow { fill: var(--glow); }
+.s-do { stroke: var(--do); fill: none; }
+.s-effect { stroke: var(--effect); fill: none; }
+.s-accent { stroke: var(--accent); fill: none; }
+.t-label { font: 600 13px var(--font-mono); }
+.t-small { font: 400 11px var(--font-mono); }
+.atom-C { fill: var(--carbon); }
+.atom-O { fill: var(--oxygen); }
+.atom-H { fill: var(--hydro); stroke: var(--muted); stroke-width: 1.2; }
+.atom-txt-C, .atom-txt-O { fill: var(--surface); font: 700 12px var(--font-mono); }
+.atom-txt-H { fill: var(--ink); font: 700 11px var(--font-mono); }
+.bond { stroke: var(--muted); stroke-width: 2.4; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow">Naturfag · 10. trinn</div>
+    <h1>Én formel. <em>Hva styrer du?</em></h1>
+    <p class="lede">En formel som F = m · a sier hvordan størrelser henger sammen. Den sier ikke hva som er årsak og hva som er virkning. Det bestemmer du, med det du holder fast og det du endrer.</p>
+    <ol class="steps">
+      <li><b>1</b> Velg forsøk: hva holder du fast?</li>
+      <li><b>2</b> Spå hva som skjer</li>
+      <li><b>3</b> Dra i glideren og sjekk</li>
+    </ol>
+    <div class="roles" aria-label="Fargene i forsøkene">
+      <span><i class="dot do"></i>det du endrer</span>
+      <span><i class="dot fixed"></i>holdes fast</span>
+      <span><i class="dot effect"></i>følger av formelen</span>
+    </div>
+  </header>
+
+  <nav class="chapters" aria-label="Kapitler">
+    <a href="#kraft">Kraft og bevegelse</a>
+    <a href="#energi">Energi</a>
+    <a href="#elektrisitet">Elektrisitet</a>
+    <a href="#organisk">Organisk kjemi</a>
+  </nav>
+
+  <!-- KRAFT -->
+  <section class="chapter" id="kraft" aria-labelledby="kraft-h">
+    <div class="chapter-head">
+      <div class="eyebrow">Kapittel 1</div>
+      <h2 id="kraft-h">Kraft og bevegelse</h2>
+      <p>Akselerasjon er hvor fort farten endrer seg. Får en vogn akselerasjonen 2 m/s², øker farten med 2 m/s hvert sekund. Newtons 2. lov sier hvor stor kraft som trengs.</p>
+    </div>
+    <div class="exp" id="exp-cart"></div>
+  </section>
+
+  <!-- ENERGI -->
+  <section class="chapter" id="energi" aria-labelledby="energi-h">
+    <div class="chapter-head">
+      <div class="eyebrow">Kapittel 2</div>
+      <h2 id="energi-h">Arbeid, energi og effekt</h2>
+      <p>Arbeid er energi som overføres når en kraft flytter noe. Effekt er hvor fort det skjer. Energiloven sier at energi aldri blir borte og aldri lages fra ingenting. Den bare går over til andre former.</p>
+    </div>
+    <div class="exp" id="exp-stairs"></div>
+    <div class="exp" id="exp-sled"></div>
+    <div class="exp" id="exp-chain"></div>
+  </section>
+
+  <!-- ELEKTRISITET -->
+  <section class="chapter" id="elektrisitet" aria-labelledby="el-h">
+    <div class="chapter-head">
+      <div class="eyebrow">Kapittel 3</div>
+      <h2 id="el-h">Spenning, strøm og Ohms lov</h2>
+      <p>Spenning (volt) er det som driver strømmen. Strøm (ampere) er hvor mye ladning som går gjennom ledningen per sekund. Resistans (ohm) er hvor vanskelig det er for strømmen å komme gjennom.</p>
+    </div>
+    <div class="exp" id="exp-lamp"></div>
+    <div class="exp" id="exp-magnet"></div>
+  </section>
+
+  <!-- ORGANISK -->
+  <section class="chapter" id="organisk" aria-labelledby="org-h">
+    <div class="chapter-head">
+      <div class="eyebrow">Kapittel 4</div>
+      <h2 id="org-h">Karbonatomet bygger molekyler</h2>
+      <p>Karbonatomet har fire bindinger. Det kan binde seg til andre karbonatomer i lange kjeder. Med bare hydrogen rundt får vi hydrokarboner. Bytter vi ett H med en OH-gruppe, får vi en alkohol. En COOH-gruppe gir en karboksylsyre.</p>
+    </div>
+    <div class="exp" id="exp-mol"></div>
+  </section>
+
+  <section class="teacher" aria-labelledby="t-h">
+    <div class="eyebrow">For læreren</div>
+    <h2 id="t-h">Hva som er sjekket, og hva som er forenklet</h2>
+    <ul>
+      <li>Forsøkene med kraft, trapp, akebakke og lyspære bygger på lovene F = m·a, v = a·t, W = m·g·h, P·t = W, energiloven og U = R·I, P = U·I. Hvilken størrelse som følger i hvert forsøk, og eksempeltall som 10 N på 2 kg gir 5 m/s², er regnet ut og bevist i Lean (<code>CausalPhys/Lang/Examples/School.lean</code>). Tallene på siden regnes ut i nettleseren med de samme formlene.</li>
+      <li>Friksjonen i akebakken er en enkel modell: en fast andel av energien som frigjøres går over til varme.</li>
+      <li>Virkningsgradene i energikjeden er omtrentlige typetall, ikke målinger.</li>
+      <li>Elektromagneten er en forenklet modell: styrken er satt proporsjonal med strøm og vindinger. Det stemmer omtrent for en spole med jernkjerne langt fra metning.</li>
+      <li>Kokepunkter er tabellverdier ved normalt trykk, avrundet til hele grader. Molar masse er regnet med C = 12, H = 1 og O = 16 g/mol.</li>
+      <li>Samme tankegang på et høyere nivå, med flere lover og sløyfer, finnes i <code>docs/kausal-lab.html</code>.</li>
+    </ul>
+  </section>
+</div>
+
+<script>
+(function () {
+  const NS = "http://www.w3.org/2000/svg";
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const fmt = (x, d = 2) => {
+    const r = Math.abs(x) >= 100 ? Math.round(x) : Number(x.toFixed(d));
+    return r.toLocaleString("nb-NO", { maximumFractionDigits: d });
+  };
+  function el(tag, attrs, parent, text) {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (text !== undefined) e.textContent = text;
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function arrowDefs(svg, id, cls) {
+    const defs = el("defs", {}, svg);
+    const m = el("marker", { id, viewBox: "0 0 10 10", refX: "8", refY: "5", markerWidth: "6", markerHeight: "6", orient: "auto-start-reverse" }, defs);
+    el("path", { d: "M0,0 L10,5 L0,10 z", class: cls }, m);
+  }
+
+  /* ---------- Felles forsøksmal ---------- */
+  // cfg: { id, title, law, intro, setups:[{label, desc, fixed:[...], change, effect:[...], predict:{q, options, answer, why}}],
+  //        sliders: {key:{label, unit, min, max, step, value}}, compute(vals, setupIndex) -> rows, draw(svg, vals, out, si) }
+  function experiment(cfg) {
+    const box = $(cfg.id);
+    const st = { si: 0, vals: {}, guess: null, checked: false };
+    for (const k in cfg.sliders) st.vals[k] = cfg.sliders[k].value;
+    box.innerHTML =
+      '<div class="exp-top"><h3>' + esc(cfg.title) + '</h3><div class="law">' + cfg.law + "</div>" +
+      (cfg.intro ? '<p class="note">' + cfg.intro + "</p>" : "") + "</div>" +
+      '<div class="bench"><figure class="fig" style="margin:0"><svg role="img" aria-label="' + esc(cfg.title) + '"></svg>' +
+      '<div class="flow" aria-live="polite"></div></figure><div class="ctrl">' +
+      '<div class="setups" role="group" aria-label="Forsøk"></div>' +
+      '<div class="predict"></div><div class="sliders"></div>' +
+      '<table class="readout"><thead><tr><th>Størrelse</th><th>Rolle</th><th>Verdi</th></tr></thead><tbody></tbody></table>' +
+      (cfg.extra ? '<div class="extra"></div>' : "") + "</div></div>";
+    const svg = box.querySelector("svg");
+    const flow = box.querySelector(".flow");
+    const setupsBox = box.querySelector(".setups");
+    const pred = box.querySelector(".predict");
+    const slidersBox = box.querySelector(".sliders");
+    const tbody = box.querySelector("tbody");
+
+    cfg.setups.forEach((s, i) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.innerHTML = esc(s.label) + "<small>" + esc(s.desc) + "</small>";
+      b.onclick = () => { st.si = i; st.guess = null; st.checked = false; render(); };
+      setupsBox.appendChild(b);
+    });
+
+    function renderSliders() {
+      const s = cfg.setups[st.si];
+      slidersBox.innerHTML = "";
+      const keys = s.sliders || Object.keys(cfg.sliders);
+      for (const k of keys) {
+        const d = cfg.sliders[k];
+        const wrap = document.createElement("div");
+        wrap.className = "slider";
+        const id = cfg.id + "-" + k;
+        wrap.innerHTML = '<div class="slider-top"><label for="' + id + '">' + esc(d.label) + "</label><output for=\"" + id + "\"></output></div>" +
+          '<input type="range" id="' + id + '" min="' + d.min + '" max="' + d.max + '" step="' + d.step + '" value="' + st.vals[k] + '">';
+        const inp = wrap.querySelector("input"), out = wrap.querySelector("output");
+        const show = () => { out.textContent = fmt(st.vals[k]) + " " + d.unit; };
+        show();
+        inp.oninput = () => { st.vals[k] = Number(inp.value); show(); draw(); };
+        slidersBox.appendChild(wrap);
+      }
+    }
+
+    function renderPredict() {
+      const p = cfg.setups[st.si].predict;
+      if (!p) { pred.hidden = true; return; }
+      pred.hidden = false;
+      pred.innerHTML = "<h3>Spå først</h3><p>" + esc(p.q) + '</p><div class="choices"></div><div class="feedback" aria-live="polite"></div>';
+      const ch = pred.querySelector(".choices"), fb = pred.querySelector(".feedback");
+      p.options.forEach((o, i) => {
+        const b = document.createElement("button");
+        b.type = "button"; b.textContent = o;
+        b.setAttribute("aria-pressed", String(st.guess === i));
+        b.onclick = () => { st.guess = i; st.checked = true; renderPredict(); };
+        ch.appendChild(b);
+      });
+      if (st.checked && st.guess !== null) {
+        const right = st.guess === p.answer;
+        fb.innerHTML = (right ? '<b class="right">Riktig.</b> ' : '<b class="wrong">Ikke helt.</b> Svaret er «' + esc(p.options[p.answer]) + "». ") + esc(p.why) +
+          '<span class="note">Dra i glideren og se det skje.</span>';
+      }
+    }
+
+    function draw() {
+      const s = cfg.setups[st.si];
+      const out = cfg.compute(st.vals, st.si);
+      // flow: fixed + change -> effect
+      const name = (k) => out[k] ? out[k].sym : k;
+      flow.innerHTML = s.fixed.map((k) => '<span class="pill fixed">' + esc(name(k)) + " fast</span>").join("") +
+        '<span class="pill do">' + esc(name(s.change)) + " endres</span>" +
+        '<span class="arrow" aria-hidden="true">→</span>' +
+        s.effect.map((k) => '<span class="pill effect">' + esc(name(k)) + "</span>").join("");
+      tbody.innerHTML = Object.keys(out).map((k) => {
+        const o = out[k];
+        const role = s.change === k ? ["do", "endrer du"] : s.fixed.includes(k) ? ["fixed", "fast"] : s.effect.includes(k) ? ["effect", "følger"] : ["fixed", ""];
+        return "<tr><td>" + esc(o.label) + " (" + esc(o.sym) + ')</td><td><span class="role ' + role[0] + '">' + role[1] + '</span></td><td class="num">' + esc(fmt(o.v, o.d === undefined ? 2 : o.d)) + " " + esc(o.unit) + "</td></tr>";
+      }).join("");
+      svg.textContent = "";
+      cfg.draw(svg, st.vals, out, st.si);
+      if (cfg.extra) cfg.extra(box.querySelector(".extra"), st.vals, out, st.si);
+    }
+
+    function render() {
+      setupsBox.querySelectorAll("button").forEach((b, i) => b.setAttribute("aria-pressed", String(i === st.si)));
+      if (cfg.setups[st.si].reset) Object.assign(st.vals, cfg.setups[st.si].reset);
+      renderSliders(); renderPredict(); draw();
+    }
+    render();
+  }
+
+  /* ---------- 1. Vogna: F = m·a ---------- */
+  experiment({
+    id: "exp-cart",
+    title: "Dra en vogn",
+    law: "F = m · a",
+    intro: "Kraften F (newton) drar vogna. Massen m (kilogram) er vogna med last. Akselerasjonen a (m/s²) er hvor fort farten øker.",
+    sliders: { m: { label: "Masse, m", unit: "kg", min: 1, max: 20, step: 1, value: 4 } },
+    setups: [
+      { label: "Samme kraft", desc: "En strikk drar alltid med 20 N.", fixed: ["F"], change: "m", effect: ["a", "v"],
+        predict: { q: "Du dobler massen. Hva skjer med akselerasjonen?", options: ["Den dobles", "Den blir halvparten", "Den er lik"], answer: 1,
+          why: "Med samme kraft er a = F / m. Dobbel masse gir halvparten så stor akselerasjon." } },
+      { label: "Samme akselerasjon", desc: "Vogna skal alltid øke farten med 2 m/s hvert sekund.", fixed: ["a"], change: "m", effect: ["F"],
+        predict: { q: "Du dobler massen. Hva må skje med kraften?", options: ["Den må dobles", "Den kan halveres", "Den er lik"], answer: 0,
+          why: "Med samme akselerasjon er F = m · a. Dobbel masse trenger dobbel kraft." } }
+    ],
+    compute(v, si) {
+      const m = v.m;
+      const F = si === 0 ? 20 : m * 2;
+      const a = si === 0 ? 20 / m : 2;
+      return {
+        F: { sym: "F", label: "Kraft", unit: "N", v: F },
+        m: { sym: "m", label: "Masse", unit: "kg", v: m, d: 0 },
+        a: { sym: "a", label: "Akselerasjon", unit: "m/s²", v: a },
+        v: { sym: "v", label: "Fart etter 3 s", unit: "m/s", v: a * 3 }
+      };
+    },
+    draw(svg, v, out) {
+      svg.setAttribute("viewBox", "0 0 360 220");
+      arrowDefs(svg, "arF", "f-do");
+      el("line", { x1: 10, y1: 170, x2: 350, y2: 170, class: "s-ink", "stroke-width": 2 }, svg);
+      // the cart moves further the larger a is (position after 1.5 s, scaled)
+      const x = 30 + Math.min(150, out.a.v * 1.125 * 10);
+      const blocks = Math.round(out.m.v / 2);
+      el("rect", { x, y: 120, width: 110, height: 40, rx: 6, class: "f-line s-ink", "stroke-width": 1.5 }, svg);
+      for (let i = 0; i < blocks; i++) {
+        const bx = x + 6 + (i % 5) * 20, by = 104 - Math.floor(i / 5) * 16;
+        el("rect", { x: bx, y: by, width: 18, height: 14, rx: 2, class: "f-accent" }, svg);
+      }
+      el("circle", { cx: x + 25, cy: 165, r: 9, class: "f-ink" }, svg);
+      el("circle", { cx: x + 85, cy: 165, r: 9, class: "f-ink" }, svg);
+      const len = Math.min(120, 10 + out.F.v * 1.6);
+      el("line", { x1: x + 112, y1: 140, x2: x + 112 + len, y2: 140, class: "s-do", "stroke-width": 4, "marker-end": "url(#arF)" }, svg);
+      el("text", { x: x + 116, y: 130, class: "t-label f-do" }, svg, "F = " + fmt(out.F.v) + " N");
+      el("text", { x: 14, y: 30, class: "t-label f-ink" }, svg, "a = " + fmt(out.a.v) + " m/s²");
+      el("text", { x: 14, y: 50, class: "t-small f-muted" }, svg, "fart etter 3 s: " + fmt(out.v.v) + " m/s");
+      el("text", { x: 14, y: 200, class: "t-small f-muted" }, svg, "vogna etter 1,5 s (lengre unna = større a)");
+    }
+  });
+
+  /* ---------- 2a. Trappa: W = m·g·h, P = W/t ---------- */
+  const g = 9.8;
+  experiment({
+    id: "exp-stairs",
+    title: "Bær en kasse opp trappa",
+    law: "W = m · g · h&emsp;og&emsp;P = W / t",
+    intro: "Arbeidet W (joule) er energien som trengs for å løfte kassen høyden h = 3 m. Effekten P (watt) er arbeid per sekund. g = 9,8 m/s².",
+    sliders: { m: { label: "Masse på kassen, m", unit: "kg", min: 5, max: 60, step: 5, value: 20 } },
+    setups: [
+      { label: "Samme tid", desc: "Du bruker alltid 6 sekunder opp.", fixed: ["h", "t"], change: "m", effect: ["W", "P"],
+        predict: { q: "Kassen blir tyngre, men du bruker like lang tid. Hva skjer med effekten?", options: ["Den øker", "Den minker", "Den er lik"], answer: 0,
+          why: "Tyngre kasse krever mer arbeid. Samme tid betyr at mer arbeid må gjøres hvert sekund: større effekt." } },
+      { label: "Samme effekt", desc: "En heis med motor på 500 W løfter kassen.", fixed: ["h", "P"], change: "m", effect: ["W", "t"],
+        predict: { q: "Kassen blir tyngre. Motoren har samme effekt. Hva skjer med tiden?", options: ["Den øker", "Den minker", "Den er lik"], answer: 0,
+          why: "Mer arbeid med samme effekt tar lengre tid: t = W / P." } }
+    ],
+    compute(v, si) {
+      const W = v.m * g * 3;
+      const t = si === 0 ? 6 : W / 500;
+      const P = si === 0 ? W / 6 : 500;
+      return {
+        m: { sym: "m", label: "Masse", unit: "kg", v: v.m, d: 0 },
+        h: { sym: "h", label: "Høyde", unit: "m", v: 3, d: 0 },
+        W: { sym: "W", label: "Arbeid", unit: "J", v: W },
+        t: { sym: "t", label: "Tid", unit: "s", v: t },
+        P: { sym: "P", label: "Effekt", unit: "W", v: P }
+      };
+    },
+    draw(svg, v, out) {
+      svg.setAttribute("viewBox", "0 0 360 220");
+      // stairs
+      let d = "M20,190";
+      for (let i = 0; i < 6; i++) d += " h40 v-22";
+      d += " h60";
+      el("path", { d, class: "s-ink", "stroke-width": 2 }, svg);
+      const size = 18 + v.m / 3;
+      el("rect", { x: 270, y: 58 - size, width: size, height: size, rx: 3, class: "f-accent" }, svg);
+      el("text", { x: 270, y: 50 - size, class: "t-small f-muted" }, svg, fmt(out.m.v, 0) + " kg");
+      el("line", { x1: 340, y1: 190, x2: 340, y2: 58, class: "s-line", "stroke-width": 2 }, svg);
+      el("text", { x: 300, y: 130, class: "t-small f-muted" }, svg, "h = 3 m");
+      el("text", { x: 14, y: 30, class: "t-label f-ink" }, svg, "W = " + fmt(out.W.v) + " J");
+      el("text", { x: 14, y: 50, class: "t-label f-ink" }, svg, "P = " + fmt(out.P.v) + " W");
+      el("text", { x: 14, y: 70, class: "t-label f-ink" }, svg, "t = " + fmt(out.t.v) + " s");
+      // time bar
+      el("rect", { x: 20, y: 205, width: Math.min(320, out.t.v * 8), height: 8, rx: 3, class: "f-effect" }, svg);
+    }
+  });
+
+  /* ---------- 2b. Akebakken: energiloven ---------- */
+  experiment({
+    id: "exp-sled",
+    title: "Ake ned bakken",
+    law: "Eₚ (start) = Eₚ + Eₖ + varme",
+    intro: "En kjelke på 30 kg starter i ro 5 m opp. Stillingsenergi Eₚ = m · g · h. Bevegelsesenergi Eₖ. Friksjon gjør noe av energien om til varme. Summen er alltid den samme.",
+    sliders: { pos: { label: "Hvor langt ned i bakken", unit: "%", min: 0, max: 100, step: 5, value: 50 } },
+    setups: [
+      { label: "Is (uten friksjon)", desc: "Glatt is: ingenting blir til varme.", fixed: ["E0"], change: "h", effect: ["Ep", "Ek", "v"],
+        predict: { q: "Halvveis ned, uten friksjon: hvor mye av energien er blitt bevegelsesenergi?", options: ["Ingenting", "Halvparten", "Alt"], answer: 1,
+          why: "Halvveis ned har kjelken mistet halvparten av høyden, altså halvparten av stillingsenergien. Den har blitt bevegelsesenergi." } },
+      { label: "Snø (med friksjon)", desc: "En femtedel av energien som frigjøres, blir varme.", fixed: ["E0"], change: "h", effect: ["Ep", "Ek", "Q", "v"],
+        predict: { q: "Med friksjon: er summen av energiene den samme som på toppen?", options: ["Ja", "Nei, den blir mindre", "Nei, den blir større"], answer: 0,
+          why: "Energiloven: energien blir ikke borte. Den som mangler i bevegelse, er blitt varme i snøen og meiene." } }
+    ],
+    compute(v, si) {
+      const m = 30, h0 = 5;
+      const h = h0 * (1 - v.pos / 100);
+      const E0 = m * g * h0, Ep = m * g * h;
+      const released = E0 - Ep;
+      const Q = si === 0 ? 0 : 0.2 * released;
+      const Ek = released - Q;
+      return {
+        E0: { sym: "E₀", label: "Energi på toppen", unit: "J", v: E0 },
+        h: { sym: "h", label: "Høyde", unit: "m", v: h },
+        Ep: { sym: "Eₚ", label: "Stillingsenergi", unit: "J", v: Ep },
+        Ek: { sym: "Eₖ", label: "Bevegelsesenergi", unit: "J", v: Ek },
+        Q: { sym: "Q", label: "Varme", unit: "J", v: Q },
+        v: { sym: "v", label: "Fart", unit: "m/s", v: Math.sqrt(2 * Ek / m) }
+      };
+    },
+    draw(svg, v, out) {
+      svg.setAttribute("viewBox", "0 0 360 220");
+      // hill from (20,40) down to (340,190)
+      const hx = (p) => 20 + 300 * p, hy = (p) => 40 + 150 * (0.5 - 0.5 * Math.cos(Math.PI * p));
+      let d = "M" + hx(0) + "," + hy(0);
+      for (let i = 1; i <= 40; i++) d += " L" + hx(i / 40).toFixed(1) + "," + hy(i / 40).toFixed(1);
+      el("path", { d: d + " L340,200 L20,200 Z", class: "f-line" }, svg);
+      el("path", { d, class: "s-ink", "stroke-width": 2 }, svg);
+      // position: the sled is at the height that matches pos (hill shape maps height linearly)
+      const p = Math.acos(1 - 2 * (v.pos / 100)) / Math.PI;
+      const x = hx(p), y = hy(p);
+      el("rect", { x: x - 14, y: y - 14, width: 28, height: 10, rx: 3, class: "f-do" }, svg);
+      el("text", { x: 230, y: 30, class: "t-label f-ink" }, svg, "fart " + fmt(out.v.v) + " m/s");
+    },
+    extra(box, v, out) {
+      const total = out.E0.v;
+      const rows = [["Stillingsenergi Eₚ", out.Ep.v, "var(--energy-p)"], ["Bevegelse Eₖ", out.Ek.v, "var(--energy-k)"], ["Varme", out.Q.v, "var(--energy-q)"]];
+      box.innerHTML = '<div class="bars">' + rows.map((r) =>
+        '<div class="bar-row"><span>' + r[0] + '</span><div class="bar-track"><div class="bar-fill" style="width:' + (100 * r[1] / total).toFixed(1) + "%;background:" + r[2] + '"></div></div><span class="num">' + fmt(r[1], 0) + " J</span></div>").join("") +
+        '<div class="bar-row"><b>Sum</b><div class="bar-track"><div class="bar-fill" style="width:100%;background:var(--ink)"></div></div><span class="num">' + fmt(out.Ep.v + out.Ek.v + out.Q.v, 0) + " J</span></div></div>" +
+        '<p class="note">Summen står stille: det er energiloven.</p>';
+    }
+  });
+
+  /* ---------- 2c. Energikjeden ---------- */
+  (function () {
+    const box = $("exp-chain");
+    const SRC = [
+      { key: "vann", label: "Vannkraft", renew: true, chain: [["Stillingsenergi", "vann i magasinet"], ["Bevegelsesenergi", "vann i rør"], ["Elektrisk energi", "turbin og generator"]], eff: 0.9 },
+      { key: "vind", label: "Vindkraft", renew: true, chain: [["Bevegelsesenergi", "vinden"], ["Bevegelsesenergi", "rotoren"], ["Elektrisk energi", "generator"]], eff: 0.4 },
+      { key: "sol", label: "Solcelle", renew: true, chain: [["Strålingsenergi", "sollys"], ["Elektrisk energi", "solcellen"]], eff: 0.2 },
+      { key: "gass", label: "Gasskraftverk", renew: false, chain: [["Kjemisk energi", "naturgass"], ["Varme", "forbrenning"], ["Bevegelsesenergi", "turbin"], ["Elektrisk energi", "generator"]], eff: 0.5 }
+    ];
+    const LED = 0.4;
+    let cur = 0;
+    box.innerHTML = '<div class="exp-top"><h3>Fra energikilde til lys</h3><p class="note">Energi går over fra én form til en annen. Hver overgang gir litt varme som vi ikke får brukt. Tallene er omtrentlige.</p></div>' +
+      '<div class="toggle" role="group" aria-label="Energikilde"></div><div class="chain" aria-live="polite"></div><div class="bars"></div>';
+    const tg = box.querySelector(".toggle");
+    SRC.forEach((s, i) => {
+      const b = document.createElement("button");
+      b.type = "button"; b.textContent = s.label;
+      b.onclick = () => { cur = i; render(); };
+      tg.appendChild(b);
+    });
+    function render() {
+      tg.querySelectorAll("button").forEach((b, i) => b.setAttribute("aria-pressed", String(i === cur)));
+      const s = SRC[cur];
+      const links = s.chain.concat([["Lys", "LED-pære"]]);
+      box.querySelector(".chain").innerHTML = links.map((l, i) => (i ? '<span class="to" aria-hidden="true">→</span>' : "") +
+        '<div class="link"><b>' + esc(l[0]) + "</b><small>" + esc(l[1]) + "</small></div>").join("") +
+        '<div class="link"><b>' + (s.renew ? "Fornybar" : "Ikke fornybar") + "</b><small>" + (s.renew ? "kilden tar ikke slutt" : "gassen brukes opp, gir CO₂") + "</small></div>";
+      const el1 = 100 * s.eff, light = el1 * LED;
+      const rows = [["Inn i kraftverket", 100, "var(--ink)"], ["Strøm ut", el1, "var(--effect)"], ["Lys fra pæra", light, "var(--glow)"], ["Varme underveis", 100 - light, "var(--energy-q)"]];
+      box.querySelector(".bars").innerHTML = rows.map((r) => '<div class="bar-row"><span>' + r[0] + '</span><div class="bar-track"><div class="bar-fill" style="width:' + r[1] + "%;background:" + r[2] + '"></div></div><span class="num">' + fmt(r[1], 0) + " J</span></div>").join("") +
+        '<p class="note">Av 100 J inn blir omtrent ' + fmt(light, 0) + " J til lys. Resten blir varme. Lys + varme = 100 J: ingenting er borte.</p>";
+    }
+    render();
+  })();
+
+  /* ---------- 3a. Lyspæra: U = R·I ---------- */
+  experiment({
+    id: "exp-lamp",
+    title: "Lyspæra",
+    law: "U = R · I&emsp;og&emsp;P = U · I",
+    intro: "Spenningen U (volt), resistansen R (ohm) og strømmen I (ampere). Effekten P (watt) avgjør hvor sterkt pæra lyser.",
+    sliders: { R: { label: "Resistans i pæra, R", unit: "Ω", min: 2, max: 30, step: 1, value: 9 } },
+    setups: [
+      { label: "Batteri", desc: "Batteriet holder spenningen på 4,5 V.", fixed: ["U"], change: "R", effect: ["I", "P"],
+        predict: { q: "Du dobler resistansen. Hva skjer med strømmen?", options: ["Den dobles", "Den halveres", "Den er lik"], answer: 1,
+          why: "Med fast spenning er I = U / R. Dobbel resistans gir halvparten så stor strøm, og pæra lyser svakere." } },
+      { label: "Strømforsyning", desc: "Et apparat som holder strømmen på 0,5 A.", fixed: ["I"], change: "R", effect: ["U", "P"],
+        predict: { q: "Du dobler resistansen. Hva skjer med spenningen over pæra?", options: ["Den dobles", "Den halveres", "Den er lik"], answer: 0,
+          why: "Med fast strøm er U = R · I. Dobbel resistans gir dobbel spenning, og pæra lyser sterkere." } }
+    ],
+    compute(v, si) {
+      const R = v.R;
+      const U = si === 0 ? 4.5 : R * 0.5;
+      const I = si === 0 ? 4.5 / R : 0.5;
+      return {
+        U: { sym: "U", label: "Spenning", unit: "V", v: U },
+        R: { sym: "R", label: "Resistans", unit: "Ω", v: R, d: 0 },
+        I: { sym: "I", label: "Strøm", unit: "A", v: I, d: 3 },
+        P: { sym: "P", label: "Effekt", unit: "W", v: U * I }
+      };
+    },
+    draw(svg, v, out, si) {
+      svg.setAttribute("viewBox", "0 0 360 220");
+      el("rect", { x: 40, y: 40, width: 280, height: 140, rx: 10, class: "s-ink", "stroke-width": 2.5 }, svg);
+      // source
+      el("rect", { x: 22, y: 85, width: 36, height: 50, rx: 4, class: "f-surface s-ink", "stroke-width": 2 }, svg);
+      el("text", { x: 40, y: 115, "text-anchor": "middle", class: "t-small f-ink" }, svg, si === 0 ? "4,5 V" : "0,5 A");
+      // lamp with glow
+      const glow = Math.min(1, out.P.v / 6);
+      el("circle", { cx: 300, cy: 110, r: 16 + 30 * glow, class: "f-glow", opacity: (0.15 + 0.6 * glow).toFixed(2) }, svg);
+      el("circle", { cx: 300, cy: 110, r: 16, class: "f-surface s-ink", "stroke-width": 2 }, svg);
+      el("path", { d: "M291,110 q4,-10 9,0 q4,10 9,0", class: "s-ink", "stroke-width": 1.6 }, svg);
+      // meters
+      el("text", { x: 180, y: 30, "text-anchor": "middle", class: "t-label f-ink" }, svg, "I = " + fmt(out.I.v, 3) + " A");
+      el("text", { x: 180, y: 205, "text-anchor": "middle", class: "t-label f-ink" }, svg, "U = " + fmt(out.U.v) + " V   ·   P = " + fmt(out.P.v) + " W");
+      // current dots: spacing shrinks with larger current
+      const n = Math.max(2, Math.round(out.I.v * 14));
+      for (let i = 0; i < n; i++) {
+        const t = i / n;
+        el("circle", { cx: 70 + 220 * t, cy: 40, r: 3, class: "f-effect" }, svg);
+      }
+    }
+  });
+
+  /* ---------- 3b. Elektromagneten ---------- */
+  experiment({
+    id: "exp-magnet",
+    title: "Elektromagneten",
+    law: "styrke ∝ N · I",
+    intro: "Strøm gjennom en spole lager et magnetfelt. Med en jernkjerne inni blir det en elektromagnet. Her er styrken forenklet: den er proporsjonal med antall vindinger N og strømmen I.",
+    sliders: { I: { label: "Strøm, I", unit: "A", min: 0, max: 2, step: 0.1, value: 1 }, N: { label: "Vindinger, N", unit: "", min: 10, max: 100, step: 10, value: 50 } },
+    setups: [
+      { label: "Endre strømmen", desc: "Samme spole, 50 vindinger.", fixed: ["N"], change: "I", effect: ["B"], sliders: ["I"], reset: { N: 50 },
+        predict: { q: "Hva skjer når strømmen er 0?", options: ["Magneten er like sterk", "Den mister magnetismen", "Den blir sterkere"], answer: 1,
+          why: "Uten strøm er det ikke noe magnetfelt rundt spolen. Derfor kan en elektromagnet slås av og på." } },
+      { label: "Endre vindingene", desc: "Samme strøm, 1 A.", fixed: ["I"], change: "N", effect: ["B"], sliders: ["N"], reset: { I: 1 },
+        predict: { q: "Du vikler dobbelt så mange vindinger. Hva skjer?", options: ["Omtrent dobbelt så sterk", "Halvparten så sterk", "Ingen endring"], answer: 0,
+          why: "Hver vinding bidrar med sitt felt. Dobbelt så mange vindinger gir omtrent dobbelt så sterk magnet." } }
+    ],
+    compute(v) {
+      const B = v.N * v.I;
+      return {
+        I: { sym: "I", label: "Strøm", unit: "A", v: v.I, d: 1 },
+        N: { sym: "N", label: "Vindinger", unit: "", v: v.N, d: 0 },
+        B: { sym: "styrke", label: "Binders den løfter", unit: "stk", v: Math.round(B / 10), d: 0 }
+      };
+    },
+    draw(svg, v, out) {
+      svg.setAttribute("viewBox", "0 0 360 220");
+      el("rect", { x: 120, y: 30, width: 120, height: 34, rx: 6, class: "f-muted" }, svg);
+      const turns = Math.round(out.N.v / 10);
+      for (let i = 0; i < turns; i++) {
+        const x = 126 + i * (108 / Math.max(1, turns - 1 || 1));
+        el("line", { x1: x, y1: 26, x2: x + 6, y2: 68, class: "s-do", "stroke-width": 3 }, svg);
+      }
+      el("text", { x: 180, y: 18, "text-anchor": "middle", class: "t-small f-muted" }, svg, "spole med jernkjerne");
+      const clips = Math.min(20, out.B.v);
+      for (let i = 0; i < clips; i++) {
+        const col = i % 5, row = Math.floor(i / 5);
+        el("rect", { x: 140 + col * 17, y: 72 + row * 22, width: 12, height: 20, rx: 6, class: "s-effect", "stroke-width": 2 }, svg);
+      }
+      el("text", { x: 180, y: 205, "text-anchor": "middle", class: "t-label f-ink" }, svg, out.B.v + " binders");
+    }
+  });
+
+  /* ---------- 4. Molekylbyggeren ---------- */
+  (function () {
+    const box = $("exp-mol");
+    const STEM = ["met", "et", "prop", "but", "pent", "heks", "hept", "okt"];
+    const DATA = {
+      alkan: { label: "Hydrokarbon (alkan)", bp: [-162, -89, -42, -1, 36, 69, 98, 126], sol: () => "nei" },
+      alkohol: { label: "Alkohol", bp: [65, 78, 97, 117, 138, 157, 176, 195], sol: (n) => (n <= 3 ? "ja, helt" : n === 4 ? "litt" : "nesten ikke") },
+      syre: { label: "Karboksylsyre", bp: [101, 118, 141, 164, 186, 205, 223, 239], sol: (n) => (n <= 4 ? "ja, helt" : n <= 6 ? "litt" : "nesten ikke") }
+    };
+    const st = { fam: "alkan", n: 2, guess: null };
+    function name(f, n) {
+      const s = STEM[n - 1];
+      if (f === "alkan") return s + "an";
+      if (f === "alkohol") return s + "anol";
+      return s + "ansyre";
+    }
+    const SUB = { 0: "₀", 1: "₁", 2: "₂", 3: "₃", 4: "₄", 5: "₅", 6: "₆", 7: "₇", 8: "₈", 9: "₉" };
+    const sub = (k) => (k === 1 ? "" : String(k).split("").map((c) => SUB[c]).join(""));
+    function formula(f, n) {
+      if (f === "alkan") return "C" + sub(n) + "H" + sub(2 * n + 2);
+      if (f === "alkohol") return "C" + sub(n) + "H" + sub(2 * n + 1) + "OH";
+      return n === 1 ? "HCOOH" : "C" + sub(n - 1) + "H" + sub(2 * n - 1) + "COOH";
+    }
+    const molar = (f, n) => (f === "alkan" ? 14 * n + 2 : f === "alkohol" ? 14 * n + 18 : 14 * n + 32);
+    const common = { "metansyre": "maursyre", "etansyre": "eddiksyre", "etanol": "i vin og øl, og i rødsprit" };
+
+    box.innerHTML = '<div class="exp-top"><h3>Molekylbyggeren</h3><p class="note">Velg en stoffgruppe og hvor mange karbonatomer kjeden skal ha.</p></div>' +
+      '<div class="bench"><figure class="fig" style="margin:0"><div class="svg-scroll"><svg id="molSvg" role="img" aria-label="Strukturformel"></svg></div><p class="note" id="molBonds"></p></figure>' +
+      '<div class="ctrl"><div class="toggle" role="group" aria-label="Stoffgruppe" id="molFam"></div>' +
+      '<div class="slider"><div class="slider-top"><label for="molN">Antall karbonatomer</label><output for="molN" id="molNOut"></output></div><input type="range" id="molN" min="1" max="8" step="1" value="2"></div>' +
+      '<div><div class="molname" id="molName"></div><div class="formula" id="molFormula"></div></div>' +
+      '<div class="facts" id="molFacts"></div></div></div>' +
+      '<div class="predict" id="molPredict"></div>' +
+      '<figure class="fig" style="margin:0"><figcaption class="note">Kokepunkt for 1–8 karbonatomer. Den valgte er markert. Den stiplede linjen er romtemperatur.</figcaption><div class="svg-scroll"><svg style="max-width:680px" id="bpChart" role="img" aria-label="Kokepunkter"></svg></div></figure>';
+
+    const famBox = $("molFam");
+    Object.keys(DATA).forEach((f) => {
+      const b = document.createElement("button");
+      b.type = "button"; b.textContent = DATA[f].label;
+      b.onclick = () => { st.fam = f; render(); };
+      famBox.appendChild(b);
+    });
+    $("molN").oninput = (e) => { st.n = Number(e.target.value); render(); };
+
+    function drawMol() {
+      const svg = $("molSvg");
+      svg.textContent = "";
+      const n = st.n, f = st.fam;
+      const dx = 56, x0 = 70, y0 = 80;
+      const extra = f === "alkan" ? 0 : f === "alkohol" ? 1 : 2;
+      const W = x0 * 2 + dx * (n - 1 + extra) + 60;
+      svg.setAttribute("viewBox", "0 0 " + W + " 170");
+      const atom = (x, y, t) => {
+        const r = t === "H" ? 11 : 15;
+        el("circle", { cx: x, cy: y, r, class: "atom-" + t }, svg);
+        el("text", { x, y: y + 4, "text-anchor": "middle", class: "atom-txt-" + t }, svg, t);
+      };
+      const bond = (x1, y1, x2, y2, dbl) => {
+        if (dbl) {
+          el("line", { x1: x1 - 3, y1, x2: x2 - 3, y2, class: "bond" }, svg);
+          el("line", { x1: x1 + 3, y1, x2: x2 + 3, y2, class: "bond" }, svg);
+        } else el("line", { x1, y1, x2, y2, class: "bond" }, svg);
+      };
+      const nC = f === "syre" ? n : n;
+      // carbon chain; for the acid, the last C is the COOH carbon
+      const cs = [];
+      for (let i = 0; i < nC; i++) cs.push([x0 + i * dx, y0]);
+      for (let i = 1; i < nC; i++) bond(cs[i - 1][0] + 15, y0, cs[i][0] - 15, y0);
+      cs.forEach(([x, y], i) => {
+        const last = i === nC - 1, first = i === 0;
+        const isAcidC = f === "syre" && last;
+        // up and down neighbours
+        if (!isAcidC) {
+          bond(x, y - 15, x, y - 41); atom(x, y - 52, "H");
+          bond(x, y + 15, x, y + 41); atom(x, y + 52, "H");
+        }
+        if (first && !(f === "syre" && nC === 1)) { bond(x - 15, y, x - 33, y); atom(x - 44, y, "H"); }
+        if (last) {
+          if (f === "alkan") { bond(x + 15, y, x + 33, y); atom(x + 44, y, "H"); }
+          if (f === "alkohol") { bond(x + 15, y, x + 39, y); atom(x + 52, y, "O"); bond(x + 67, y, x + 85, y); atom(x + 96, y, "H"); }
+          if (f === "syre") {
+            if (nC === 1) { bond(x - 15, y, x - 33, y); atom(x - 44, y, "H"); }
+            bond(x, y - 15, x, y - 41, true); atom(x, y - 54, "O");
+            bond(x + 15, y, x + 39, y); atom(x + 52, y, "O"); bond(x + 67, y, x + 85, y); atom(x + 96, y, "H");
+          }
+        }
+        atom(x, y, "C");
+      });
+      $("molBonds").textContent = "Hvert karbonatom (svart) har fire bindinger." + (f === "syre" ? " I COOH-gruppen er den ene en dobbeltbinding til O." : "");
+    }
+
+    function drawChart() {
+      const svg = $("bpChart");
+      svg.textContent = "";
+      const w = 560, h = 230, left = 70, bottom = 190, top = 20;
+      svg.setAttribute("viewBox", "0 0 " + w + " " + h);
+      const ymin = -200, ymax = 250;
+      const Y = (t) => bottom - (t - ymin) / (ymax - ymin) * (bottom - top);
+      for (const t of [-200, -100, 0, 100, 200]) {
+        el("line", { x1: left, y1: Y(t), x2: w - 10, y2: Y(t), class: "s-line", "stroke-width": t === 0 ? 1.5 : 1 }, svg);
+        el("text", { x: left - 6, y: Y(t) + 4, "text-anchor": "end", class: "t-small f-muted" }, svg, (t < 0 ? "−" + Math.abs(t) : t) + " °C");
+      }
+      el("line", { x1: left, y1: Y(20), x2: w - 10, y2: Y(20), class: "s-accent", "stroke-width": 1, "stroke-dasharray": "4 4" }, svg);
+      el("text", { x: left + 4, y: Y(20) - 5, class: "t-small f-accent" }, svg, "20 °C");
+      const fams = Object.keys(DATA), gw = (w - left - 20) / 8;
+      const fill = { alkan: "f-muted", alkohol: "f-effect", syre: "f-do" };
+      for (let n = 1; n <= 8; n++) {
+        fams.forEach((f, k) => {
+          const t = DATA[f].bp[n - 1];
+          const x = left + 6 + (n - 1) * gw + k * (gw - 12) / 3;
+          const y0 = Y(0), y1 = Y(t);
+          const sel = f === st.fam && n === st.n;
+          el("rect", { x, y: Math.min(y0, y1), width: (gw - 14) / 3, height: Math.max(1, Math.abs(y1 - y0)), class: fill[f], opacity: sel ? 1 : 0.45 }, svg);
+        });
+        el("text", { x: left + 6 + (n - 1) * gw + (gw - 12) / 2, y: h - 22, "text-anchor": "middle", class: "t-small f-muted" }, svg, n + " C");
+      }
+      fams.forEach((f, k) => {
+        el("rect", { x: left + 6 + k * 150, y: h - 12, width: 10, height: 10, class: fill[f] }, svg);
+        el("text", { x: left + 20 + k * 150, y: h - 3, class: "t-small f-ink" }, svg, DATA[f].label);
+      });
+    }
+
+    function renderPredict() {
+      const P = $("molPredict");
+      const q = { q: "Etan, etanol og etansyre har alle to karbonatomer. Hvilket stoff koker ved høyest temperatur?", options: ["Etan", "Etanol", "Etansyre"], answer: 2,
+        why: "Etansyre koker ved 118 °C, etanol ved 78 °C og etan ved −89 °C. OH- og COOH-gruppene lager hydrogenbindinger mellom molekylene, og de må brytes før stoffet koker. Syren har to O-atomer og binder enda sterkere." };
+      P.innerHTML = "<h3>Spå først</h3><p>" + esc(q.q) + '</p><div class="choices"></div><div class="feedback" aria-live="polite"></div>';
+      const ch = P.querySelector(".choices");
+      q.options.forEach((o, i) => {
+        const b = document.createElement("button");
+        b.type = "button"; b.textContent = o;
+        b.setAttribute("aria-pressed", String(st.guess === i));
+        b.onclick = () => { st.guess = i; renderPredict(); };
+        ch.appendChild(b);
+      });
+      if (st.guess !== null) {
+        const right = st.guess === q.answer;
+        P.querySelector(".feedback").innerHTML = (right ? '<b class="right">Riktig.</b> ' : '<b class="wrong">Ikke helt.</b> ') + esc(q.why) +
+          '<span class="note">To ting styrer kokepunktet: hvor lang kjeden er, og hvilken gruppe molekylet har. Prøv begge i molekylbyggeren.</span>';
+      }
+    }
+
+    function render() {
+      famBox.querySelectorAll("button").forEach((b, i) => b.setAttribute("aria-pressed", String(Object.keys(DATA)[i] === st.fam)));
+      const f = st.fam, n = st.n;
+      $("molNOut").textContent = n;
+      const nm = name(f, n);
+      $("molName").textContent = nm.charAt(0).toUpperCase() + nm.slice(1) + (common[nm] ? " (" + common[nm] + ")" : "");
+      $("molFormula").textContent = formula(f, n);
+      const bp = DATA[f].bp[n - 1];
+      const facts = [
+        ["Molar masse", molar(f, n) + " g/mol"],
+        ["Kokepunkt", (bp < 0 ? "−" + Math.abs(bp) : bp) + " °C"],
+        ["Ved 20 °C", bp < 20 ? "gass" : "væske"],
+        ["Løses i vann?", DATA[f].sol(n)]
+      ];
+      $("molFacts").innerHTML = facts.map((x) => '<div class="fact"><small>' + x[0] + "</small><b>" + esc(x[1]) + "</b></div>").join("");
+      drawMol(); drawChart();
+    }
+    render();
+    renderPredict();
+  })();
+})();
+</script>

@@ -108,6 +108,7 @@ The build prints warnings that Mathlib modules are "designed for use with the mo
 - `CausalPhys/` — the library (see `CausalPhys.lean` for the module list)
 - `CausalPhysAnalysis/` — functional analysis beyond what the language needs (Minty–Browder in Hilbert and Banach spaces, reflexivity of ℓᵖ and Lᵖ, infinite causal models)
 - `docs/roadmap.md` — the development plan
+- `docs/kausal-10.html` — a simpler teaching page (Norwegian) for 10th grade: force and motion, work, energy and power, the law of energy, electricity and magnetism, and a molecule builder for hydrocarbons, alcohols and carboxylic acids. What each experiment determines, and sample numbers, are checked in `Lang/Examples/School.lean`.
 - `PearlDoCalculus/` — a copy of PearlDoCalculus ported to this toolchain; the changes are in `docs/pearldocalculus-lean-4.36-port.patch`
 - `docs/kausal-lab.html` — an interactive teaching page (Norwegian) on causal ordering for secondary school. Its builder section lets students pick a model, choose what the lab holds fixed and intervene; every answer (causal order, blocks, `#causal_check` verdict, units, interventions, and the numbers for the named setups from `#causal_eval`) was computed by Lean for every possible setup by `scripts/build_lab.py` (with `scripts/Export.lean`), and CI fails if the page differs from what Lean computes. Its "Finn feilen" section shows wrong models with the errors pinned in `Tests/Rejects.lean`.
 
