@@ -54,12 +54,9 @@ def setups (M : Expr) : MetaM String := do
     for e in laws do
       let v ← kernelNorm (← mkAppM ``Order.Cert.σ #[cert, e])
       let deps ← listOf (← mkAppM ``Model.deps #[M, e, v])
-      let rank ← kernelNorm (← mkAppM ``Order.Cert.rank #[cert, e])
-      let some r := rank.rawNatLit? <|> (do let n ← rank.nat?; pure n)
-        | throwError "export: rank {rank}"
       let blk ← listOf (← mkAppM ``Order.blockOf #[st, e])
       rows := rows.push ("{\"law\":" ++ jstr (shortName e) ++ ",\"var\":" ++ jstr (shortName v) ++
-        ",\"reads\":" ++ jnames deps ++ ",\"rank\":" ++ toString r ++
+        ",\"reads\":" ++ jnames deps ++
         ",\"block\":" ++ jnames blk ++ "}")
     let acyc ← isTrue (← mkAppM ``Order.OrderedLT #[st, cert])
     out := out.push ("{" ++ fixed ++ ",\"valid\":true,\"acyclic\":" ++ toString acyc ++

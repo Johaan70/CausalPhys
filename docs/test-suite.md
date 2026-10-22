@@ -62,11 +62,12 @@ Negative tests (`Tests/Rejects.lean`) pin the errors the language must give for 
 - parameters must be explicit and must not share a name with a variable;
 - a model without a witness, and a model whose domain contradicts its laws;
 - units that do not match: the gas law without R, a solving formula with the wrong unit, an Arrhenius exponent that is not dimensionless, a constant or variable without a unit;
-- an intervention on a variable the lab already holds fixed (a law is left with nothing to determine).
+- an intervention on a variable the lab already holds fixed (a law is left with nothing to determine);
+- `#causal_eval` with a value for a variable the lab does not hold fixed, and on a nonlinear block (the closed flask).
 
 ## The teaching page
 
-`scripts/build_lab.py` asks Lean (`scripts/Export.lean`) for the causal order of every possible lab setup of eight of these models, and of every setup with one law switched off (an intervention), and runs `#causal_check` on every setup with a cyclic block. The result is written into `docs/kausal-lab.html`. Before writing, the script compares the export with the pinned `#causal_order` output of every named setup. CI runs it again with `--check` and fails if the page differs from what Lean computes.
+`scripts/build_lab.py` asks Lean (`scripts/Export.lean`) for the causal order of every possible lab setup of eight of these models, and of every setup with one law switched off (an intervention), and runs `#causal_check` on every setup with a cyclic block and `#causal_eval` for four sets of values in each named setup whose blocks are linear (56 evaluations). The result is written into `docs/kausal-lab.html`. Before writing, the script compares the export with the pinned `#causal_order` output of every named setup. CI runs it again with `--check` and fails if the page differs from what Lean computes.
 
 ## What the tests do and do not show
 

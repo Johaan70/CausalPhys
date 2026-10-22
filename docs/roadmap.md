@@ -37,12 +37,14 @@ The plan, ordered by what it gives: first make the core right, then make it usef
 
 **Done when:** the closed flask and the weak acid under titration get "exactly one outcome" automatically.
 
-## 4. Numbers, not only directions
+## 4. Numbers, not only directions — done (with one gap)
 
-- `#causal_eval S with T := 450, …` computes the outcome exactly (rationals) for acyclic setups and linear blocks, with a proof that the numbers solve the laws.
-- The teaching page gets sliders whose values were computed by Lean. This closes the gap the teacher section states openly: the numbers in the circuit are computed on the page, not proved.
+- `#causal_eval S with T := 300, … using R` computes the outcome exactly (rationals) for acyclic setups and linear blocks, and proves that the state lies in the domain, satisfies every law, solves the causal model with these fixed values and is the only outcome (`Lang/Eval.lean`). The numbers are found without being trusted: block by block in causal order, a cyclic block by probing its affine formulas and solving the linear system over ℚ; the proof then checks them with `norm_num`, and uniqueness comes from `Setup.unique` or `block_linear` with the determinant evaluated at the given values.
+- It reports instead of guessing: a value for a variable the lab does not hold fixed, a nonlinear block (the closed flask), or a formula that does not give a rational number (an exponential). Pinned in `Examples/Gas`, `Examples/Divider` and `Tests/Rejects.lean`.
+- The builder on the teaching page shows Lean's numbers for every named setup with linear blocks: four values of one fixed variable each, 56 evaluations, regenerated and compared in CI.
+- Found along the way: the rank the matching certificate carries does not give the order of the blocks (in the weak-acid buffer all three laws had the same rank), so both `#causal_eval` and the page now order blocks by what they read. The rank is no longer exported.
 
-**Done when:** every number in the first three experiments on the page is exported from Lean and checked in CI.
+**Gap:** the three hand-built experiments at the top of the page still compute their numbers in the browser. The gas and circuit numbers could be replaced by Lean's; the equilibrium A + B ⇌ C is the root of a quadratic and is rarely rational, so exact numbers need a different method (an interval that provably contains the root).
 
 ## 5. Try it in a classroom
 

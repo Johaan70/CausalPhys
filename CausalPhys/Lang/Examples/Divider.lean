@@ -54,6 +54,19 @@ info: acyclic: every intervention has exactly one outcome of the causal model (S
 #guard_msgs in
 #causal_check Divider.voltageSource
 
+-- Numbers in the cyclic block: the current divider with 3 A, 10 Ω and 20 Ω.
+/--
+info: I = 3  (fixed)
+I1 = 2  (computed)
+I2 = 1  (computed)
+U = 20  (computed)
+R1 = 10  (fixed)
+R2 = 20  (fixed)
+proved: in the domain, satisfies every law, and is the only outcome of the setup with these fixed values
+-/
+#guard_msgs in
+#causal_eval Divider.currentSource with I := 3, R1 := 10, R2 := 20
+
 namespace Divider
 
 theorem currentSource_cyclic : ¬ currentSource.Acyclic := by struct_decide

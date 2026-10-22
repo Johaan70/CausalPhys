@@ -6,6 +6,8 @@
   imported by `CausalPhys.lean`; CI checks it on its own.
 -/
 import CausalPhys.Lang.Syntax
+import CausalPhys.Lang.Examples.Gas
+import CausalPhys.Lang.Examples.Complexation
 
 open CausalPhys CausalPhys.Lang
 
@@ -271,5 +273,22 @@ causal_model MoneyWithoutVelocity where
   law fisher : M * Vel = P * Y
   witness M := 1, Vel := 1, P := 1, Y := 1
   setup target fixes Vel P Y
+
+/-! Numbers only for the variables the lab holds fixed: with a locked piston the
+    pressure is an effect, not an input. -/
+/--
+error: #causal_eval: the lab does not hold p fixed in this setup; only the fixed variables get values (vol, n, T)
+-/
+#guard_msgs in
+#causal_eval CausalPhys.Examples.Gas.locked with vol := 1/40, n := 1, p := 100000 using R
+
+/-! A nonlinear block is reported, not computed: the closed flask's equilibrium
+    is the root of a polynomial, not a rational number in general. -/
+/--
+error: #causal_eval: the block [k1, k2, metal, ligand] is not linear in its own variables, so its values cannot be computed this way
+-/
+#guard_msgs in
+#causal_eval CausalPhys.Examples.Complexation.closed ⟨1000, 100, by norm_num, by norm_num⟩ with
+  m0 := 1/1000, l0 := 1/500
 
 end CausalPhys.Tests.Rejects

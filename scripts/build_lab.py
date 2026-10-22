@@ -31,7 +31,7 @@ MODELS = [
      "(CausalPhys.Tests.Keynes.model ⟨0, 1/2, by norm_num, by norm_num⟩)", "(k : Keynes.Params)"),
     ("quantity", "Tests/Economics.lean", "Quantity", "CausalPhys.Tests.Quantity.model", None),
 ]
-CLAUSES = ("variables", "units", "domain", "law", "solve", "witness", "setup")
+CLAUSES = ("variables", "units", "domain", "facts", "law", "solve", "witness", "setup")
 
 
 def model_block(path, name):
@@ -62,6 +62,8 @@ def parse(path, name):
         if t.startswith("units "):
             out["unitsClause"] = t[len("units "):].strip()
             out["units_declared"] = [[x.strip() for x in u.split(":")] for u in out["unitsClause"].split(",")]
+        elif t.startswith("facts "):
+            out["facts"] = t[len("facts "):].strip()
         elif t.startswith("domain "):
             out["domain"] = t[len("domain "):].strip()
         elif t.startswith("law "):
@@ -126,6 +128,95 @@ def lean(code):
     return out
 
 
+# Numbers for the named setups, computed and proved by #causal_eval: the values
+# of the fixed variables (one of them takes several values on the page), the
+# concrete parameters, and constants to unfold. Setups whose block is not linear
+# are listed with None: Lean cannot compute their numbers exactly.
+EVALS = {
+    "gas": {"params": None, "using": "R", "setups": {
+        "locked": ({"vol": "1/40", "n": "1"}, "T", ["250", "300", "350", "400"]),
+        "weighted": ({"p": "100000", "n": "1"}, "T", ["250", "300", "350", "400"])}},
+    "circuit": {"params": None, "using": None, "setups": {
+        "voltageSource": ({"U": "12", "Ta": "293", "k": "2"}, "Rr", ["5", "10", "15", "20"]),
+        "currentSource": ({"I": "1", "Ta": "293", "k": "2"}, "Rr", ["5", "10", "15", "20"])}},
+    "divider": {"params": None, "using": None, "setups": {
+        "currentSource": ({"I": "3", "R2": "20"}, "R1", ["10", "20", "30", "40"]),
+        "voltageSource": ({"U": "12", "R2": "20"}, "R1", ["10", "20", "30", "40"])}},
+    "complexation": {"params": "⟨1000, 100, by norm_num, by norm_num⟩", "using": None, "setups": {
+        "closed": None,
+        "buffered": ({"m0": "1/1000"}, "L", ["1/10000", "1/1000", "1/100", "1/10"])}},
+    "weakacid": {"params": None, "using": None, "setups": {
+        "titration": None,
+        "buffer": ({"C": "1/10", "Ka": "9/500000"}, "H", ["1/100000", "1/50000", "1/20000", "1/10000"])}},
+    "market": {"params": "⟨100, 2, 1, 10, 3, 5, by norm_num, by norm_num⟩", "using": None, "setups": {
+        "closed": ({"Imp": "0", "y": "50", "w": "1"}, "t", ["0", "5", "10", "15"]),
+        "open_": ({"P": "30", "y": "50", "w": "1"}, "t", ["0", "5", "10", "15"])}},
+    "keynes": {"params": "⟨100, 3/4, by norm_num, by norm_num⟩", "using": None, "setups": {
+        "shortRun": ({"I": "200", "Tax": "200"}, "G", ["100", "200", "300", "400"]),
+        "target": ({"Y": "1000", "I": "200"}, "Tax", ["100", "200", "300", "400"])}},
+    "quantity": {"params": None, "using": None, "setups": {
+        "classical": ({"Vel": "5", "Y": "100"}, "M", ["1000", "2000", "3000", "4000"]),
+        "fixedPrice": ({"Vel": "5", "P": "2"}, "M", ["1000", "2000", "3000", "4000"])}},
+}
+
+
+def run_parallel(head, cmds, marker):
+    """Run Lean commands in two processes; return the output after each marker."""
+    halves = [cmds[0::2], cmds[1::2]]
+    procs = []
+    for i, part in enumerate(halves):
+        f = os.path.join(ROOT, ".lake", f"lab_{marker}{i}.lean")
+        open(f, "w").write(head + "\n".join(f'#print "@@{marker}@@"\n{c}' for c in part) + "\n")
+        procs.append(subprocess.Popen(["lake", "env", "lean", f], cwd=ROOT,
+                                      stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True))
+    outs = [None] * len(cmds)
+    for i, (part, pr) in enumerate(zip(halves, procs)):
+        out = pr.communicate()[0]
+        if pr.returncode != 0 or re.search(r"error", out):
+            sys.exit("build_lab: Lean failed\n" + out[:4000])
+        msgs = out.split(f"@@{marker}@@")[1:]
+        if len(msgs) != len(part):
+            sys.exit(f"build_lab: expected {len(part)} messages, got {len(msgs)}\n{out[:3000]}")
+        for j, m in enumerate(msgs):
+            outs[i + 2 * j] = m.strip()
+    return outs
+
+
+def evals(data):
+    """#causal_eval for the named setups; adds `numbers` to each named setup."""
+    cmds, jobs = [], []
+    for key, path, name, term, binder in MODELS:
+        cfg = EVALS.get(key)
+        if not cfg:
+            continue
+        ns = "CausalPhys.Tests." if path.startswith("Tests") else "CausalPhys.Examples."
+        for sname, spec in cfg["setups"].items():
+            if spec is None:
+                continue
+            base, vary, values = spec
+            S = f"{ns}{name}.{sname}" + (f" {cfg['params']}" if cfg["params"] else "")
+            for val in values:
+                items = ", ".join(f"{k} := {v}" for k, v in {**base, vary: val}.items())
+                use = f" using {cfg['using']}" if cfg["using"] else ""
+                cmds.append(f"#causal_eval ({S}) with {items}{use}")
+                jobs.append((key, sname, vary, val))
+    head = "import CausalPhys\nopen CausalPhys CausalPhys.Lang CausalPhys.Examples CausalPhys.Tests\n"
+    outs = run_parallel(head, cmds, "EVAL")
+    for (key, sname, vary, val), out in zip(jobs, outs):
+        vals = dict(re.findall(r"^(\w+) = (\S+)  \((?:fixed|computed)\)$", out, re.M))
+        if "proved:" not in out or not vals:
+            sys.exit(f"build_lab: #causal_eval failed for {key}.{sname}\n{out}")
+        named = next(n for n in data[key]["named"] if n["name"] == sname)
+        nums = named.setdefault("numbers", {"vary": vary, "rows": []})
+        nums["rows"].append(vals)
+    for key, cfg in EVALS.items():
+        for sname, spec in cfg["setups"].items():
+            if spec is None:
+                named = next(n for n in data[key]["named"] if n["name"] == sname)
+                named["numbers"] = None
+    return len(cmds)
+
+
 def main():
     check = "--check" in sys.argv
     export = open(os.path.join(ROOT, "scripts", "Export.lean")).read()
@@ -186,6 +277,8 @@ def main():
             lst = data[key]["setups"] if where is None else data[key]["without"][where]
             next(x for x in lst if x["fixed"] == fixed)["check"] = msg.strip()
 
+    n_evals = evals(data)
+
     # The pinned outputs of the named setups must agree with the export
     for key, d in data.items():
         for named in d["named"]:
@@ -209,7 +302,7 @@ def main():
     else:
         open(PAGE, "w").write(new)
         n = sum(len(d["setups"]) + sum(len(v) for v in d["without"].values()) for d in data.values())
-        print(f"wrote {len(data)} models, {n} setups, {len(jobs)} checks")
+        print(f"wrote {len(data)} models, {n} setups, {len(jobs)} checks, {n_evals} evaluations")
 
 
 def order_text(s):

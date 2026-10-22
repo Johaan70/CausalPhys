@@ -40,6 +40,17 @@ acyclic: every intervention has exactly one outcome of the causal model
 #guard_msgs in
 #causal_order Gas.weighted
 
+-- Numbers: 1 mol at 300 K in 25 L. Computed exactly and proved.
+/--
+info: p = 12471693927/125000  (computed)
+vol = 1/40  (fixed)
+n = 1  (fixed)
+T = 300  (fixed)
+proved: in the domain, satisfies every law, and is the only outcome of the setup with these fixed values
+-/
+#guard_msgs in
+#causal_eval Gas.locked with vol := 1/40, n := 1, T := 300 using R
+
 namespace Gas
 
 /-! ## Computed by Lean -/

@@ -25,6 +25,7 @@ import CausalPhys.Lang.Linear
 import CausalPhys.Lang.Blockwise
 import CausalPhys.Lang.Secant
 import CausalPhys.Lang.Tactic
+import CausalPhys.Lang.Eval
 import CausalPhys.Lang.Units
 import CausalPhys.Lang.Syntax
 import CausalPhys.Lang.Examples.Gas

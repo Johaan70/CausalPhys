@@ -43,7 +43,7 @@
   read as that variable. This also applies to identifiers bound inside a
   formula (`fun y => …`), so bound names must differ from the variable names.
 -/
-import CausalPhys.Lang.Tactic
+import CausalPhys.Lang.Eval
 import CausalPhys.Lang.Units
 
 namespace CausalPhys.Lang
