@@ -194,6 +194,14 @@ theorem find_spec {e : E} {v : V} (h : v ∈ M.canSolve e) :
     subst h1
     exact ⟨pm, by simp [find, hf], h2⟩
 
+/-- On the domain, a law holds exactly when the variable it is solved for
+    equals its formula. -/
+theorem mechOf_sound {e : E} {v : V} (hv : v ∈ M.canSolve e) (s : V → α) (hD : M.dom s) :
+    M.law e s ↔ s v = (M.mechOf e v).f s := by
+  obtain ⟨m, hf, hm⟩ := M.find_spec hv
+  simp only [mechOf, hf, Option.getD_some]
+  exact M.sound e v m hm s hD
+
 /-- The solvers, packaged for the matching algorithm. -/
 def solversOf (exo : List V) : Solvers (M.struct exo) M.equation M.dom where
   mech := M.mechOf
@@ -252,6 +260,20 @@ def Model.remove {E V : Type} {α : Type u} [DecidableEq E] (M : Model E V α) (
   dom := M.dom
   solvers e' := M.solvers e'.1
   sound e' := M.sound e'.1
+
+/-- The same laws, with each law solved only for `pick e`. Used to look at a
+    setup through another matching of laws to variables: inside the domain the
+    solutions are the same (`Setup.solves_iff_restrict`). -/
+def Model.restrict {E V : Type} {α : Type u} [DecidableEq V] (M : Model E V α) (pick : E → V) :
+    Model E V α where
+  eqList := M.eqList
+  varList := M.varList
+  eq_complete := M.eq_complete
+  var_complete := M.var_complete
+  law := M.law
+  dom := M.dom
+  solvers e := (M.solvers e).filter fun p => decide (p.1 = pick e)
+  sound e v m h := M.sound e v m (List.mem_filter.1 h).1
 
 theorem Model.sat_remove {E V : Type} {α : Type u} [DecidableEq E] (M : Model E V α) (e : E)
     (s : V → α) : (M.remove e).Sat s ↔ ∀ e', e' ≠ e → M.law e' s :=
@@ -472,6 +494,13 @@ theorem blocks_independent (hu : DM.Uniform (M.struct S.exo) M.eqVars)
     DM.Reach (fun e v => v ∈ M.eqVars e) S.cert.σ x e ↔
       DM.Reach (fun e v => v ∈ M.eqVars e) c.σ x e :=
   DM.blocks_independent hu S.valid hc x e
+
+/-- A setup of the restricted model with the same fixed variables has the same
+    solutions inside the domain. -/
+theorem solves_iff_restrict (pick : E → V) (S' : Setup (M.restrict pick)) (hexo : S'.exo = S.exo)
+    (u s : V → α) (hD : M.dom s) : S.scm.Solves u s ↔ S'.scm.Solves u s := by
+  rw [S.solves_iff u s hD, S'.solves_iff u s hD, hexo]
+  rfl
 
 /-! ### Reading a solution off, variable by variable -/
 

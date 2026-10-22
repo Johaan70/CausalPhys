@@ -27,15 +27,24 @@ The plan, ordered by what it gives: first make the core right, then make it usef
 
 **Left for later:** the derivation does not divide by a factor the domain keeps positive only through a fact it cannot see; such a formula is simply not derived (a hand-written formula with a proof still works). Of the 45 setups with a cyclic block on the page, 18 are not decided by either criterion: formulas such as M = ML/(K₁L) are neither affine nor multi-affine. That is step 3.
 
-## 3. Existence, not only uniqueness, in nonlinear blocks
+## 3. Existence, not only uniqueness, in nonlinear blocks — done (with limits)
 
-**Problem:** the secant criterion gives at most one solution; complexation and titration need exactly one.
+**Problem:** the secant criterion gave at most one outcome; the closed flask and titration need exactly one. And the criterion read each law through the formula the matching chose.
 
-- An automatic existence criterion for blocks whose domain is a box: monotonicity along one variable (as in the complexation proof), Brouwer where needed.
-- The titration case: let a block be decided by the laws directly, not through the formulas the matching chose (`unique_of_laws`, automated).
-- A new `#causal_check` answer: exactly one outcome in the domain.
+What was built:
 
-**Done when:** the closed flask and the weak acid under titration get "exactly one outcome" automatically.
+- **Existence** (`block_exists`, `Lang/Exist.lean`): the other variables are computed from a small set of core variables by their formulas; for each core variable F(x) = x − (its formula); the box is 0 ≤ x ≤ (the formula at x = 0), which for a mass balance is the total. The Poincaré–Miranda theorem (`PoincareMiranda.lean`, proved from the Brouwer theorem already in the library) gives a zero when F < 0 on the lower faces and F ≥ 0 on the upper ones. The tactic tries every matching of laws to variables and every small core, proves the face inequalities, the domain and the laws (`Model.mechOf_sound`), and skips candidates whose formulas divide by a core variable.
+- **Uniqueness from the laws** (`law_secant_unique`, `Setup.laws_secant_unique`): the secant P-matrix argument on residuals ±(lhs − rhs) of the laws, so it no longer depends on the formulas the matching chose. Also `secant_unique_any`, which reads the setup through another matching (`Model.restrict`, `Setup.solves_iff_restrict`).
+- `positivity_hyps`: positivity that uses hypotheses 0 < t, 0 ≤ t from the context.
+- `#causal_check` now says "exactly one outcome in the domain whenever every fixed value is positive" when both halves succeed.
+
+Results:
+
+- Closed flask: exactly one equilibrium for positive m₀, l₀, fully automatic (`Complexation.closed_existsUnique`).
+- Weak acid under titration: exactly one equilibrium before the equivalence point, Na⁺ < C (`WeakAcid.titration_existsUnique`), and none at or after it (`WeakAcid.titration_none`), because the model leaves out water. This needed the domain to say that all concentrations are positive, which it should have said from the start.
+- Of the 45 setups with a cyclic block on the teaching page, 14 are still undecided (17 before). Most of those are genuinely not unique: fixing [ML] in the complexation model leaves a quadratic in [L] with two positive roots for some values. The heated resistor with R and P fixed is unique physically (U > 0 picks the positive root), but the criterion fails because it asks for a P-matrix on the whole domain, where the current may be negative.
+
+**Limits:** existence is only attempted automatically under "every fixed value positive"; conditions like Na⁺ < C must be given as hypotheses. `block_exists` does not handle a model with a law switched off (an intervention). The checks on the page take about five minutes.
 
 ## 4. Numbers, not only directions — done (with one gap)
 

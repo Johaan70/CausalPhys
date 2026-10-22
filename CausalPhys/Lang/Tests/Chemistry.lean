@@ -24,7 +24,7 @@ namespace CausalPhys.Tests
 causal_model WeakAcid where
   variables H A HA Na C Ka
   units H : M, A : M, HA : M, Na : M, C : M, Ka : M
-  domain 0 < H ∧ 0 < Ka
+  domain 0 < H ∧ 0 < A ∧ 0 < HA ∧ 0 < Ka
   law acid : Ka * HA = H * A
   law mass : C = HA + A
   law charge : H + Na = A
@@ -33,15 +33,15 @@ causal_model WeakAcid where
   setup buffer fixes C H Ka
 
 /--
-info: acid determines A, reading [Ka, HA, H]
-mass determines HA, reading [C, A]
+info: acid determines HA, reading [H, A, Ka]
+mass determines A, reading [C, HA]
 charge determines H, reading [Na, A]
 cyclic block: [acid, mass, charge]
 -/
 #guard_msgs in
 #causal_order WeakAcid.titration
 /--
-info: cyclic: neither criterion applies (some formula is not affine in its own block, and not affine in each variable separately); uniqueness needs a domain-specific argument (monotonicity, Gale–Nikaido, Minty–Browder), plugged in with Setup.unique_of_laws
+info: cyclic, not linear in its own block, but multi-affine: at most one outcome in the domain (secant P-matrix criterion, proved by secant_unique)
 -/
 #guard_msgs in
 #causal_check WeakAcid.titration
@@ -64,6 +64,32 @@ info: cyclic, linear in each block: exactly one outcome of the causal model prov
 namespace WeakAcid
 
 theorem titration_cyclic : ¬ titration.Acyclic := by struct_decide
+
+/-- Titration before the equivalence point (less base than acid): exactly one
+    equilibrium with positive concentrations. Uniqueness by the secant criterion,
+    existence by Poincaré–Miranda; the condition Na⁺ < C is the chemistry. -/
+theorem titration_existsUnique (u : V → ℝ) (hC : 0 < u .C) (hK : 0 < u .Ka)
+    (hNa : 0 < u .C - u .Na) : ∃! s, titration.scm.Solves u s ∧ model.dom s := by
+  have huniq : ∀ u x y, titration.scm.Solves u x → titration.scm.Solves u y →
+      model.dom x → model.dom y → x = y := by
+    secant_unique
+  have hex : ∃ s, titration.scm.Solves u s ∧ model.dom s := by block_exists
+  obtain ⟨s, hs, hD⟩ := hex
+  exact ⟨s, ⟨hs, hD⟩, fun t ⟨ht, hDt⟩ => huniq u t s ht hs hDt hD⟩
+
+/-- At or after the equivalence point the model has no equilibrium at all: the
+    charge balance needs [A⁻] > [Na⁺] ≥ C, the mass balance [A⁻] < C. The model
+    leaves out water (OH⁻), which is what carries the excess base. -/
+theorem titration_none (u : V → ℝ) (hNa : u .C ≤ u .Na) :
+    ¬ ∃ s, titration.scm.Solves u s ∧ model.dom s := by
+  rintro ⟨s, hs, hD⟩
+  obtain ⟨hsat, hexo⟩ := (titration.solves_iff u s hD).1 hs
+  have m : s .C = s .HA + s .A := hsat .mass
+  have ch : s .H + s .Na = s .A := hsat .charge
+  have eC : s .C = u .C := hexo .C (by simp [titration])
+  have eNa : s .Na = u .Na := hexo .Na (by simp [titration])
+  obtain ⟨hH, -, hHA, -⟩ := hD
+  linarith
 theorem buffer_charge_determines_Na : buffer.determines .charge = .Na := by struct_decide
 theorem buffer_block : buffer.block .acid = [.acid, .mass] := by struct_decide
 
@@ -71,15 +97,13 @@ theorem buffer_existsUnique (u : V → ℝ) (hH : 0 < u .H) (hK : 0 < u .Ka) :
     ∃! s, buffer.scm.Solves u s := by
   linear_block
 
-/-- Henderson–Hasselbalch: the dissociated fraction. -/
+/-- Henderson–Hasselbalch: the dissociated fraction, for an outcome with positive
+    concentrations. -/
 theorem dissociated {u s : V → ℝ} (hH : 0 < u .H) (hK : 0 < u .Ka)
-    (hs : buffer.scm.Solves u s) : s .A = u .C * u .Ka / (u .H + u .Ka) := by
+    (hs : buffer.scm.Solves u s) (hD : model.dom s) : s .A = u .C * u .Ka / (u .H + u .Ka) := by
   have eH : s .H = u .H := buffer.exo_eq hs (by simp [buffer])
   have eK : s .Ka = u .Ka := buffer.exo_eq hs (by simp [buffer])
   have eC : s .C = u .C := buffer.exo_eq hs (by simp [buffer])
-  have hD : model.dom s := by
-    show 0 < s .H ∧ 0 < s .Ka
-    rw [eH, eK]; exact ⟨hH, hK⟩
   obtain ⟨hsat, -⟩ := (buffer.solves_iff u s hD).1 hs
   have a : s .Ka * s .HA = s .H * s .A := hsat .acid
   have m : s .C = s .HA + s .A := hsat .mass

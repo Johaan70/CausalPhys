@@ -113,7 +113,7 @@ causal_model Nonlinear where
   setup s fixes a
 
 /--
-info: cyclic: neither criterion applies (some formula is not affine in its own block, and not affine in each variable separately); uniqueness needs a domain-specific argument (monotonicity, Gale–Nikaido, Minty–Browder), plugged in with Setup.unique_of_laws
+info: cyclic: neither criterion applies (the block is not linear, and no reading of its laws gives multi-affine residuals with a P-matrix secant on the domain); uniqueness needs a domain-specific argument (monotonicity, Gale–Nikaido, Minty–Browder), plugged in with Setup.unique_of_laws
 -/
 #guard_msgs in
 #causal_check Nonlinear.s

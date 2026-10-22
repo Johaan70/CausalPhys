@@ -235,5 +235,151 @@ theorem secant_unique (hE : S.Enum laws vars) (hma : S.MultiAffine laws vars)
     simp only [w, Pi.zero_apply, sub_eq_zero] at this
     exact this
 
+/-! ## The secant criterion on the laws themselves
+
+  The criterion above reads each law through the formula the matching chose.
+  When that formula divides by a variable of the block (M = ML/(K₁L)), it is
+  not multi-affine although the law is. The same argument works on residuals of
+  the laws, rᵢ(s) = ±(lhs − rhs), which vanish exactly where the laws hold: if
+  every rᵢ is multi-affine and the secant matrix of the residuals is a
+  P-matrix, two solutions in the domain coincide. Which law is paired with which
+  variable, and the sign of each residual, are free choices (the tactic
+  `law_secant_unique` makes them so that the diagonal is positive). -/
+
+variable {n : ℕ} {vars : Fin n → V}
+
+/-- Slope of a function `g` in coordinate `j` at the mixed state. -/
+def gslope (vars : Fin n → V) (g : (V → ℝ) → ℝ) (x y : V → ℝ) (j : Fin n) : ℝ :=
+  g (Function.update (zmix vars j x y) (vars j) (y (vars j) + 1)) - g (zmix vars j x y)
+
+/-- `g` is affine in each coordinate `vars j` separately. -/
+def GAffine (vars : Fin n → V) (g : (V → ℝ) → ℝ) : Prop :=
+  ∀ j (z : V → ℝ) (t : ℝ), g (Function.update z (vars j) t) =
+    g (Function.update z (vars j) 0) + t * (g (Function.update z (vars j) 1) -
+      g (Function.update z (vars j) 0))
+
+theorem gstep_eq {g : (V → ℝ) → ℝ} (hg : GAffine vars g) (hinj : ∀ i j, vars i = vars j → i = j)
+    (x y : V → ℝ) (j : Fin n) :
+    g (zmix vars (j + 1) x y) - g (zmix vars j x y) =
+      gslope vars g x y j * (x (vars j) - y (vars j)) := by
+  have hz : zmix vars j x y (vars j) = y (vars j) := by
+    unfold zmix
+    have : vars j ∉ (List.ofFn vars).take j := by
+      intro h
+      obtain ⟨a, ha⟩ := List.mem_iff_get.1 h
+      simp only [List.get_eq_getElem, List.getElem_take, List.getElem_ofFn] at ha
+      have := hinj _ _ ha
+      have hlt := a.2
+      simp only [List.length_take, List.length_ofFn] at hlt
+      have h2 := congrArg Fin.val this
+      simp only at h2
+      omega
+    simp [this]
+  rw [zmix_succ, gslope]
+  set z := zmix vars j x y
+  have hzz : Function.update z (vars j) (y (vars j)) = z := by
+    rw [← hz]; exact Function.update_eq_self _ _
+  have e1 := hg j z (x (vars j))
+  have e2 := hg j z (y (vars j) + 1)
+  have e3 := hg j z (y (vars j))
+  rw [hzz] at e3
+  rw [e1, e2, e3]
+  ring
+
+/-- The secant identity for a multi-affine function of the state, for two
+    states that agree outside `vars`. -/
+theorem gsecant_identity {g : (V → ℝ) → ℝ} (hg : GAffine vars g)
+    (hinj : ∀ i j, vars i = vars j → i = j) (x y : V → ℝ)
+    (hout : ∀ v, (∀ j, vars j ≠ v) → x v = y v) :
+    g x - g y = ∑ j, gslope vars g x y j * (x (vars j) - y (vars j)) := by
+  have htel : ∀ K : ℕ, K ≤ n →
+      g (zmix vars K x y) - g y =
+        ∑ j : Fin n, if (j : ℕ) < K then gslope vars g x y j * (x (vars j) - y (vars j)) else 0 := by
+    intro K
+    induction K with
+    | zero => intro _; simp [zmix_zero]
+    | succ K ih =>
+      intro hK
+      have hj : K < n := hK
+      have := gstep_eq hg hinj x y ⟨K, hj⟩
+      simp only at this
+      rw [← Finset.sum_erase_add _ _ (Finset.mem_univ (⟨K, hj⟩ : Fin n))]
+      have hsplit : ∑ j ∈ Finset.univ.erase (⟨K, hj⟩ : Fin n), (if (j : ℕ) < K + 1 then
+          gslope vars g x y j * (x (vars j) - y (vars j)) else 0) =
+          ∑ j : Fin n, if (j : ℕ) < K then
+            gslope vars g x y j * (x (vars j) - y (vars j)) else 0 := by
+        rw [← Finset.sum_erase_add _ _ (Finset.mem_univ (⟨K, hj⟩ : Fin n))]
+        simp only [lt_irrefl, ite_false, add_zero]
+        apply Finset.sum_congr rfl
+        intro j hjm
+        have hne : (j : ℕ) ≠ K := fun h => (Finset.mem_erase.1 hjm).1 (Fin.ext h)
+        by_cases hlt : (j : ℕ) < K
+        · simp [hlt, Nat.lt_succ_of_lt hlt]
+        · have : ¬ (j : ℕ) < K + 1 := by omega
+          simp [hlt, this]
+      rw [hsplit, ← ih (Nat.le_of_succ_le hK)]
+      simp only [Nat.lt_succ_self, ite_true]
+      linarith
+  have hn := htel n le_rfl
+  have hx : zmix vars n x y = x := by
+    funext v
+    unfold zmix
+    by_cases hv : ∃ j, vars j = v
+    · obtain ⟨j, rfl⟩ := hv
+      simp [vars_mem_take_n j]
+    · push Not at hv
+      have : v ∉ (List.ofFn vars).take n := by
+        rw [List.take_of_length_le (by simp)]
+        simp only [List.mem_ofFn, not_exists]
+        exact hv
+      simp [this, hout v hv]
+  rw [hx] at hn
+  rw [hn]
+  apply Finset.sum_congr rfl
+  intro j _
+  simp [j.2]
+
+/-- **The secant criterion on the laws.** Residuals that vanish where the laws
+    hold, are multi-affine, and whose secant matrix is a P-matrix on the domain
+    (for two states that satisfy the laws with the same fixed values) allow at
+    most one solution in the domain. -/
+theorem laws_secant_unique (S : Setup M) (hinj : ∀ i j, vars i = vars j → i = j)
+    (hcov : ∀ v, v ∉ S.exo → ∃ j, vars j = v)
+    (res : Fin n → (V → ℝ) → ℝ) (hres : ∀ s, M.dom s → M.Sat s → ∀ i, res i s = 0)
+    (hma : ∀ i, GAffine vars (res i))
+    (hP : ∀ x y, M.dom x → M.dom y → (∀ v, v ∈ S.exo → x v = y v) →
+      PMat.IsP (Matrix.of fun i j => gslope vars (res i) x y j))
+    {u x y : V → ℝ} (hx : S.scm.Solves u x) (hy : S.scm.Solves u y)
+    (hDx : M.dom x) (hDy : M.dom y) : x = y := by
+  obtain ⟨hsx, hx1⟩ := (S.solves_iff u x hDx).1 hx
+  obtain ⟨hsy, hy1⟩ := (S.solves_iff u y hDy).1 hy
+  have hexo : ∀ v, v ∈ S.exo → x v = y v := fun v hv => (hx1 v hv).trans (hy1 v hv).symm
+  have hout : ∀ v, (∀ j, vars j ≠ v) → x v = y v := by
+    intro v hv
+    by_cases he : v ∈ S.exo
+    · exact hexo v he
+    · obtain ⟨j, hj⟩ := hcov v he
+      exact absurd hj (hv j)
+  let w : Fin n → ℝ := fun j => x (vars j) - y (vars j)
+  have hw : (Matrix.of fun i j => gslope vars (res i) x y j).mulVec w = 0 := by
+    funext i
+    have hid := gsecant_identity (hma i) hinj x y hout
+    rw [hres x hDx hsx i, hres y hDy hsy i] at hid
+    simp only [Matrix.mulVec, dotProduct, Matrix.of_apply, Pi.zero_apply, w]
+    linarith
+  have hw0 : w = 0 := by
+    by_contra hne
+    obtain ⟨i, hi⟩ := (hP x y hDx hDy hexo).nonrev w hne
+    rw [hw] at hi
+    simp at hi
+  funext v
+  by_cases hv : ∃ j, vars j = v
+  · obtain ⟨j, rfl⟩ := hv
+    have := congrFun hw0 j
+    simp only [w, Pi.zero_apply, sub_eq_zero] at this
+    exact this
+  · push Not at hv
+    exact hout v hv
+
 end Setup
 end CausalPhys.Lang

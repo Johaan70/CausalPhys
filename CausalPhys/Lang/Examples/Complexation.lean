@@ -63,7 +63,7 @@ cyclic block: [k1, k2, metal]
 #guard_msgs in
 #causal_order buffered c
 /--
-info: cyclic, not linear in its own block, but multi-affine: at most one outcome in the domain (secant P-matrix criterion, proved by secant_unique)
+info: cyclic, not linear in its own block, but multi-affine: exactly one outcome in the domain whenever every fixed value is positive (at most one: secant P-matrix criterion, proved by secant_unique; at least one: Poincaré–Miranda, proved by block_exists)
 -/
 #guard_msgs in
 #causal_check closed c
@@ -77,7 +77,7 @@ info: cyclic, linear in each block: exactly one outcome of the causal model prov
 -- A setup written in place gets the same answer as the named one (regression:
 -- the tactics used to unfold the structure literal and time out).
 /--
-info: cyclic, not linear in its own block, but multi-affine: at most one outcome in the domain (secant P-matrix criterion, proved by secant_unique)
+info: cyclic, not linear in its own block, but multi-affine: exactly one outcome in the domain whenever every fixed value is positive (at most one: secant P-matrix criterion, proved by secant_unique; at least one: Poincaré–Miranda, proved by block_exists)
 -/
 #guard_msgs in
 #causal_check ({ exo := [.m0, .l0] } : Setup (model c))
@@ -132,6 +132,19 @@ theorem isEq {s : V → ℝ} (hD : (model c).dom s) (h : (model c).Sat s) :
 theorem closed_atMostOne : ∀ u x y : V → ℝ, (closed c).scm.Solves u x →
     (closed c).scm.Solves u y → (model c).dom x → (model c).dom y → x = y := by
   secant_unique
+
+/-- The closed flask has an equilibrium with positive concentrations whenever the
+    amounts added are positive, found by `block_exists` (Poincaré–Miranda on the
+    box 0 ≤ [M] ≤ m₀, 0 ≤ [L] ≤ l₀). -/
+theorem closed_exists (u : V → ℝ) (hm : 0 < u .m0) (hl : 0 < u .l0) :
+    ∃ s, (closed c).scm.Solves u s ∧ (model c).dom s := by
+  block_exists
+
+/-- Exactly one equilibrium with positive concentrations, both halves automatic. -/
+theorem closed_existsUnique (u : V → ℝ) (hm : 0 < u .m0) (hl : 0 < u .l0) :
+    ∃! s, (closed c).scm.Solves u s ∧ (model c).dom s := by
+  obtain ⟨s, hs, hD⟩ := closed_exists u hm hl
+  exact ⟨s, ⟨hs, hD⟩, fun t ⟨ht, hDt⟩ => closed_atMostOne u t s ht hs hDt hD⟩
 
 theorem closed_unique {u s t : V → ℝ} (hDs : (model c).dom s) (hDt : (model c).dom t)
     (hs : (closed c).scm.Solves u s) (ht : (closed c).scm.Solves u t) : s = t :=
