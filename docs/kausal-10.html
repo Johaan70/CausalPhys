@@ -168,7 +168,16 @@ table.readout th:last-child { text-align: right; }
 .fact b { font: 700 1.05rem/1.2 var(--font-mono); font-variant-numeric: tabular-nums; }
 .svg-scroll { overflow-x: auto; }
 .svg-scroll svg { min-width: 300px; }
+#bpChart { min-width: 520px; }
 
+.gloss { display: grid; gap: 0.6rem; }
+.gloss h3 { font-size: 1rem; color: var(--accent); }
+.gloss summary { cursor: pointer; margin-bottom: 0.5rem; }
+.gloss dl { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 0.5rem; }
+.gloss .term { border-left: 3px solid var(--accent); background: var(--surface); padding: 0.45rem 0.7rem; border-radius: 0 6px 6px 0; display: grid; gap: 0.15rem; align-content: start; }
+.gloss dt { font: 700 0.98rem/1.25 var(--font-display); }
+.gloss dt small { display: block; font: 600 0.76rem/1.3 var(--font-mono); color: var(--muted); margin-top: 0.1rem; }
+.gloss dd { margin: 0; font-size: 0.92rem; line-height: 1.45; }
 .teacher { display: grid; gap: 0.8rem; border-top: 2px solid var(--line); padding-top: 1.5rem; }
 .teacher ul { margin: 0; padding-left: 1.2rem; display: grid; gap: 0.4rem; max-width: 70ch; }
 
@@ -231,6 +240,7 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid 
       <h2 id="kraft-h">Kraft og bevegelse</h2>
       <p>Akselerasjon er hvor fort farten endrer seg. Får en vogn akselerasjonen 2 m/s², øker farten med 2 m/s hvert sekund. Newtons 2. lov sier hvor stor kraft som trengs.</p>
     </div>
+    <details class="gloss" open data-gloss="kraft"></details>
     <div class="exp" id="exp-cart"></div>
   </section>
 
@@ -241,6 +251,7 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid 
       <h2 id="energi-h">Arbeid, energi og effekt</h2>
       <p>Arbeid er energi som overføres når en kraft flytter noe. Effekt er hvor fort det skjer. Energiloven sier at energi aldri blir borte og aldri lages fra ingenting. Den bare går over til andre former.</p>
     </div>
+    <details class="gloss" open data-gloss="energi"></details>
     <div class="exp" id="exp-stairs"></div>
     <div class="exp" id="exp-sled"></div>
     <div class="exp" id="exp-chain"></div>
@@ -253,6 +264,7 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid 
       <h2 id="el-h">Spenning, strøm og Ohms lov</h2>
       <p>Spenning (volt) er det som driver strømmen. Strøm (ampere) er hvor mye ladning som går gjennom ledningen per sekund. Resistans (ohm) er hvor vanskelig det er for strømmen å komme gjennom.</p>
     </div>
+    <details class="gloss" open data-gloss="elektrisitet"></details>
     <div class="exp" id="exp-lamp"></div>
     <div class="exp" id="exp-magnet"></div>
   </section>
@@ -264,6 +276,7 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid 
       <h2 id="org-h">Karbonatomet bygger molekyler</h2>
       <p>Karbonatomet har fire bindinger. Det kan binde seg til andre karbonatomer i lange kjeder. Med bare hydrogen rundt får vi hydrokarboner. Bytter vi ett H med en OH-gruppe, får vi en alkohol. En COOH-gruppe gir en karboksylsyre.</p>
     </div>
+    <details class="gloss" open data-gloss="organisk"></details>
     <div class="exp" id="exp-mol"></div>
   </section>
 
@@ -275,7 +288,7 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid 
       <li>Friksjonen i akebakken er en enkel modell: en fast andel av energien som frigjøres går over til varme.</li>
       <li>Virkningsgradene i energikjeden er omtrentlige typetall, ikke målinger.</li>
       <li>Elektromagneten er en forenklet modell: styrken er satt proporsjonal med strøm og vindinger. Det stemmer omtrent for en spole med jernkjerne langt fra metning.</li>
-      <li>Kokepunkter er tabellverdier ved normalt trykk, avrundet til hele grader. Molar masse er regnet med C = 12, H = 1 og O = 16 g/mol.</li>
+      <li>Kokepunkter er tabellverdier ved normalt trykk, avrundet til hele grader. Molekylmassen er regnet med C = 12 u, H = 1 u og O = 16 u (samme tall som molar masse i g/mol, som elevene møter senere).</li>
       <li>Samme tankegang på et høyere nivå, med flere lover og sløyfer, finnes i <code>docs/kausal-lab.html</code>.</li>
     </ul>
   </section>
@@ -302,6 +315,62 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid 
     const m = el("marker", { id, viewBox: "0 0 10 10", refX: "8", refY: "5", markerWidth: "6", markerHeight: "6", orient: "auto-start-reverse" }, defs);
     el("path", { d: "M0,0 L10,5 L0,10 z", class: cls }, m);
   }
+
+
+  /* ---------- Ord du trenger ---------- */
+  const GLOSS = {
+    kraft: [
+      ["Årsak og virkning", "", "Årsaken er det du endrer. Virkningen er det som skjer fordi du endret det. I hvert forsøk her er det du som velger hva som er årsak."],
+      ["Holde fast", "", "Å sørge for at en størrelse ikke endrer seg i forsøket, for eksempel at strikken alltid drar like hardt."],
+      ["Kraft", "F, newton (N)", "Et dytt eller et drag. 1 N er omtrent tyngden du kjenner når du holder et lite eple på 100 g i hånden."],
+      ["Masse", "m, kilogram (kg)", "Hvor mye stoff noe består av. Jo større masse, jo vanskeligere er det å få det i fart."],
+      ["Fart", "v, meter per sekund (m/s)", "Hvor mange meter noe flytter seg hvert sekund. 10 m/s er 36 km/t."],
+      ["Akselerasjon", "a, meter per sekund i andre (m/s²)", "Hvor mye farten øker hvert sekund. a = 2 m/s² betyr at farten øker med 2 m/s for hvert sekund som går."],
+      ["Newtons 2. lov", "F = m · a", "Kraften som trengs er masse ganger akselerasjon. Samme lov kan leses begge veier, avhengig av hva du holder fast."]
+    ],
+    energi: [
+      ["Energi", "joule (J)", "Det som trengs for å gjøre noe: løfte, varme opp, sette i bevegelse eller lage lys. 1 J er omtrent det som trengs for å løfte et lite eple på 100 g én meter."],
+      ["Arbeid", "W, joule (J)", "Energi som overføres når en kraft flytter noe. Løfter du en kasse opp en trapp, gjør du et arbeid på kassen."],
+      ["Effekt", "P, watt (W)", "Hvor fort energien overføres: joule per sekund. Samme arbeid på kortere tid betyr større effekt."],
+      ["Tyngdeakselerasjon", "g = 9,8 m/s²", "Hvor fort ting faller fortere og fortere på jorda. Brukes når vi regner ut energien til noe som løftes."],
+      ["Stillingsenergi", "Eₚ = m · g · h", "Energi noe har fordi det er høyt oppe. Kalles også potensiell energi."],
+      ["Bevegelsesenergi", "Eₖ", "Energi noe har fordi det beveger seg. Kalles også kinetisk energi. Jo større fart, jo mer bevegelsesenergi."],
+      ["Friksjon", "", "Kraften som bremser når to flater gnis mot hverandre. Den gjør bevegelsesenergi om til varme."],
+      ["Energiloven", "", "Energi kan ikke lages og ikke forsvinne. Den går bare over fra én form til en annen. Summen er alltid den samme."],
+      ["Energikilde", "", "Det vi henter energien fra: vann, vind, sol, gass, olje. Fornybare kilder tar ikke slutt. Ikke-fornybare blir brukt opp."],
+      ["Virkningsgrad", "prosent (%)", "Hvor stor del av energien som blir til det vi vil ha. Resten blir varme som vi ikke får brukt."]
+    ],
+    elektrisitet: [
+      ["Spenning", "U, volt (V)", "Det som driver strømmen rundt i kretsen, litt som trykket i en vannslange. Et vanlig batteri har 1,5 V."],
+      ["Strøm", "I, ampere (A)", "Hvor mye elektrisk ladning som går gjennom ledningen hvert sekund, litt som hvor mye vann som renner gjennom slangen."],
+      ["Resistans", "R, ohm (Ω)", "Hvor vanskelig det er for strømmen å komme gjennom. En tynn, lang tråd har stor resistans."],
+      ["Ohms lov", "U = R · I", "Spenningen er resistans ganger strøm. Med samme spenning gir større resistans mindre strøm."],
+      ["Effekt i en krets", "P = U · I, watt (W)", "Hvor mye energi pæra bruker hvert sekund. Større effekt gir mer lys og varme."],
+      ["Batteri og strømforsyning", "", "Et batteri holder spenningen omtrent fast. En laboratorie-strømforsyning kan stilles inn til å holde strømmen fast i stedet."],
+      ["Spole og vinding", "", "En spole er en ledning viklet rundt mange ganger. Hver runde kalles en vinding."],
+      ["Elektromagnet", "", "En spole med jernkjerne som blir magnetisk når det går strøm i den. Uten strøm er den ikke magnetisk."]
+    ],
+    organisk: [
+      ["Atom", "", "Den minste delen av et grunnstoff. Her bruker vi karbon (C), hydrogen (H) og oksygen (O)."],
+      ["Molekyl", "", "Flere atomer bundet sammen. Et vannmolekyl er H₂O: to H-atomer og ett O-atom."],
+      ["Binding", "", "Det som holder to atomer sammen. På tegningen er hver binding en strek. Karbon har alltid fire bindinger, hydrogen én og oksygen to."],
+      ["Organisk kjemi", "", "Kjemien til stoffer som er bygd opp rundt karbonatomer. Mye av det som finnes i levende ting, er organiske stoffer."],
+      ["Hydrokarbon", "", "Et stoff av bare karbon og hydrogen, som metan i naturgass og oktan i bensin. Alkaner er hydrokarboner med bare enkeltbindinger."],
+      ["Alkohol", "–OH", "Et hydrokarbon der ett H er byttet med en OH-gruppe. Etanol er alkoholen i øl og vin."],
+      ["Karboksylsyre", "–COOH", "Et stoff med en COOH-gruppe i enden. Eddiksyre (etansyre) gjør eddik surt."],
+      ["Funksjonell gruppe", "", "Den delen av molekylet som gir stoffet egenskapene sine, for eksempel OH eller COOH."],
+      ["Kjemisk formel", "for eksempel C₂H₆", "Forteller hvor mange atomer av hvert slag molekylet har. Strukturformelen viser i tillegg hvordan de er bundet sammen."],
+      ["Molekylmasse", "u", "Hvor mye ett molekyl veier. Enheten u er bitteliten: et H-atom veier omtrent 1 u, et C-atom 12 u og et O-atom 16 u. Vi legger sammen atomene."],
+      ["Kokepunkt", "°C", "Temperaturen der et stoff går fra væske til gass. Er kokepunktet under 20 °C, er stoffet en gass i rommet."],
+      ["Hydrogenbinding", "", "En ekstra sterk tiltrekning mellom molekyler med OH- eller COOH-grupper. Den må brytes for at stoffet skal koke, så kokepunktet blir høyere."],
+      ["Løses i vann", "", "At stoffet blander seg helt med vann, slik sukker og etanol gjør. Olje og bensin løses ikke."]
+    ]
+  };
+  document.querySelectorAll(".gloss").forEach((box) => {
+    const list = GLOSS[box.dataset.gloss] || [];
+    box.innerHTML = "<summary><h3 style=\"display:inline\">Ord du trenger</h3> <span class=\"note\">(" + list.length + " ord, trykk for å skjule)</span></summary><dl>" + list.map(([t, u, d]) =>
+      '<div class="term"><dt>' + esc(t) + (u ? "<small>" + esc(u) + "</small>" : "") + "</dt><dd>" + esc(d) + "</dd></div>").join("") + "</dl>";
+  });
 
   /* ---------- Felles forsøksmal ---------- */
   // cfg: { id, title, law, intro, setups:[{label, desc, fixed:[...], change, effect:[...], predict:{q, options, answer, why}}],
@@ -828,7 +897,7 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid 
       $("molFormula").textContent = formula(f, n);
       const bp = DATA[f].bp[n - 1];
       const facts = [
-        ["Molar masse", molar(f, n) + " g/mol"],
+        ["Molekylmasse", molar(f, n) + " u"],
         ["Kokepunkt", (bp < 0 ? "−" + Math.abs(bp) : bp) + " °C"],
         ["Ved 20 °C", bp < 20 ? "gass" : "væske"],
         ["Løses i vann?", DATA[f].sol(n)]
