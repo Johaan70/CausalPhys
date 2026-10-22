@@ -19,15 +19,8 @@ causal_model Divider where
   units I : A, I1 : A, I2 : A, U : V, R1 : ohm, R2 : ohm
   domain 0 < R1 ∧ 0 < R2
   law kcl : I = I1 + I2
-    solve I := I1 + I2
-    solve I1 := I - I2
-    solve I2 := I - I1
   law ohm1 : U = R1 * I1
-    solve U := R1 * I1
-    solve I1 := U / R1
   law ohm2 : U = R2 * I2
-    solve U := R2 * I2
-    solve I2 := U / R2
   witness I := 2, I1 := 1, I2 := 1, U := 1, R1 := 1, R2 := 1
   setup currentSource fixes I R1 R2
   setup voltageSource fixes U R1 R2

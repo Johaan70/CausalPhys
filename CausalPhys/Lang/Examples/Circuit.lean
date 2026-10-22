@@ -19,13 +19,8 @@ causal_model Circuit where
   units U : V, Rr : ohm, I : A, P : W, T : K, Ta : K, k : K/W
   domain 0 < U ∧ 0 < Rr
   law joule : P = U * I
-    solve P := U * I
-    solve I := P / U
   law ohm : U = Rr * I
-    solve I := U / Rr
-    solve U := Rr * I
   law newton : T = Ta + k * P
-    solve T := Ta + k * P
   witness U := 1, Rr := 1, I := 1, P := 1
   setup voltageSource fixes U Rr Ta k
   setup currentSource fixes I Rr Ta k

@@ -254,4 +254,22 @@ causal_model MissingUnit where
   witness U := 0
   setup s fixes R I
 
+/-! A formula is derived only where the domain makes it valid. Without `0 < Vel`
+    in the domain, MV = PY cannot be solved for M (that divides by V), so a
+    setup that needs the law to determine M is rejected. -/
+/--
+error: could not synthesize default value for field 'valid' of 'CausalPhys.Lang.Setup' using tactics
+---
+error: this setup has no valid causal reading: the laws cannot be matched one-to-one with the variables that are not fixed (fix fewer or other variables)
+⊢ Order.Valid (model.struct [V.Vel, V.P, V.Y]) (model.order [V.Vel, V.P, V.Y])
+-/
+#guard_msgs in
+causal_model MoneyWithoutVelocity where
+  variables M Vel P Y
+  units M : NOK, Vel : 1/yr, P : NOK/item, Y : item/yr
+  domain 0 < P ∧ 0 < Y
+  law fisher : M * Vel = P * Y
+  witness M := 1, Vel := 1, P := 1, Y := 1
+  setup target fixes Vel P Y
+
 end CausalPhys.Tests.Rejects

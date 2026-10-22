@@ -21,24 +21,20 @@ causal_model ThermalWall where
   units Q : W, Tm : K, T1 : K, T2 : K, R1 : K/W, R2 : K/W
   domain 0 < R1 ∧ 0 < R2
   law wall1 : T1 - Tm = R1 * Q
-    solve Q := (T1 - Tm) / R1
-    solve Tm := T1 - R1 * Q
   law wall2 : Tm - T2 = R2 * Q
-    solve Q := (Tm - T2) / R2
-    solve Tm := T2 + R2 * Q
   witness R1 := 1, R2 := 1
   setup baths fixes T1 T2 R1 R2
 
 /--
-info: wall1 determines Tm, reading [T1, R1, Q]
-wall2 determines Q, reading [Tm, T2, R2]
+info: wall1 determines Q, reading [T1, Tm, R1]
+wall2 determines Tm, reading [T2, R2, Q]
 cyclic block: [wall1, wall2]
 -/
 #guard_msgs in
 #causal_order ThermalWall.baths
 /--
 info: cyclic, linear in each block: exactly one outcome of the causal model provided that
-  ¬1 + (u ThermalWall.V.R2)⁻¹ * u ThermalWall.V.R1 = 0
+  ¬1 + (u ThermalWall.V.R1)⁻¹ * u ThermalWall.V.R2 = 0
 (finish `block_linear` with a proof of this)
 -/
 #guard_msgs in
@@ -84,9 +80,7 @@ causal_model Battery where
   units I : A, U : V, eps : V, r : ohm, R : ohm
   domain 0 < r ∧ 0 < R
   law loop : eps = (R + r) * I
-    solve I := eps / (R + r)
   law load : U = R * I
-    solve U := R * I
   witness I := 1, U := 1, eps := 2, r := 1, R := 1
   setup circuit fixes eps r R
 

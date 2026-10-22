@@ -131,7 +131,8 @@ def main():
     export = open(os.path.join(ROOT, "scripts", "Export.lean")).read()
     srcs = {key: parse(path, name) for key, path, name, _, _ in MODELS}
     calls = "\n".join(
-        f'#export_model "{key}" "{srcs[key]["unitsClause"]}" {term}' for key, _, _, term, _ in MODELS)
+        f'set_option maxHeartbeats 2000000 in\n#export_model "{key}" "{srcs[key]["unitsClause"]}" {term}'
+        for key, _, _, term, _ in MODELS)
     out = lean(export + "\n" + calls + "\n")
     data = {}
     for line in re.findall(r"EXPORT (\{.*\})", out):

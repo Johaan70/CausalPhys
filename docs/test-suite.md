@@ -52,6 +52,7 @@ Negative tests (`Tests/Rejects.lean`) pin the errors the language must give for 
 ## What the language must reject (`Tests/Rejects.lean`)
 
 - a formula that does not solve its law;
+- a formula that would need more than the domain gives (MV = PY solved for M without `0 < V`): it is not derived, so a setup that needs it is rejected;
 - a solver for a variable that does not exist;
 - a formula for x that mentions x;
 - a setup that fixes so much that the laws cannot be matched to the remaining variables;
@@ -69,7 +70,7 @@ Negative tests (`Tests/Rejects.lean`) pin the errors the language must give for 
 
 ## What the tests do and do not show
 
-For acyclic setups, most answer theorems read the outcome off the solved formulas with `read_solution`; they check the formulas the user wrote and the causal order, not that the formulas were derived from the laws (that is what `law_solve` checks, on the domain). For cyclic setups the answers are derived from the laws through `solves_iff`. `Gas.locked_laws`, `Battery.circuit_laws`, `Divider.currentSource_laws` and `Market.closed_laws` state uniqueness for the laws themselves inside the domain. Every model carries a checked witness (`consistent`) and declares units, so every law and formula in the suite is dimensionally consistent.
+For acyclic setups, most answer theorems read the outcome off the solved formulas with `read_solution`. The models in the suite write no formulas: `causal_model` derives every formula from a law that is affine in the variable, and `law_solve` proves on the domain that it solves the law. For cyclic setups the answers are derived from the laws through `solves_iff`. `Gas.locked_laws`, `Battery.circuit_laws`, `Divider.currentSource_laws` and `Market.closed_laws` state uniqueness for the laws themselves inside the domain. Every model carries a checked witness (`consistent`) and declares units, so every law and formula in the suite is dimensionally consistent.
 
 ## How the expected answers were chosen
 

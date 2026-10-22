@@ -13,15 +13,19 @@ The plan, ordered by what it gives: first make the core right, then make it usef
 
 **Done when:** `Lang/` depends only on what it needs, the checks after the build take under five minutes, and a setup written in place gets the same answer as a named one.
 
-## 2. Let Lean find the formulas
+## 2. Let Lean find the formulas — done
 
-**Problem:** the causal order depends on which `solve` lines the user writes. The gas law could not make T the effect until the formula was added by hand.
+**Problem:** the causal order depended on which `solve` lines the user wrote. The gas law could not make T the effect until the formula was added by hand.
 
-- When a law is linear in a variable, `causal_model` derives the formula for it and proves it with `law_solve`. This covers almost all textbook laws (pV = nRT, U = RI, mass balances).
-- The domain conditions this needs (what is divided by must not be zero) are proposed, or the model is refused with a clear message.
-- User formulas remain possible for laws that are not linear in the variable.
+- For every variable a law is affine in, `causal_model` derives the formula from the law (`deriveFormula`: split each side into the part proportional to the variable and the rest, then x = (lB − rB)/(rA − lA), simplified) and keeps it if `law_solve` proves that it solves the law on the domain. A formula that needs more than the domain gives is left out, not refused: MV = PY is not solved for M without `0 < V` (pinned in `Tests/Rejects.lean`).
+- `law_solve` now uses the facts stored in parameter structures (`c.hK1 : 0 < c.K1`), and a new clause `facts R_pos` makes facts about constants available to every formula proof and to the witness.
+- `#causal_solvable M` shows what each law can be solved for.
+- Formulas written by hand (`solve x := …`) remain, must be proved, and come first. They are needed for laws that are not affine in the variable.
+- No example or test model writes a formula any more. The models on the teaching page went from 29 to 50 valid lab setups (complexation 4 → 15, market 4 → 9, circuit 3 → 6, weak acid 6 → 7, Keynes 2 → 3); the gas law already had all four formulas by hand.
 
-**Done when:** the examples work without `solve` lines where the law is linear in the variable, and the teaching page shows more valid setups.
+**What changed in the pinned outputs:** only the order in which a law lists what it reads, and in the two-wall model which law determines which variable inside the cyclic block (pinned only to detect changes). One theorem (`Keynes.target_G`) needed a `ring` because the derived formula is written Y − (C + I) instead of Y − C − I.
+
+**Left for later:** the derivation does not divide by a factor the domain keeps positive only through a fact it cannot see; such a formula is simply not derived (a hand-written formula with a proof still works). Of the 45 setups with a cyclic block on the page, 18 are not decided by either criterion: formulas such as M = ML/(K₁L) are neither affine nor multi-affine. That is step 3.
 
 ## 3. Existence, not only uniqueness, in nonlinear blocks
 

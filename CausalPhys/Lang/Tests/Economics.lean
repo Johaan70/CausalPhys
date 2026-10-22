@@ -31,10 +31,7 @@ causal_model Keynes (k : Keynes.Params) where
   variables Y C I G Tax
   units Y : NOK/yr, C : NOK/yr, I : NOK/yr, G : NOK/yr, Tax : NOK/yr, k.c0 : NOK/yr, k.c1 : 1
   law income : Y = C + I + G
-    solve Y := C + I + G
-    solve G := Y - C - I
   law consumption : C = k.c0 + k.c1 * (Y - Tax)
-    solve C := k.c0 + k.c1 * (Y - Tax)
   witness C := k.c0, G := -k.c0
   setup shortRun fixes I G Tax
   setup target fixes Y I Tax
@@ -105,6 +102,7 @@ theorem target_G {u s : V → ℝ} (hs : (target k).scm.Solves u s) :
     s .G = u .Y - (k.c0 + k.c1 * (u .Y - u .Tax)) - u .I := by
   read_solution hs
   rw [hs_G, hs_C, hs_Y, hs_I, hs_Tax]
+  ring
 
 end Keynes
 
@@ -123,8 +121,6 @@ causal_model Quantity where
   units M : NOK, Vel : 1/yr, P : NOK/item, Y : item/yr
   domain 0 < P ∧ 0 < Y
   law fisher : M * Vel = P * Y
-    solve P := M * Vel / Y
-    solve Y := M * Vel / P
   witness M := 1, Vel := 1, P := 1, Y := 1
   setup classical fixes M Vel Y
   setup fixedPrice fixes M Vel P

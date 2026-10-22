@@ -5,24 +5,31 @@
 
       causal_model Gas where
         variables p vol n T
-        domain 0 < p ∧ 0 < vol
+        domain 0 < p ∧ 0 < vol ∧ 0 < n ∧ 0 < T
+        facts R_pos
         law gas : p * vol = n * R * T
-          solve p := n * R * T / vol
-          solve vol := n * R * T / p
         witness p := 1, vol := 1, n := 1, T := 1 / R
         setup locked fixes vol n T
         setup weighted fixes p n T
 
   and becomes, inside `namespace Gas`:
     * `V` (the variables) and `Law` (the laws) as enumeration types,
-    * `model : Model Law V ℝ`, built with `Model.ofSolvers`; what each formula
-      reads is collected from the formula itself, and that each formula solves
-      its law on the domain is proved by `law_solve` (or by the tactic given
-      after `by`),
+    * `model : Model Law V ℝ`, built with `Model.ofSolvers`. For every variable
+      a law is affine in, the formula is derived from the law (`deriveFormula`)
+      and kept if `law_solve` proves that it solves the law on the domain; a
+      formula that needs more (a denominator the domain does not keep away from
+      0) is left out. `#causal_solvable` shows the result. A formula can also
+      be written by hand, `solve x := …` (with a proof after `by` if needed),
+      which is the way for laws that are not affine in `x`; a formula written
+      by hand must be proved, and comes before the derived ones. What each
+      formula reads is collected from the formula itself,
     * `consistent : ∃ s, model.dom s ∧ model.Sat s`, proved from the `witness`
       (a concrete state; variables not listed are 0). Every model must have one,
       so a domain that contradicts the laws is rejected,
     * one `Setup model` per `setup` line.
+
+  `facts h₁, h₂` makes facts about constants (such as `R_pos : 0 < R`)
+  available to every formula proof and to the witness.
 
   Parameters (equilibrium constants, elasticities …) are binders after the
   name: `causal_model Market (m : Params) where …`; then `model` and every
@@ -55,6 +62,7 @@ syntax (name := causalModel) "causal_model " ident (ppSpace bracketedBinder)* " 
   ppLine "variables " ident+
   (ppLine unitsClause)?
   (ppLine "domain " term)?
+  (ppLine "facts " term,+)?
   (ppLine lawClause)+
   (ppLine witnessClause)?
   (ppLine setupClause)* : command
@@ -86,6 +94,144 @@ def binderArgs (bs : Array Syntax) : Array Term := Id.run do
         out := out.push ⟨x⟩
   return out
 
+/-! ## Deriving a formula from a law that is linear in a variable
+
+  A law `lhs = rhs` that is affine in `x` is `a·x + b = 0` with `a`, `b` free of
+  `x`. The derivation works on the syntax: every side is split into the part
+  proportional to `x` and the rest, as signed sums of terms, and then
+  `x = (lB − rB) / (rA − lA)` is written with the obvious simplifications
+  (no `0 +`, no `1 ·`, no `/ 1`). Whether the formula solves the law on the
+  domain (where `rA − lA ≠ 0` is needed) is decided when the model is
+  elaborated; a derived formula that cannot be proved is left out. -/
+
+/-- A signed sum of terms; `true` means the term is added. -/
+abbrev SSum := Array (Bool × Term)
+
+def isOne (t : Term) : Bool := match t.raw.isNatLit? with | some 1 => true | _ => false
+
+def one : MacroM Term := `(1)
+
+/-- Multiply every term of a sum by `t` (on the left). -/
+def SSum.mulL (t : Term) (xs : SSum) : MacroM SSum :=
+  xs.mapM fun (sg, x) => do
+    if isOne x then return (sg, t) else return (sg, ← `($t * $x))
+
+/-- Multiply every term of a sum by `t` (on the right). -/
+def SSum.mulR (xs : SSum) (t : Term) : MacroM SSum :=
+  xs.mapM fun (sg, x) => do
+    if isOne x then return (sg, t) else return (sg, ← `($x * $t))
+
+def SSum.div (xs : SSum) (t : Term) : MacroM SSum :=
+  xs.mapM fun (sg, x) => do return (sg, ← `($x / $t))
+
+def SSum.neg (xs : SSum) : SSum := xs.map fun (sg, x) => (!sg, x)
+
+/-- The sum as a term. -/
+def SSum.toTerm (xs : SSum) : MacroM Term := do
+  if xs.isEmpty then return ← `(0)
+  let (sg0, x0) := xs[0]!
+  let mut acc : Term ← if sg0 then pure x0 else `(-$x0)
+  for (sg, x) in xs.toList.drop 1 do
+    acc ← if sg then `($acc + $x) else `($acc - $x)
+  return acc
+
+/-- Does the syntax mention the identifier `x`? -/
+partial def mentions (x : Name) : Syntax → Bool
+  | Syntax.ident _ _ n _ => n.eraseMacroScopes == x
+  | Syntax.node _ _ args => args.any (mentions x)
+  | _ => false
+
+/-- Split `e` into `a·x + b`; `none` if `e` is not affine in `x`. -/
+partial def splitLin (x : Name) (e : Term) : MacroM (Option (SSum × SSum)) := do
+  if !mentions x e then return some (#[], #[(true, e)])
+  match e with
+  | `($i:ident) => if i.getId.eraseMacroScopes == x then return some (#[(true, ← one)], #[])
+                   else return some (#[], #[(true, e)])
+  | `(($a)) => splitLin x a
+  | `($a + $b) => do
+    let some (a1, b1) ← splitLin x a | return none
+    let some (a2, b2) ← splitLin x b | return none
+    return some (a1 ++ a2, b1 ++ b2)
+  | `($a - $b) => do
+    let some (a1, b1) ← splitLin x a | return none
+    let some (a2, b2) ← splitLin x b | return none
+    return some (a1 ++ a2.neg, b1 ++ b2.neg)
+  | `(-$a) => do
+    let some (a1, b1) ← splitLin x a | return none
+    return some (a1.neg, b1.neg)
+  | `($a * $b) => do
+    if !mentions x a then
+      let some (a2, b2) ← splitLin x b | return none
+      return some (← a2.mulL a, ← b2.mulL a)
+    if !mentions x b then
+      let some (a1, b1) ← splitLin x a | return none
+      return some (← a1.mulR b, ← b1.mulR b)
+    return none
+  | `($a / $b) => do
+    if mentions x b then return none
+    let some (a1, b1) ← splitLin x a | return none
+    return some (← a1.div b, ← b1.div b)
+  | _ => return none
+
+/-- The formula for `x` from the law `lhs = rhs`, if the law is affine in `x`. -/
+def deriveFormula (x : Name) (rel : Term) : MacroM (Option Term) := do
+  let `($l = $r) := rel | return none
+  let some (lA, lB) ← splitLin x l | return none
+  let some (rA, rB) ← splitLin x r | return none
+  -- x = (lB − rB) / (rA − lA), or the same with both signs flipped
+  let num := lB ++ rB.neg
+  let den := rA ++ lA.neg
+  if den.isEmpty then return none
+  let (num, den) := if den.all (fun p => !p.1) then (num.neg, den.neg) else (num, den)
+  let numT ← num.toTerm
+  if den.size == 1 && isOne den[0]!.2 && den[0]!.1 then return some numT
+  let denT ← den.toTerm
+  if den.size == 1 then return some (← `($numT / $denT))
+  return some (← `($numT / ($denT)))
+
+/-! ## Optional solvers
+
+  `solvers% [req% a, opt% b, …]` elaborates to the list of those entries that
+  elaborate without error: a required entry (written by the user) must, an
+  optional one (derived) is dropped if its proof fails. -/
+
+syntax solverEntry := ("req% " <|> "opt% ") term
+syntax (name := solversList) "solvers%" "[" solverEntry,* "]" : term
+
+open Lean.Elab.Term Meta in
+@[term_elab solversList] def elabSolvers : TermElab := fun stx expectedType? => do
+  let some expTy := expectedType? | throwError "solvers%: the expected type is not known"
+  let expTy ← whnfR (← instantiateMVars expTy)
+  unless expTy.isAppOfArity ``List 1 do
+    throwError "solvers%: expected a list type, got {expTy}"
+  let elemTy := expTy.appArg!
+  let ents := stx[2].getSepArgs
+  let isReq (ent : Syntax) :=
+    let tok := if ent[0].isAtom then ent[0] else ent[0][0]
+    tok.getAtomVal.startsWith "req%"
+  -- required entries first, with their proofs, so that a failing optional
+  -- entry cannot take them down with it
+  let mut out : Array Expr := #[]
+  for ent in ents do
+    if isReq ent then out := out.push (← elabTermEnsuringType ent[1] elemTy)
+  synthesizeSyntheticMVarsNoPostponing
+  for ent in ents do
+    if isReq ent then continue
+    let saved ← saveState
+    let errs0 := (← Core.getMessageLog).toList.filter (·.severity == .error) |>.length
+    let ok ← try
+        let e ← withoutErrToSorry do
+          let e ← elabTermEnsuringType ent[1] elemTy
+          synthesizeSyntheticMVarsNoPostponing
+          instantiateMVars e
+        let errs := (← Core.getMessageLog).toList.filter (·.severity == .error) |>.length
+        if e.hasSorry || errs > errs0 then pure none else pure (some e)
+      catch _ => pure none
+    match ok with
+    | some e => out := out.push e
+    | none => saved.restore
+  mkListLit elemTy out.toList
+
 def vIdent (n : Name) : Ident := mkIdent (`V ++ n)
 def lawIdent (n : Name) : Ident := mkIdent (`Law ++ n)
 
@@ -94,6 +240,7 @@ macro_rules
         variables $vs:ident*
         $[$uc?:unitsClause]?
         $[domain $dom?]?
+        $[facts $facts?,*]?
         $laws:lawClause*
         $[$wc?:witnessClause]?
         $setups:setupClause*) => do
@@ -107,6 +254,17 @@ macro_rules
       if vars.contains a.raw.getId.eraseMacroScopes then
         Macro.throwErrorAt a s!"causal_model: the parameter {a.raw.getId} has the same name as a variable"
     let s ← `(s)
+    -- facts about constants (such as `R_pos : 0 < R`) available to every formula proof
+    let factTerms : Array Term := match facts? with
+      | some fs => fs.getElems
+      | none => #[]
+    let withFacts (t : TSyntax `tactic) : MacroM (TSyntax `tactic) := do
+      let mut tac := t
+      for f in factTerms.reverse do
+        tac ← `(tactic| (have := $f; $tac))
+      pure tac
+    let solveTac : TSyntax ``Lean.Parser.Tactic.tacticSeq ←
+      `(tacticSeq| $(← withFacts (← `(tactic| law_solve))):tactic)
     -- units: dimensional analysis of laws, domain and solving formulas
     let mut uenv : Units.Env := []
     if let some uc := uc? then
@@ -154,11 +312,28 @@ macro_rules
         let f' : Term := ⟨← substVars vars s f⟩
         let proof ← withRef sol <| match tac? with
           | some tac => `(by $tac)
-          | none => `(by law_solve)
+          | none => `(by $solveTac)
         entries := entries.push (← `(⟨$(vIdent xn), CausalPhys.Lang.mech [$psT,*] (fun $s => $f'),
             $proof⟩))
+      -- formulas derived for the other variables the law is affine in
+      let given := sols.filterMap fun sol => match sol with
+        | `(solveClause| solve $x:ident := $_:term $[by $_]?) => some x.getId.eraseMacroScopes
+        | _ => none
+      let mut opts : Array Term := #[]
+      for xn in collectVars vars #[] rel do
+        if given.contains xn then continue
+        let some f ← deriveFormula xn rel | continue
+        let ps := collectVars vars #[] f
+        if ps.contains xn then continue
+        let psT : Array Term := ps.map fun p => ⟨(vIdent p).raw⟩
+        let f' : Term := ⟨← substVars vars s f⟩
+        opts := opts.push (← `(⟨$(vIdent xn), CausalPhys.Lang.mech [$psT,*] (fun $s => $f'),
+            by $solveTac⟩))
+      let reqE ← entries.mapM fun e => `(solverEntry| req% $e)
+      let optE ← opts.mapM fun e => `(solverEntry| opt% $e)
       solverAlts := solverAlts.push
-        (← `(Lean.Parser.Term.matchAltExpr| | $(lawIdent lname):ident => [$entries,*]))
+        (← `(Lean.Parser.Term.matchAltExpr| | $(lawIdent lname):ident =>
+              solvers% [$(reqE ++ optE),*]))
     let domBody : Term ← match dom? with
       | some d => pure ⟨← substVars vars s d⟩
       | none => `(True)
@@ -209,7 +384,9 @@ macro_rules
       walts := walts.push (← `(Lean.Parser.Term.matchAltExpr| | $(vIdent v):ident => $val))
     let wproof ← withRef wc <| match wtac? with
       | some t => `(by $t)
-      | none => `(by witness_check)
+      | none => do
+        let t ← withFacts (← `(tactic| witness_check))
+        `(by $t:tactic)
     let consT := mkIdent `consistent
     cmds := cmds.push (← `(
       /-- The domain and the laws are consistent: the witness satisfies both. -/

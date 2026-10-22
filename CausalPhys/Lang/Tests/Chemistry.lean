@@ -26,15 +26,8 @@ causal_model WeakAcid where
   units H : M, A : M, HA : M, Na : M, C : M, Ka : M
   domain 0 < H ∧ 0 < Ka
   law acid : Ka * HA = H * A
-    solve A := Ka * HA / H
-    solve HA := H * A / Ka
   law mass : C = HA + A
-    solve HA := C - A
-    solve A := C - HA
-    solve C := HA + A
   law charge : H + Na = A
-    solve Na := A - H
-    solve H := A - Na
   witness H := 1, A := 1, HA := 1, C := 2, Ka := 1
   setup titration fixes C Na Ka
   setup buffer fixes C H Ka
@@ -42,7 +35,7 @@ causal_model WeakAcid where
 /--
 info: acid determines A, reading [Ka, HA, H]
 mass determines HA, reading [C, A]
-charge determines H, reading [A, Na]
+charge determines H, reading [Na, A]
 cyclic block: [acid, mass, charge]
 -/
 #guard_msgs in
@@ -55,7 +48,7 @@ info: cyclic: neither criterion applies (some formula is not affine in its own b
 /--
 info: acid determines A, reading [Ka, HA, H]
 mass determines HA, reading [C, A]
-charge determines Na, reading [A, H]
+charge determines Na, reading [H, A]
 cyclic block: [acid, mass]
 -/
 #guard_msgs in
@@ -112,10 +105,7 @@ causal_model BeerLambert where
   units Abs : 1, eps : 1/(M*m), l : m, c : M, n : mol, vol : L
   domain 0 < vol
   law beer : Abs = eps * l * c
-    solve Abs := eps * l * c
   law conc : c * vol = n
-    solve c := n / vol
-    solve n := c * vol
   witness vol := 1
   setup prepared fixes eps l n vol
   setup flowCell fixes eps l c vol
@@ -171,9 +161,7 @@ causal_model Arrhenius where
   units k : 1/s, Pre : 1/s, Ea : J/mol, T : K, X : M, rate : M/s, R : J/(mol*K)
   domain 0 < T
   law arrhenius : k = Pre * Real.exp (-(Ea / (R * T)))
-    solve k := Pre * Real.exp (-(Ea / (R * T)))
   law rateLaw : rate = k * X
-    solve rate := k * X
   witness T := 1
   setup lab fixes Pre Ea T X
 

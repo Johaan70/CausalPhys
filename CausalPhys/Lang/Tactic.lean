@@ -26,27 +26,6 @@ namespace CausalPhys.Lang
 
 open Lean Meta Elab Tactic Command
 
-/-! ## Proving that a formula solves its law -/
-
-/-- Proves `∀ s, dom s → (law s ↔ s v = formula s)` for the usual algebraic
-    rearrangements: definitional, linear, or after clearing denominators that
-    the domain makes nonzero. -/
-macro "law_solve" : tactic => `(tactic| (
-  intro s hD
-  try simp only [CausalPhys.Lang.mech] at hD ⊢
-  all_goals try casesm* _ ∧ _
-  all_goals first
-  | exact Iff.rfl
-  | exact eq_comm
-  | (constructor <;> intro h <;> (try field_simp at h) <;> (try field_simp) <;>
-      first
-      | linear_combination h
-      | linear_combination -h
-      | linarith
-      | nlinarith [h])
-  | fail "law_solve: could not show that this formula solves the law on the domain. \
-      Check the formula, add what is needed to the domain, or give a proof after `by`."))
-
 /-! ## Evaluation by the kernel -/
 
 /-- Weak head normal form computed by the kernel (fast for the matching algorithm). -/
@@ -118,6 +97,33 @@ def addParamFacts : TacticM Unit := withMainContext do
     g := g'
   replaceMainGoal [g]
 
+/-- `add_param_facts` adds the propositional fields of the parameter structures
+    in the context as hypotheses (see `addParamFacts`). -/
+elab "add_param_facts" : tactic => addParamFacts
+
+/-! ## Proving that a formula solves its law -/
+
+/-- Proves `∀ s, dom s → (law s ↔ s v = formula s)` for the usual algebraic
+    rearrangements: definitional, linear, or after clearing denominators that
+    the domain makes nonzero. The propositional fields of parameter structures
+    (such as `c.hK1 : 0 < c.K1`) are available as hypotheses. -/
+macro "law_solve" : tactic => `(tactic| (
+  intro s hD
+  add_param_facts
+  try simp only [CausalPhys.Lang.mech] at hD ⊢
+  all_goals try casesm* _ ∧ _
+  all_goals first
+  | exact Iff.rfl
+  | exact eq_comm
+  | (constructor <;> intro h <;> (try field_simp at h) <;> (try field_simp) <;>
+      first
+      | linear_combination h
+      | linear_combination -h
+      | linarith
+      | nlinarith [h])
+  | fail "law_solve: could not show that this formula solves the law on the domain. \
+      Check the formula, add what is needed to the domain, or give a proof after `by`."))
+
 /-! ## Reading off a solution -/
 
 /-- `read_solution h` adds `h_x : s x = …` for every variable `x`. -/
@@ -179,6 +185,22 @@ partial def shortName (e : Expr) : String :=
     match e.getAppFn.constName? with
     | some n => n.getString!
     | none => toString e
+
+/-- `#causal_solvable M` prints, for every law of the model, the variables it can
+    be solved for: those with a formula written by the user, and those whose
+    formula `causal_model` derived (the law is affine in the variable, and the
+    formula was proved to solve the law on the domain). -/
+elab "#causal_solvable " t:term : command => runTermElabM fun _ => do
+  let M ← Term.elabTerm t none
+  Term.synthesizeSyntheticMVarsNoPostponing
+  let M ← instantiateMVars M
+  let eqs ← kernelNorm (← mkAppM ``Model.eqList #[M])
+  let some (_, laws) := eqs.listLit? | throwError "#causal_solvable: expected a model"
+  let mut lines : Array MessageData := #[]
+  for e in laws do
+    let vs ← kernelNorm (← mkAppM ``Model.canSolve #[M, e])
+    lines := lines.push m!"{shortName e} can be solved for {shortName vs}"
+  logInfo (MessageData.joinSep lines.toList "\n")
 
 /-- `#causal_order S` prints the causal order a setup gets. -/
 elab "#causal_order " t:term : command => runTermElabM fun _ => do

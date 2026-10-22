@@ -17,14 +17,15 @@ causal_model Gas where
   variables p vol n T
   units p : Pa, vol : m^3, n : mol, T : K, R : J/(mol*K)
   domain 0 < p ∧ 0 < vol ∧ 0 < n ∧ 0 < T
+  facts R_pos
   law gas : p * vol = n * R * T
-    solve p := n * R * T / vol
-    solve vol := n * R * T / p
-    solve T := p * vol / (n * R) by have := R_pos.ne'; law_solve
-    solve n := p * vol / (R * T) by have := R_pos.ne'; law_solve
-  witness p := 1, vol := 1, n := 1, T := 1 / R by have := R_pos; witness_check
+  witness p := 1, vol := 1, n := 1, T := 1 / R
   setup locked fixes vol n T      -- locked piston, heat bath, closed vessel
   setup weighted fixes p n T      -- weighted piston, heat bath, closed vessel
+
+/-- info: gas can be solved for [p, vol, n, T] -/
+#guard_msgs in
+#causal_solvable Gas.model
 
 /--
 info: gas determines p, reading [n, T, vol]

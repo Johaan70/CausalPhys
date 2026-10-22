@@ -34,15 +34,8 @@ causal_model Market (m : Market.Params) where
     y : NOK/yr, w : 1, m.a : item/yr, m.b : item^2/(NOK*yr), m.c : item/NOK,
     m.d : item/yr, m.e : item^2/(NOK*yr), m.f : item/yr
   law demand : Qd = m.a - m.b * P + m.c * y
-    solve Qd := m.a - m.b * P + m.c * y
-    solve P := (m.a + m.c * y - Qd) / m.b by have := m.hb.ne'; law_solve
   law supply : Qs = m.d + m.e * (P - t) + m.f * w
-    solve Qs := m.d + m.e * (P - t) + m.f * w
-    solve P := (Qs - m.d - m.f * w) / m.e + t by have := m.he.ne'; law_solve
   law clearing : Qd = Qs + Imp
-    solve Qd := Qs + Imp
-    solve Qs := Qd - Imp
-    solve Imp := Qd - Qs
   witness Qd := m.a, Qs := m.d, Imp := m.a - m.d
   setup closed fixes Imp t y w    -- closed economy: imports fixed (normally 0)
   setup open_ fixes P t y w       -- small open economy: the world price is given
@@ -52,7 +45,7 @@ namespace Market
 variable (m : Params)
 
 /--
-info: demand determines P, reading [y, Qd]
+info: demand determines P, reading [Qd, y]
 supply determines Qs, reading [P, t, w]
 clearing determines Qd, reading [Qs, Imp]
 cyclic block: [demand, supply, clearing]

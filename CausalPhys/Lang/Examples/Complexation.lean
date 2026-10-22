@@ -32,15 +32,9 @@ causal_model Complexation (c : Complexation.Consts) where
   units M : M, L : M, ML : M, ML2 : M, m0 : M, l0 : M, c.K1 : 1/M, c.K2 : 1/M
   domain 0 < M ∧ 0 < L ∧ 0 < ML ∧ 0 < ML2
   law k1 : ML = c.K1 * M * L
-    solve ML := c.K1 * M * L
   law k2 : ML2 = c.K2 * ML * L
-    solve ML2 := c.K2 * ML * L
   law metal : m0 = M + ML + ML2
-    solve M := m0 - ML - ML2
-    solve m0 := M + ML + ML2
   law ligand : l0 = L + ML + 2 * ML2
-    solve L := l0 - ML - 2 * ML2
-    solve l0 := L + ML + 2 * ML2
   witness M := 1, L := 1, ML := c.K1, ML2 := c.K2 * c.K1, m0 := 1 + c.K1 + c.K2 * c.K1,
     l0 := 1 + c.K1 + 2 * (c.K2 * c.K1)
   setup closed fixes m0 l0        -- closed flask: the amounts added are fixed

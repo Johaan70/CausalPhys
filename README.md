@@ -18,21 +18,25 @@ A model is written the way it is written on a blackboard (`CausalPhys/Lang/Examp
 ```lean
 causal_model Gas where
   variables p vol n T
-  domain 0 < p ∧ 0 < vol
+  units p : Pa, vol : m^3, n : mol, T : K, R : J/(mol*K)
+  domain 0 < p ∧ 0 < vol ∧ 0 < n ∧ 0 < T
+  facts R_pos
   law gas : p * vol = n * R * T
-    solve p := n * R * T / vol
-    solve vol := n * R * T / p
+  witness p := 1, vol := 1, n := 1, T := 1 / R
   setup locked fixes vol n T      -- locked piston, heat bath, closed vessel
   setup weighted fixes p n T      -- weighted piston, heat bath, closed vessel
+
+#causal_solvable Gas.model
+-- gas can be solved for [p, vol, n, T]
 
 #causal_order Gas.locked
 -- gas determines p, reading [n, T, vol]
 -- acyclic: every intervention has exactly one outcome
 ```
 
-What the user writes is only domain content: variables, laws, the domain where they make sense, how each law can be solved, and which variables a lab holds fixed. Everything else is field-independent machinery:
+What the user writes is only domain content: variables, laws, the domain where they make sense, facts about constants (such as `R_pos : 0 < R`), and which variables a lab holds fixed. Everything else is field-independent machinery:
 
-- `causal_model` (`Lang/Syntax.lean`) collects what each formula reads from the formula itself, and proves with `law_solve` that each formula solves its law on the domain (a proof can be given after `by` when the algebra needs more, such as a positive parameter).
+- `causal_model` (`Lang/Syntax.lean`) finds the formulas itself. When a law is affine in a variable (as pV = nRT is in each of p, V, n and T), it writes the formula for that variable and proves with `law_solve` that it solves the law on the domain; a formula that needs more than the domain gives (dividing by something that may be zero) is left out, and `#causal_solvable` shows what is left. Laws that are not affine in a variable can be given a formula by hand with `solve x := … ` (and a proof after `by` when the algebra needs more). What each formula reads is collected from the formula itself.
 - `Lang/Core.lean` computes the Simon order of each setup (`struct_decide`, checked by the kernel, also for models with symbolic parameters) and proves general theorems for every model: solutions of the causal model are the solutions of the laws (`solves_iff`), setups cannot be told apart by data (`obs_equiv`), do(x := c) is equation surgery (`do_iff`), and an acyclic setup gives exactly one outcome for every intervention (`do_existsUnique`). For a cyclic block, uniqueness is the domain-specific part and is plugged in through `unique_of_laws`.
 - `Lang/Tactic.lean` has `read_solution h`, which turns a solution, before or after an intervention, into one equation per variable, and `#causal_order`.
 - Cyclic blocks are handled by a toolbox. `Lang/Linear.lean` proves once for every model that affine formulas with det(I − C) ≠ 0 give exactly one outcome (`linear_existsUnique`). The tactic `linear_block` applies it: it enumerates the computed matching, checks that every formula is affine, computes the determinant, and tries to show it is nonzero; if it cannot, the determinant condition is left as the domain-specific goal. `#causal_check S` reports which case a setup is in: acyclic, cyclic and linear (with the condition still to show), linear but singular, or nonlinear (then a domain argument such as monotonicity, Gale–Nikaido or Minty–Browder goes in through `unique_of_laws`).
@@ -108,7 +112,7 @@ The build prints warnings that Mathlib modules are "designed for use with the mo
 
 ## Known limitations
 
-- The surface language uses `variables`, `domain`, `law`, `solve`, `setup` and `fixes` as keywords in files that import it, and values are real numbers.
+- The surface language uses `variables`, `units`, `domain`, `facts`, `law`, `solve`, `witness`, `setup` and `fixes` as keywords in files that import it, and values are real numbers.
 - The duality (Lᵖ)* ≅ L^q is proved for sequence spaces ℓᵖ but not for general measures (only the isometric embedding Lᵖ → (L^q)* that reflexivity needs).
 - Uniqueness for infinite models holds among square-summable solutions only.
 - Mechanisms have finitely many parents, so aggregates over infinitely many variables are not expressible.
