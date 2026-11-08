@@ -80,6 +80,8 @@ Proving that cyclic blocks have solutions led to a sequence of results, several 
 
 Agreement up to rotation is not causal agreement: a rotation can turn uncorrelated coordinates (no edge, in a linear-Gaussian model) into correlated ones (`rotation_breaks_independence`, a centred four-state world), while renaming and rescaling the coordinates keep which pairs are uncorrelated (`relabel_keeps_zeros`). To read a causal graph, in the sense of `PearlDoCalculus`, off a learned representation, it must be determined up to renaming and rescaling, which the theorem does not give.
 
+The same point in the language: `Lang/Examples/Variables.lean` writes the sled on a hill once with Ep and Ek and once with S = Ep + Ek and D = Ep − Ek. `#causal_eval` gives the same state in both, but the causal order differs: with the mixed variables the friction loss Q becomes an ancestor of D through the height law. Causal ordering belongs to the equations in the variables you measure.
+
 ## Status
 
 - 39 modules in `CausalPhys/` (about 11,000 lines) and 7 in `CausalPhysAnalysis/` (about 2,000 lines).
