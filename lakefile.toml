@@ -13,6 +13,9 @@ name = "CausalPhys"
 name = "CausalPhysAnalysis"
 
 [[lean_lib]]
+name = "MonomialMatrix"
+
+[[lean_lib]]
 name = "Platonic"
 
 [[lean_lib]]

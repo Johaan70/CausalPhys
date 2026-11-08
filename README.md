@@ -80,7 +80,7 @@ Proving that cyclic blocks have solutions led to a sequence of results, several 
 
 Agreement up to rotation is not causal agreement: a rotation can turn uncorrelated coordinates (no edge, in a linear-Gaussian model) into correlated ones (`rotation_breaks_independence`, a centred four-state world), while renaming and rescaling the coordinates keep which pairs are uncorrelated (`relabel_keeps_zeros`). To read a causal graph, in the sense of `PearlDoCalculus`, off a learned representation, it must be determined up to renaming and rescaling, which the theorem does not give.
 
-The converse holds too (`Platonic.Monomial`): an invertible change of coordinates that never creates a correlation where there was none is monomial, a renaming and rescaling (`preserves_iff_monomial`), and these form a group. So the rotations that keep causal structure are exactly the permutations with signs (`rotation_preserves_iff`). The group and the converse are proved over any field; the connection to second moments is over ℝ, where it has that meaning.
+The converse holds too (`MonomialMatrix.lean`, a self-contained file over any field that imports nothing from the rest of the repository; applied in `Platonic.Monomial`): an invertible change of coordinates that never creates a correlation where there was none is monomial, a renaming and rescaling (`preserves_iff_monomial`), and these form a group. So the rotations that keep causal structure are exactly the permutations with signs (`rotation_preserves_iff`). The group and the converse are proved over any field; the connection to second moments is over ℝ, where it has that meaning.
 
 The same point in the language: `Lang/Examples/Variables.lean` writes the sled on a hill once with Ep and Ek and once with S = Ep + Ek and D = Ep − Ek. `#causal_eval` gives the same state in both, but the causal order differs: with the mixed variables the friction loss Q becomes an ancestor of D through the height law. Causal ordering belongs to the equations in the variables you measure.
 
@@ -117,7 +117,8 @@ The build prints warnings that Mathlib modules are "designed for use with the mo
 
 - `CausalPhys/` — the library (see `CausalPhys.lean` for the module list)
 - `CausalPhysAnalysis/` — functional analysis beyond what the language needs (Minty–Browder in Hilbert and Banach spaces, reflexivity of ℓᵖ and Lᵖ, infinite causal models)
-- `Platonic/` — the Platonic Representation Theorem in its finite, exact form, and the group of monomial matrices (not used by the language)
+- `Platonic/` — the Platonic Representation Theorem in its finite, exact form, and what it does not give (not used by the language)
+- `MonomialMatrix.lean` — the group of monomial matrices over a field, and the matrices that keep diagonal matrices diagonal; standalone
 - `docs/roadmap.md` — the development plan
 - `docs/kausal-10.html` — a simpler teaching page (Norwegian) for 10th grade: force and motion, work, energy and power, the law of energy, electricity and magnetism, and a molecule builder for hydrocarbons, alcohols and carboxylic acids. What each experiment determines, and sample numbers, are checked in `Lang/Examples/School.lean`.
 - `PearlDoCalculus/` — a copy of PearlDoCalculus ported to this toolchain; the changes are in `docs/pearldocalculus-lean-4.36-port.patch`
