@@ -78,6 +78,8 @@ Proving that cyclic blocks have solutions led to a sequence of results, several 
 
 `Platonic.lean` is a separate library, unrelated to the language, with the finite, exact form of the theorem of Balestriero and LeCun (2026): modalities trained separately with the same objective, through injective observations of a finite world, learn the same embedding of the world up to an orthogonal matrix, for any number of modalities, provided the optimum is unique up to rotation (`platonic`, `platonic_family`). Injectivity is needed (`blind`). In the spectral case, two orthonormal frames in the same `k`-dimensional subspace differ by an orthogonal matrix (`frames_rotate`), so the optimum is unique up to rotation (`platonic_spectral`). Assumed, not proved: that the optimal frames of the spectral objective are those spanning the top-`k` eigenspace when there is an eigengap (Ky Fan). Not covered: the paper's bound for different positive pairs, its experiments, and its claims about next-token prediction.
 
+Agreement up to rotation is not causal agreement: a rotation can turn uncorrelated coordinates (no edge, in a linear-Gaussian model) into correlated ones (`rotation_breaks_independence`, a centred four-state world), while renaming and rescaling the coordinates keep which pairs are uncorrelated (`relabel_keeps_zeros`). To read a causal graph, in the sense of `PearlDoCalculus`, off a learned representation, it must be determined up to renaming and rescaling, which the theorem does not give.
+
 ## Status
 
 - 39 modules in `CausalPhys/` (about 11,000 lines) and 7 in `CausalPhysAnalysis/` (about 2,000 lines).

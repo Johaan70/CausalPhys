@@ -24,6 +24,13 @@
      subspace `V`, then `L` meets the hypothesis of 1, so all modalities agree
      up to rotation.
 
+  4. `rotation_breaks_independence` and `relabel_keeps_zeros`: agreement up to
+     rotation is not causal agreement. A rotation can turn uncorrelated coordinates
+     (no edge, in a linear-Gaussian model) into correlated ones; renaming and
+     rescaling the coordinates keep which pairs are uncorrelated. Reading a causal
+     graph off a learned representation needs it determined up to renaming and
+     rescaling, which the theorem above does not give.
+
   Not formalized: that the spectral objective's optimal frames are exactly
   those spanning the top-`k` eigenspace when there is an eigengap (Ky Fan's
   maximum principle). It is a hypothesis of part 3, as uniqueness is a
@@ -201,5 +208,89 @@ theorem framesIn_objective (V : Submodule ℝ (W → ℝ))
   · intro hE E'
     simp only [ite_eq_left hE]
     split_ifs <;> norm_num
+
+/-! ## Agreement up to rotation is not causal agreement
+
+The theorem above says that modalities agree up to rotation. Causal statements about
+the coordinates of a representation do not survive rotations: in a linear-Gaussian
+model, two coordinates are independent exactly when their covariance is zero, and a
+rotation can turn zero covariance into nonzero covariance. Renaming and rescaling the
+coordinates, on the other hand, keeps the pattern of zeros. So to read a causal graph
+off a learned representation, it must be determined up to renaming and rescaling, not
+just up to rotation. -/
+
+/-- Second moments of the coordinates over the world, with weights `p` (the covariance
+    when the coordinates have mean zero). -/
+def secondMoment [DecidableEq W] (p : W → ℝ) (E : Emb W k) : Matrix (Fin k) (Fin k) ℝ :=
+  Eᵀ * Matrix.diagonal p * E
+
+/-- Mean of each coordinate over the world, with weights `p`. -/
+def mean (p : W → ℝ) (E : Emb W k) (j : Fin k) : ℝ := ∑ w, p w * E w j
+
+/-- Rotating the representation rotates its second moments. -/
+theorem secondMoment_mul [DecidableEq W] (p : W → ℝ) (E : Emb W k) (Q : Matrix (Fin k) (Fin k) ℝ) :
+    secondMoment p (E * Q) = Qᵀ * secondMoment p E * Q := by
+  simp only [secondMoment, Matrix.transpose_mul, Matrix.mul_assoc]
+
+/-- Equal variances and no correlations survive every rotation. -/
+theorem isotropic_rotated [DecidableEq W] (p : W → ℝ) (E : Emb W k) {Q : Matrix (Fin k) (Fin k) ℝ}
+    (hQ : Qᵀ * Q = 1) {c : ℝ} (hE : secondMoment p E = c • 1) :
+    secondMoment p (E * Q) = c • 1 := by
+  rw [secondMoment_mul, hE, Matrix.mul_smul, Matrix.mul_one, Matrix.smul_mul, hQ]
+
+/-- **A rotation turns uncorrelated coordinates into correlated ones.** In a world of four
+    states, an embedding whose two coordinates have mean zero and no correlation, and a
+    rotation of it (by the orthogonal matrix with entries ±3/5, ±4/5) whose coordinates
+    still have mean zero but are correlated. Two modalities that agree up to this rotation
+    disagree about whether there is an edge between the coordinates. -/
+theorem rotation_breaks_independence :
+    ∃ (p : Fin 4 → ℝ) (E : Emb (Fin 4) 2) (Q : Matrix (Fin 2) (Fin 2) ℝ),
+      (∀ w, 0 < p w) ∧ ∑ w, p w = 1 ∧ Qᵀ * Q = 1 ∧ Rotated E (E * Q) ∧
+      (∀ j, mean p E j = 0) ∧ (∀ j, mean p (E * Q) j = 0) ∧
+      secondMoment p E 0 1 = 0 ∧ secondMoment p (E * Q) 0 1 ≠ 0 := by
+  let p : Fin 4 → ℝ := ![1/6, 1/6, 1/3, 1/3]
+  let E : Emb (Fin 4) 2 := !![1, 0; -1, 0; 0, 1; 0, -1]
+  let Q : Matrix (Fin 2) (Fin 2) ℝ := !![3/5, -4/5; 4/5, 3/5]
+  have hQ : Qᵀ * Q = 1 := by
+    ext i j; fin_cases i <;> fin_cases j <;>
+      simp [Q, Matrix.mul_apply, Fin.sum_univ_two] <;> norm_num
+  refine ⟨p, E, Q, ?_, ?_, hQ, ⟨Q, hQ, rfl⟩, ?_, ?_, ?_, ?_⟩
+  · intro w; fin_cases w <;> simp [p]
+  · simp [p, Fin.sum_univ_four]; norm_num
+  · intro j; fin_cases j <;> simp [mean, p, E, Fin.sum_univ_four]
+  · intro j; fin_cases j <;>
+      simp [mean, p, E, Q, Matrix.mul_apply, Fin.sum_univ_four, Fin.sum_univ_two]
+  · simp [secondMoment, p, E, Matrix.mul_apply, Fin.sum_univ_four, Matrix.diagonal]
+  · rw [secondMoment_mul]
+    simp [secondMoment, p, E, Q, Matrix.mul_apply, Fin.sum_univ_four, Fin.sum_univ_two,
+      Matrix.diagonal]
+    norm_num
+
+/-- Renaming the coordinates by `σ` and rescaling each by `d`: new coordinate `j` is
+    `d j` times old coordinate `σ j`. -/
+def relabel (σ : Equiv.Perm (Fin k)) (d : Fin k → ℝ) : Matrix (Fin k) (Fin k) ℝ :=
+  Matrix.of fun a j => if a = σ j then d j else 0
+
+theorem secondMoment_relabel [DecidableEq W] (p : W → ℝ) (E : Emb W k) (σ : Equiv.Perm (Fin k))
+    (d : Fin k → ℝ) (i j : Fin k) :
+    secondMoment p (E * relabel σ d) i j = d i * d j * secondMoment p E (σ i) (σ j) := by
+  rw [secondMoment_mul]
+  simp only [relabel, Matrix.mul_apply, Matrix.transpose_apply, Matrix.of_apply,
+    ite_mul, zero_mul, mul_ite, mul_zero, Finset.sum_ite_eq', Finset.mem_univ, ite_true]
+  ring
+
+/-- **Renaming and rescaling keep the pattern of correlations.** Coordinates `i` and `j`
+    are uncorrelated after renaming and rescaling (by nonzero factors) exactly when the
+    coordinates they came from were. -/
+theorem relabel_keeps_zeros [DecidableEq W] (p : W → ℝ) (E : Emb W k) (σ : Equiv.Perm (Fin k))
+    {d : Fin k → ℝ} (hd : ∀ j, d j ≠ 0) (i j : Fin k) :
+    secondMoment p (E * relabel σ d) i j = 0 ↔ secondMoment p E (σ i) (σ j) = 0 := by
+  rw [secondMoment_relabel]
+  constructor
+  · intro h
+    rcases mul_eq_zero.1 h with h' | h'
+    · exact absurd h' (mul_ne_zero (hd i) (hd j))
+    · exact h'
+  · intro h; rw [h, mul_zero]
 
 end Platonic
