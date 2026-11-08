@@ -43,5 +43,11 @@ jobs:
           lake build CausalPhysAnalysis 2>&1 | tee -a build.log; test ${PIPESTATUS[0]} -eq 0
           echo "CausalPhysAnalysis built in $((SECONDS - start)) s"
 
+      - name: Build the Platonic Representation Theorem (Platonic)
+        run: |
+          start=$SECONDS
+          lake build Platonic 2>&1 | tee -a build.log; test ${PIPESTATUS[0]} -eq 0
+          echo "Platonic built in $((SECONDS - start)) s"
+
       - name: Checks (sorry, warnings, axioms, negative tests)
         run: scripts/ci.sh build.log

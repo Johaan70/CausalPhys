@@ -13,5 +13,8 @@ name = "CausalPhys"
 name = "CausalPhysAnalysis"
 
 [[lean_lib]]
+name = "Platonic"
+
+[[lean_lib]]
 name = "PearlDoCalculus"
 leanOptions = {autoImplicit = false}

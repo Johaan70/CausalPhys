@@ -74,6 +74,10 @@ Proving that cyclic blocks have solutions led to a sequence of results, several 
 | Clarkson's inequality and reflexivity of Lᵖ(μ), 1 < p < ∞, arbitrary measures | `CausalPhysAnalysis.LpMeasure` |
 | Causal models with infinitely many variables on ℓ² | `CausalPhysAnalysis.InfiniteSCM` |
 
+## The Platonic Representation Theorem
+
+`Platonic.lean` is a separate library, unrelated to the language, with the finite, exact form of the theorem of Balestriero and LeCun (2026): modalities trained separately with the same objective, through injective observations of a finite world, learn the same embedding of the world up to an orthogonal matrix, for any number of modalities, provided the optimum is unique up to rotation (`platonic`, `platonic_family`). Injectivity is needed (`blind`). In the spectral case, two orthonormal frames in the same `k`-dimensional subspace differ by an orthogonal matrix (`frames_rotate`), so the optimum is unique up to rotation (`platonic_spectral`). Assumed, not proved: that the optimal frames of the spectral objective are those spanning the top-`k` eigenspace when there is an eigengap (Ky Fan). Not covered: the paper's bound for different positive pairs, its experiments, and its claims about next-token prediction.
+
 ## Status
 
 - 39 modules in `CausalPhys/` (about 11,000 lines) and 7 in `CausalPhysAnalysis/` (about 2,000 lines).
@@ -107,6 +111,7 @@ The build prints warnings that Mathlib modules are "designed for use with the mo
 
 - `CausalPhys/` — the library (see `CausalPhys.lean` for the module list)
 - `CausalPhysAnalysis/` — functional analysis beyond what the language needs (Minty–Browder in Hilbert and Banach spaces, reflexivity of ℓᵖ and Lᵖ, infinite causal models)
+- `Platonic.lean` — the Platonic Representation Theorem in its finite, exact form (not used by the language)
 - `docs/roadmap.md` — the development plan
 - `docs/kausal-10.html` — a simpler teaching page (Norwegian) for 10th grade: force and motion, work, energy and power, the law of energy, electricity and magnetism, and a molecule builder for hydrocarbons, alcohols and carboxylic acids. What each experiment determines, and sample numbers, are checked in `Lang/Examples/School.lean`.
 - `PearlDoCalculus/` — a copy of PearlDoCalculus ported to this toolchain; the changes are in `docs/pearldocalculus-lean-4.36-port.patch`

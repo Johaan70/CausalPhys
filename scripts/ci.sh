@@ -14,8 +14,8 @@ echo "== 2. sorry"
 if grep -n "declaration uses .sorry." "$log"; then fail=1; fi
 
 step_done
-echo "== 3. warnings in CausalPhys and CausalPhysAnalysis (PearlDoCalculus is a vendored copy and exempt)"
-if grep -E "^warning: CausalPhys(Analysis)?/" "$log" | grep -v "module system"; then fail=1; fi
+echo "== 3. warnings in CausalPhys, CausalPhysAnalysis and Platonic (PearlDoCalculus is a vendored copy and exempt)"
+if grep -E "^warning: (CausalPhys(Analysis)?/|Platonic\.lean)" "$log" | grep -v "module system"; then fail=1; fi
 
 step_done
 echo "== 4. axioms"

@@ -1,11 +1,12 @@
 /-
-  Axiom check for CI: every declaration of CausalPhys, CausalPhysAnalysis and PearlDoCalculus may
+  Axiom check for CI: every declaration of CausalPhys, CausalPhysAnalysis, Platonic and PearlDoCalculus may
   depend only on the three standard axioms of Lean and Mathlib. This also
   catches `sorry` (which is the axiom `sorryAx`) and `native_decide`
   (which adds an axiom per use).
 -/
 import CausalPhys
 import CausalPhysAnalysis
+import Platonic
 
 open Lean Elab Command
 
@@ -19,6 +20,7 @@ elab "#check_project_axioms" : command => do
     let some idx := env.getModuleIdxFor? n | continue
     let modName := env.header.moduleNames[idx.toNat]!
     unless (`CausalPhys).isPrefixOf modName || (`CausalPhysAnalysis).isPrefixOf modName ||
+        (`Platonic).isPrefixOf modName ||
         (`PearlDoCalculus).isPrefixOf modName do continue
     if n.isInternal then continue
     count := count + 1
